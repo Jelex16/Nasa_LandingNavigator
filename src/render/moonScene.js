@@ -1,181 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-/**
- * Generates a procedural high-fidelity lunar surface texture map and bump map.
- * Includes highlands, basaltic maria, rayed impact craters (Tycho, Copernicus),
- * and calibrated South Pole craters (Shackleton, Malapert, Haworth, Cabeus).
- */
-function createProceduralMoonTextures() {
-  const width = 2048;
-  const height = 1024;
-
-  const colorCanvas = document.createElement('canvas');
-  colorCanvas.width = width;
-  colorCanvas.height = height;
-  const ctx = colorCanvas.getContext('2d');
-
-  const bumpCanvas = document.createElement('canvas');
-  bumpCanvas.width = width;
-  bumpCanvas.height = height;
-  const bctx = bumpCanvas.getContext('2d');
-
-  // Base background: Lunar anorthositic highlands
-  ctx.fillStyle = '#9b9da0';
-  ctx.fillRect(0, 0, width, height);
-  bctx.fillStyle = '#808080';
-  bctx.fillRect(0, 0, width, height);
-
-  // Micro-noise for regolith texture
-  const imgData = ctx.getImageData(0, 0, width, height);
-  const bumpData = bctx.getImageData(0, 0, width, height);
-  const data = imgData.data;
-  const bdata = bumpData.data;
-
-  // Simple pseudo-random hash
-  function noise(x, y) {
-    let n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-    return n - Math.floor(n);
-  }
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4;
-      const n = (noise(x * 0.1, y * 0.1) * 0.5 + noise(x * 0.02, y * 0.02) * 0.5) * 35;
-      const v = Math.max(0, Math.min(255, 150 + n - 17));
-      data[idx] = v;
-      data[idx + 1] = v;
-      data[idx + 2] = v + 2; // subtle cool tone
-      bdata[idx] = v;
-      bdata[idx + 1] = v;
-      bdata[idx + 2] = v;
-    }
-  }
-  ctx.putImageData(imgData, 0, 0);
-  bctx.putImageData(bumpData, 0, 0);
-
-  // Helper to convert selenographic (lat, lon) to canvas (x, y)
-  // lon: 0..360 -> x: 0..width, lat: 90..-90 -> y: 0..height
-  function coordToXY(lat, lon) {
-    const x = ((lon % 360) / 360) * width;
-    const y = ((90 - lat) / 180) * height;
-    return { x, y };
-  }
-
-  // Draw Lunar Maria (Dark basaltic plains)
-  const maria = [
-    { name: 'Mare Tranquillitatis', lat: 8, lon: 31, rx: 110, ry: 75, angle: 0.1 },
-    { name: 'Mare Serenitatis', lat: 28, lon: 17, rx: 95, ry: 70, angle: -0.2 },
-    { name: 'Mare Imbrium', lat: 32, lon: 344, rx: 160, ry: 110, angle: 0 },
-    { name: 'Oceanus Procellarum', lat: 18, lon: 302, rx: 210, ry: 190, angle: 0.3 },
-    { name: 'Mare Crisium', lat: 17, lon: 59, rx: 70, ry: 50, angle: 0.1 },
-    { name: 'South Pole-Aitken Basin', lat: -53, lon: 191, rx: 250, ry: 130, angle: -0.1 }
-  ];
-
-  maria.forEach((m) => {
-    const { x, y } = coordToXY(m.lat, m.lon);
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(m.angle);
-    const grad = ctx.createRadialGradient(0, 0, m.rx * 0.2, 0, 0, m.rx);
-    grad.addColorStop(0, 'rgba(45, 48, 52, 0.88)');
-    grad.addColorStop(0.7, 'rgba(65, 68, 72, 0.75)');
-    grad.addColorStop(1, 'rgba(155, 157, 160, 0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, m.rx, m.ry, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    // Bump depression
-    bctx.save();
-    bctx.translate(x, y);
-    bctx.rotate(m.angle);
-    const bgrad = bctx.createRadialGradient(0, 0, m.rx * 0.2, 0, 0, m.rx);
-    bgrad.addColorStop(0, 'rgba(40, 40, 40, 0.8)');
-    bgrad.addColorStop(1, 'rgba(128, 128, 128, 0)');
-    bctx.fillStyle = bgrad;
-    bctx.beginPath();
-    bctx.ellipse(0, 0, m.rx, m.ry, 0, 0, Math.PI * 2);
-    bctx.fill();
-    bctx.restore();
-  });
-
-  // Major craters & South Pole features
-  const craters = [
-    // South Pole craters
-    { name: 'Shackleton', lat: -89.9, lon: 124, r: 14, rim: 3, rays: false },
-    { name: 'Haworth', lat: -87.4, lon: 354, r: 24, rim: 4, rays: false },
-    { name: 'Shoemaker', lat: -88.1, lon: 45, r: 28, rim: 5, rays: false },
-    { name: 'Faustini', lat: -87.3, lon: 84, r: 22, rim: 4, rays: false },
-    { name: 'Nobile', lat: -85.2, lon: 36, r: 35, rim: 6, rays: false },
-    { name: 'Amundsen', lat: -84.5, lon: 82, r: 42, rim: 7, rays: false },
-    { name: 'Malapert Massif', lat: -85.9, lon: 357, r: 30, rim: 8, rays: false },
-    // Rayed landmark craters
-    { name: 'Tycho', lat: -43.3, lon: 348.8, r: 32, rim: 8, rays: true, rayLen: 450 },
-    { name: 'Copernicus', lat: 9.6, lon: 339.9, r: 36, rim: 9, rays: true, rayLen: 280 },
-    { name: 'Kepler', lat: 8.1, lon: 322.0, r: 20, rim: 5, rays: true, rayLen: 160 }
-  ];
-
-  craters.forEach((c) => {
-    const { x, y } = coordToXY(c.lat, c.lon);
-
-    // Ejecta rays
-    if (c.rays) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.strokeStyle = 'rgba(235, 238, 245, 0.35)';
-      ctx.lineWidth = 1.8;
-      for (let a = 0; a < Math.PI * 2; a += 0.25) {
-        const rayL = c.rayLen * (0.6 + noise(a * 10, c.lat) * 0.8);
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(a) * rayL, Math.sin(a) * rayL);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    // Crater Rim highlight
-    ctx.strokeStyle = 'rgba(230, 235, 240, 0.85)';
-    ctx.lineWidth = c.rim;
-    ctx.beginPath();
-    ctx.arc(x, y, c.r, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Crater interior shadow / floor
-    const floorGrad = ctx.createRadialGradient(x, y, 0, x, y, c.r);
-    floorGrad.addColorStop(0, 'rgba(40, 42, 45, 0.95)');
-    floorGrad.addColorStop(0.85, 'rgba(65, 68, 72, 0.9)');
-    floorGrad.addColorStop(1, 'rgba(120, 125, 130, 0.3)');
-    ctx.fillStyle = floorGrad;
-    ctx.beginPath();
-    ctx.arc(x, y, c.r, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Bump map crater: high rim, depressed floor
-    bctx.strokeStyle = '#ffffff';
-    bctx.lineWidth = c.rim;
-    bctx.beginPath();
-    bctx.arc(x, y, c.r, 0, Math.PI * 2);
-    bctx.stroke();
-
-    bctx.fillStyle = '#222222';
-    bctx.beginPath();
-    bctx.arc(x, y, c.r * 0.85, 0, Math.PI * 2);
-    bctx.fill();
-  });
-
-  const colorTexture = new THREE.CanvasTexture(colorCanvas);
-  colorTexture.wrapS = THREE.RepeatWrapping;
-  colorTexture.wrapT = THREE.ClampToEdgeWrapping;
-
-  const bumpTexture = new THREE.CanvasTexture(bumpCanvas);
-  bumpTexture.wrapS = THREE.RepeatWrapping;
-  bumpTexture.wrapT = THREE.ClampToEdgeWrapping;
-
-  return { colorTexture, bumpTexture };
-}
+import { LunarTextureManager } from './lunarTextureManager.js';
 
 /**
  * Creates a procedural Earth sphere texture with oceans, continents, and atmosphere.
@@ -246,7 +71,7 @@ export class MoonScene {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -256,6 +81,12 @@ export class MoonScene {
     this.controls.maxDistance = 70;
 
     this.moonRadius = 10;
+    // Matches the active 2.5x control: 0.22 * 2.5.
+    this.displacementScale = 0.55;
+    this.displacementEnabled = true;
+    this.currentLayerId = 'lroc';
+    this.textureManager = new LunarTextureManager();
+
     this.siteMarkers = new Map();
     this.currentSite = null;
     this.activeSitePin = null;
@@ -285,11 +116,11 @@ export class MoonScene {
 
   initLighting() {
     // Ambient light simulating subtle starlight & earthshine
-    this.ambientLight = new THREE.AmbientLight(0x182436, 0.35);
+    this.ambientLight = new THREE.AmbientLight(0x1a2638, 0.4);
     this.scene.add(this.ambientLight);
 
     // Dynamic Directional Sun Light
-    this.sunLight = new THREE.DirectionalLight(0xfff7e6, 2.4);
+    this.sunLight = new THREE.DirectionalLight(0xfff8ea, 2.6);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
@@ -330,27 +161,32 @@ export class MoonScene {
     this.sunMesh.add(this.sunCorona);
   }
 
-  initMoon() {
-    const { colorTexture, bumpTexture } = createProceduralMoonTextures();
+  async initMoon() {
+    // High tessellation sphere to support true vertex displacement for craters and mountains
+    const moonGeom = new THREE.SphereGeometry(this.moonRadius, 192, 192);
 
-    const moonGeom = new THREE.SphereGeometry(this.moonRadius, 96, 96);
     this.moonMaterial = new THREE.MeshStandardMaterial({
-      map: colorTexture,
-      bumpMap: bumpTexture,
-      bumpScale: 0.18,
-      roughness: 0.88,
-      metalness: 0.05
+      color: 0xffffff,
+      roughness: 0.92,
+      metalness: 0.04,
+      displacementScale: this.displacementScale,
+      displacementBias: -this.displacementScale * 0.45,
+      bumpScale: 0.12
     });
 
     this.moonMesh = new THREE.Mesh(moonGeom, this.moonMaterial);
     this.moonMesh.receiveShadow = true;
     this.moonMesh.castShadow = true;
+
+    // Three.js SphereGeometry maps texture u=0.5 to +X, the same convention as
+    // latLonToVector3's lon=0. Rotating the mesh here would shift the photo
+    // layer 90° away from the landing-site pins.
     this.scene.add(this.moonMesh);
 
     // Polar axis ring indicator (Subtle dashed line)
     const axisGeom = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, -this.moonRadius * 1.3, 0),
-      new THREE.Vector3(0, this.moonRadius * 1.3, 0)
+      new THREE.Vector3(0, -this.moonRadius * 1.35, 0),
+      new THREE.Vector3(0, this.moonRadius * 1.35, 0)
     ]);
     const axisMat = new THREE.LineDashedMaterial({
       color: 0x4a6f94,
@@ -362,6 +198,65 @@ export class MoonScene {
     this.axisLine = new THREE.Line(axisGeom, axisMat);
     this.axisLine.computeLineDistances();
     this.scene.add(this.axisLine);
+
+    // Load initial NASA elevation and photographic textures
+    try {
+      const [dispTex, colorTex] = await Promise.all([
+        this.textureManager.loadDisplacementTexture(),
+        this.textureManager.getLayerTexture(this.currentLayerId)
+      ]);
+
+      if (dispTex) {
+        this.moonMaterial.displacementMap = dispTex;
+        this.moonMaterial.bumpMap = dispTex;
+      }
+      if (colorTex) {
+        this.moonMaterial.map = colorTex;
+      }
+      this.moonMaterial.needsUpdate = true;
+    } catch (err) {
+      console.warn('Falling back on basic texture initialization:', err);
+    }
+  }
+
+  /**
+   * Switches the active lunar map layer (LROC Photo, LOLA Topography DEM, LOLA Hillshade, LOLA Slope).
+   */
+  async setLayer(layerId) {
+    this.currentLayerId = layerId;
+    try {
+      const tex = await this.textureManager.getLayerTexture(layerId);
+      if (tex && this.moonMaterial) {
+        this.moonMaterial.map = tex;
+        this.moonMaterial.needsUpdate = true;
+      }
+    } catch (err) {
+      console.error('Failed to switch layer to:', layerId, err);
+    }
+  }
+
+  /**
+   * Sets the 3D surface elevation exaggeration multiplier (1x = real scale, 2.5x, 5x, 0 = flat).
+   */
+  setElevationExaggeration(multiplier) {
+    if (!this.moonMaterial) return;
+
+    if (multiplier <= 0) {
+      this.displacementEnabled = false;
+      this.moonMaterial.displacementScale = 0;
+      this.moonMaterial.displacementBias = 0;
+    } else {
+      this.displacementEnabled = true;
+      this.displacementScale = 0.22 * multiplier;
+      this.moonMaterial.displacementScale = this.displacementScale;
+      this.moonMaterial.displacementBias = -this.displacementScale * 0.45;
+    }
+    this.moonMaterial.needsUpdate = true;
+
+    // Reposition markers to float cleanly above displaced relief
+    if (this.currentSitesList) {
+      this.setLandingSites(this.currentSitesList, this.onSelectCallback);
+    }
   }
 
   initEarth() {
@@ -457,15 +352,13 @@ export class MoonScene {
    * Coordinate convention: Y is lunar spin axis (North = +Y, South = -Y)
    * X and Z lie on equatorial plane. Prime meridian (0 lon) along +X.
    */
-  latLonToVector3(lat, lon, altitudeOffset = 0.08) {
-    const r = this.moonRadius + altitudeOffset;
+  latLonToVector3(lat, lon, altitudeOffset = 0.12) {
+    // Offset accounts for displacement and ensures pin hovers visibly above terrain
+    const totalOffset = altitudeOffset + (this.displacementEnabled ? this.displacementScale * 0.4 : 0);
+    const r = this.moonRadius + totalOffset;
     const phi = (lat * Math.PI) / 180;
     const theta = (lon * Math.PI) / 180;
 
-    // Selenographic standard:
-    // Y = sin(phi) (Pole axis)
-    // X = cos(phi) * cos(theta) (Prime meridian towards Earth center)
-    // Z = -cos(phi) * sin(theta) (East/West)
     const x = r * Math.cos(phi) * Math.cos(theta);
     const y = r * Math.sin(phi);
     const z = -r * Math.cos(phi) * Math.sin(theta);
@@ -477,6 +370,7 @@ export class MoonScene {
    * Adds or updates 3D pins for all landing sites.
    */
   setLandingSites(sites, onSelectCallback) {
+    this.currentSitesList = sites;
     this.onSelectCallback = onSelectCallback;
 
     // Clear old markers
@@ -487,7 +381,7 @@ export class MoonScene {
 
     sites.forEach((site) => {
       const group = new THREE.Group();
-      const pos = this.latLonToVector3(site.lat, site.lon, 0.05);
+      const pos = this.latLonToVector3(site.lat, site.lon, 0.08);
       group.position.copy(pos);
 
       // Normal vector pointing outwards from Moon center
@@ -524,10 +418,14 @@ export class MoonScene {
       this.scene.add(group);
       this.siteMarkers.set(site.id, group);
     });
+
+    if (this.currentSite) {
+      this.setActiveSite(this.currentSite);
+    }
   }
 
   /**
-   * Updates marker color based on Neural Network classification score.
+   * Updates marker color based on the transparent decision score.
    */
   updateSiteStatus(siteId, scorePercent) {
     const group = this.siteMarkers.get(siteId);
@@ -549,7 +447,7 @@ export class MoonScene {
    */
   setActiveSite(site) {
     this.currentSite = site;
-    const sitePos = this.latLonToVector3(site.lat, site.lon, 0.1);
+    const sitePos = this.latLonToVector3(site.lat, site.lon, 0.15);
 
     // Highlight active pin
     this.siteMarkers.forEach((group, id) => {
@@ -589,10 +487,6 @@ export class MoonScene {
   updateEphemeris(ephData, site) {
     if (!ephData) return;
 
-    // Ephemeris vectors are in Selenographic (MCMF) unit coordinates:
-    // sunDirMCMF = [x, y, z] where Y is pole (lat), X is 0 lon, Z is 90 lon.
-    // In our Three.js coordinate system:
-    // Three.js Y = MCMF Z (pole), Three.js X = MCMF X, Three.js Z = -MCMF Y
     const sunDist = 38;
     const sX = ephData.sunDirMCMF[0];
     const sY = ephData.sunDirMCMF[2]; // pole in MCMF
@@ -612,7 +506,7 @@ export class MoonScene {
 
     // Update Sightlines from selected landing site
     if (site) {
-      const sitePos = this.latLonToVector3(site.lat, site.lon, 0.1);
+      const sitePos = this.latLonToVector3(site.lat, site.lon, 0.12);
 
       // Sun vector
       const sunPoints = [sitePos, sitePos.clone().add(new THREE.Vector3(sX, sY, sZ).normalize().multiplyScalar(10))];

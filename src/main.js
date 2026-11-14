@@ -2,291 +2,332 @@ import './style.css';
 import { MoonScene } from './render/moonScene.js';
 import { SkyDomeRadar } from './ui/skyDomeRadar.js';
 import { TimelineChart } from './ui/timelineChart.js';
-import { NetworkVisualizer } from './ui/networkVisualizer.js';
+import { Panorama25D } from './ui/panorama25d.js';
 import { renderComparisonTable } from './ui/comparisonView.js';
-import { LANDING_SITES, getCustomSite } from './topography/lunarData.js';
 import {
-  calculateLunarEphemeris,
-  calculateEphemerisSeries,
-  calculateEventCountdowns
-} from './ephemeris/astronomy.js';
-import { queryHorizons, buildHorizonsUrl } from './ephemeris/horizonsApi.js';
-import { evaluateLandingSite, scanRegionWithNeuralNet } from './neural/landingNetwork.js';
+  loadLandingSites,
+  setMastHeight,
+  getCustomSite,
+  getQuickMapUrl,
+  getMoonTrekUrl
+} from './topography/lunarData.js';
+import { calculateLunarEphemeris } from './ephemeris/astronomy.js';
+import {
+  loadEphemeris,
+  sampleEphemeris,
+  AU_KM,
+  SUN_RADIUS_KM,
+  EARTH_RADIUS_KM
+} from './ephemeris/jplEphemeris.js';
+import {
+  analyzeSite,
+  findNextEvents,
+  makeSky,
+  panelIrradianceWm2,
+  PROFILE_BY_ID,
+  PANELS,
+  DEFAULT_PROFILE_ID,
+  WINDOW_DAYS
+} from './analysis/scoring.js';
+import { angularRadiusDeg, azElToMcmf, clamp } from './analysis/geometry.js';
 
-// Application State
+const DAY_MS = 86_400_000;
+const WINDOW_MS = WINDOW_DAYS * DAY_MS;
+const WINDOW_HOURS = WINDOW_DAYS * 24;
+
 const state = {
-  currentSite: LANDING_SITES[0], // Malapert Mountain default
-  currentDate: new Date(Date.UTC(2026, 10, 14, 0, 0, 0)), // November 14, 2026 (Space Apps / Artemis III Window)
+  sites: [],
+  customSite: null,
+  currentSite: null,
   baseDate: new Date(Date.UTC(2026, 10, 14, 0, 0, 0)),
+  currentDate: new Date(Date.UTC(2026, 10, 14, 0, 0, 0)),
+  mastHeightM: 2,
+  panelType: 'vertical_tracker',
+  profileId: DEFAULT_PROFILE_ID,
+  series: [],
+  analysis: null,
+  currentSky: null,
+  events: null,
   isPlaying: false,
-  playbackSpeed: 1, // 1 hour per tick, 10, 60
-  seriesDays: 30,
-  currentEphemeris: null,
-  currentSeries: [],
-  currentEvaluation: null
+  playbackSpeed: 1,
+  evaluationToken: 0,
+  panoramaMode: 'zoom',
+  panoramaDiskScale: 'enlarged',
+  panoramaOpen: false
 };
 
-// UI Element References
-const siteSelect = document.getElementById('site-select');
-const siteProgramBadge = document.getElementById('site-program-badge');
-const siteDescription = document.getElementById('site-description');
-const siteSlopeVal = document.getElementById('site-slope-val');
-const siteElevVal = document.getElementById('site-elev-val');
-const siteIceVal = document.getElementById('site-ice-val');
+const $ = (id) => document.getElementById(id);
 
-const presetSelect = document.getElementById('preset-select');
-const datetimeInput = document.getElementById('datetime-input');
-const timeScrubber = document.getElementById('time-scrubber');
-const scrubberDayLabel = document.getElementById('scrubber-day-label');
-const playPauseBtn = document.getElementById('play-pause-btn');
-const playIcon = document.getElementById('play-icon');
-const playText = document.getElementById('play-text');
-const clockDisplay = document.getElementById('clock-display');
+const siteSelect = $('site-select');
+const sitePillsBar = $('site-pills-bar');
+const siteProgramBadge = $('site-program-badge');
+const siteDescription = $('site-description');
+const siteSlopeVal = $('site-slope-val');
+const siteElevVal = $('site-elev-val');
+const siteDataQuality = $('site-data-quality');
+const siteDataSource = $('site-data-source');
+const hudSiteName = $('hud-site-name');
+const hudCoords = $('hud-coords');
+const mastSelect = $('mast-select');
+const panelSelect = $('panel-select');
+const profileSelect = $('profile-select');
 
-// HUD elements
-const hudSiteName = document.getElementById('hud-site-name');
-const hudCoords = document.getElementById('hud-coords');
-const hudSunElev = document.getElementById('hud-sun-elev');
-const hudEarthElev = document.getElementById('hud-earth-elev');
+const scoreCircle = $('score-circle');
+const scoreNumber = $('score-number');
+const classificationBadge = $('classification-badge');
+const classificationText = $('classification-text');
+const energyScore = $('energy-score');
+const energyFill = $('energy-fill');
+const eclipseScore = $('eclipse-score');
+const eclipseFill = $('eclipse-fill');
+const dteScore = $('dte-score');
+const dteFill = $('dte-fill');
+const commsScore = $('comms-score');
+const commsFill = $('comms-fill');
+const xaiItems = $('xai-items');
+const scoreWindowLabel = $('score-window-label');
 
-// Neural Evaluation elements
-const scoreCircle = document.getElementById('score-circle');
-const scoreNumber = document.getElementById('score-number');
-const classificationBadge = document.getElementById('classification-badge');
-const classificationText = document.getElementById('classification-text');
-const terrainScore = document.getElementById('terrain-score');
-const terrainFill = document.getElementById('terrain-fill');
-const powerScore = document.getElementById('power-score');
-const powerFill = document.getElementById('power-fill');
-const commScore = document.getElementById('comm-score');
-const commFill = document.getElementById('comm-fill');
-const scienceScore = document.getElementById('science-score');
-const scienceFill = document.getElementById('science-fill');
-const xaiItems = document.getElementById('xai-items');
+const hudSunElev = $('hud-sun-elev');
+const hudEarthElev = $('hud-earth-elev');
+const solarEffVal = $('solar-eff-val');
+const commLinkStatus = $('comm-link-status');
+const sunHorizonVal = $('sun-horizon-val');
+const earthHorizonVal = $('earth-horizon-val');
+const sunsetLabel = $('sunset-label');
+const sunsetCountdown = $('sunset-countdown');
+const sunsetSub = $('sunset-sub');
+const earthsetLabel = $('earthset-label');
+const earthsetCountdown = $('earthset-countdown');
+const earthsetSub = $('earthset-sub');
 
-// Operational Countdown elements
-const sunsetCountdown = document.getElementById('sunset-countdown');
-const sunsetSub = document.getElementById('sunset-sub');
-const earthsetCountdown = document.getElementById('earthset-countdown');
-const earthsetSub = document.getElementById('earthset-sub');
-const solarEffVal = document.getElementById('solar-eff-val');
-const commLinkStatus = document.getElementById('comm-link-status');
+const clockDisplay = $('clock-display');
+const presetSelect = $('preset-select');
+const datetimeInput = $('datetime-input');
+const timeScrubber = $('time-scrubber');
+const scrubberDayLabel = $('scrubber-day-label');
+const playPauseBtn = $('play-pause-btn');
+const playIcon = $('play-icon');
+const playText = $('play-text');
 
-// Modals
-const comparisonModal = document.getElementById('comparison-modal');
-const comparisonModalBody = document.getElementById('comparison-modal-body');
-const closeComparisonModal = document.getElementById('close-comparison-modal');
-const openComparisonBtn = document.getElementById('open-comparison-btn');
+const comparisonModal = $('comparison-modal');
+const comparisonModalBody = $('comparison-modal-body');
+const closeComparisonModal = $('close-comparison-modal');
+const openComparisonBtn = $('open-comparison-btn');
+const horizonsModal = $('horizons-modal');
+const closeHorizonsModal = $('close-horizons-modal');
+const openHorizonsBtn = $('open-horizons-btn');
+const nnModal = $('nn-modal');
+const closeNnModal = $('close-nn-modal');
+const toggleNnViewBtn = $('toggle-nn-view-btn');
+const panoramaModal = $('panorama-modal');
+const closePanoramaModal = $('close-panorama-modal');
+const openPanoramaBtn = $('open-panorama-btn');
+const panoramaSiteLabel = $('panorama-site-label');
+const panoramaZoomBtn = $('panorama-zoom-btn');
+const panoramaFullBtn = $('panorama-full-btn');
+const panoramaDiskBtn = $('panorama-disk-btn');
+const panoramaSun = $('panorama-sun');
+const panoramaEarth = $('panorama-earth');
+const panoramaSunHorizon = $('panorama-sun-horizon');
+const panoramaEarthHorizon = $('panorama-earth-horizon');
+const panoramaMast = $('panorama-mast');
 
-const horizonsModal = document.getElementById('horizons-modal');
-const closeHorizonsModal = document.getElementById('close-horizons-modal');
-const openHorizonsBtn = document.getElementById('open-horizons-btn');
-const horizonsUrlBox = document.getElementById('horizons-url-box');
-const testHorizonsFetchBtn = document.getElementById('test-horizons-fetch-btn');
-const horizonsFetchStatus = document.getElementById('horizons-fetch-status');
+const chartDrawer = $('chart-drawer');
+const timelineToggleBtn = $('timeline-toggle-btn');
+const closeChartBtn = $('close-chart-btn');
+const timelineArrow = $('timeline-arrow');
+const loadingOverlay = $('loading-overlay');
 
-const nnModal = document.getElementById('nn-modal');
-const closeNnModal = document.getElementById('close-nn-modal');
-const toggleNnViewBtn = document.getElementById('toggle-nn-view-btn');
-
-// Timeline Drawer Elements
-const timelineToggleBtn = document.getElementById('timeline-toggle-btn');
-const chartDrawer = document.getElementById('chart-drawer');
-const timelineArrow = document.getElementById('timeline-arrow');
-
-// Initialize 3D Scene & Canvas Components
-const threeContainer = document.getElementById('three-container');
-const moonScene = new MoonScene(threeContainer);
-
-const skyDomeCanvas = document.getElementById('sky-dome-canvas');
-const skyDomeRadar = new SkyDomeRadar(skyDomeCanvas);
-
-const timelineCanvas = document.getElementById('timeline-chart-canvas');
-const timelineChart = new TimelineChart(timelineCanvas, (selectedDate) => {
-  state.currentDate = selectedDate;
-  updateDateTimeInput();
+const moonScene = new MoonScene($('three-container'));
+const skyDomeRadar = new SkyDomeRadar($('sky-dome-canvas'));
+const timelineChart = new TimelineChart($('timeline-chart-canvas'), (selectedDate) => {
+  state.currentDate = clampDate(selectedDate, state.baseDate, addDays(state.baseDate, WINDOW_DAYS));
   updateSimulation();
 });
+let panorama = null;
 
-const nnCanvas = document.getElementById('neural-net-canvas');
-const networkVisualizer = new NetworkVisualizer(nnCanvas);
+function clampDate(date, min, max) {
+  const ms = date.getTime();
+  return new Date(Math.max(min.getTime(), Math.min(max.getTime(), ms)));
+}
 
-/**
- * Initializes the landing site dropdown and quick-select pill buttons.
- */
-function initSiteSelector() {
-  siteSelect.innerHTML = '';
-  LANDING_SITES.forEach((site) => {
-    const opt = document.createElement('option');
-    opt.value = site.id;
-    opt.textContent = `${site.name} (${site.lat.toFixed(1)}°, ${site.lon.toFixed(1)}°)`;
-    siteSelect.appendChild(opt);
-  });
+function addDays(date, days) {
+  return new Date(date.getTime() + days * DAY_MS);
+}
 
-  siteSelect.addEventListener('change', (e) => {
-    const selected = LANDING_SITES.find((s) => s.id === e.target.value);
-    if (selected) {
-      setLandingSite(selected);
+function formatAzEl(az, el) {
+  return `${Math.round(((az % 360) + 360) % 360)}° / ${el >= 0 ? '+' : ''}${el.toFixed(1)}°`;
+}
+
+function formatDurationMs(ms) {
+  if (!Number.isFinite(ms) || ms <= 0) return '0h 00m';
+  const totalMinutes = Math.floor(ms / 60_000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days}d ${hours}h ${String(minutes).padStart(2, '0')}m`;
+  return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+}
+
+function utcLabel(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+}
+
+function updateDateTimeInput() {
+  const d = state.currentDate;
+  const pad = (n) => String(n).padStart(2, '0');
+  datetimeInput.value = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+function setLoading(visible, message) {
+  if (message) {
+    const text = loadingOverlay.querySelector('.loading-card span:last-child');
+    if (text) text.textContent = message;
+  }
+  loadingOverlay.classList.toggle('hidden', !visible);
+}
+
+function localSample(site, timeMs) {
+  const eph = calculateLunarEphemeris(new Date(timeMs), site.lat, site.lon);
+  const sunDistanceKm = eph.sun.distanceKm;
+  return {
+    timeMs,
+    sun: {
+      azDeg: eph.sun.az,
+      elDeg: eph.sun.el,
+      distance: sunDistanceKm / AU_KM,
+      angularRadiusDeg: angularRadiusDeg(SUN_RADIUS_KM, sunDistanceKm)
+    },
+    earth: {
+      azDeg: eph.earth.az,
+      elDeg: eph.earth.el,
+      distance: eph.earth.distanceKm,
+      angularRadiusDeg: angularRadiusDeg(EARTH_RADIUS_KM, eph.earth.distanceKm)
     }
-  });
+  };
+}
 
-  // Pill buttons in Top Nav Bar
-  const pills = document.querySelectorAll('#site-pills-bar .pill-btn');
-  pills.forEach((pill) => {
-    pill.addEventListener('click', (e) => {
-      const siteId = e.currentTarget.getAttribute('data-site');
-      const found = LANDING_SITES.find((s) => s.id === siteId);
-      if (found) {
-        setLandingSite(found);
-      }
+function sampleSite(site, timeMs) {
+  if (site.ephem) {
+    const sample = sampleEphemeris(site.ephem, timeMs);
+    if (sample) return sample;
+  }
+  return localSample(site, timeMs);
+}
+
+async function ensureEphemeris(site) {
+  if (site.ephemSource !== 'jpl_horizons' || site.ephem) return;
+  try {
+    site.ephem = await loadEphemeris(site.id);
+  } catch (error) {
+    site.ephem = null;
+    site.ephemSource = 'iau2000_local';
+    console.warn(`Horizons no disponible para ${site.id}; usando motor IAU 2000.`, error);
+  }
+}
+
+function allSites() {
+  return state.customSite ? [...state.sites, state.customSite] : [...state.sites];
+}
+
+function updateSitePanel(site) {
+  hudSiteName.textContent = site.name;
+  siteProgramBadge.textContent = site.program;
+  siteDescription.textContent = site.description;
+  siteSlopeVal.textContent = `${Number(site.maxSlopeDeg).toFixed(1)}°`;
+  siteElevVal.textContent = `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`;
+  hudCoords.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
+  siteDataQuality.textContent = site.dataQuality;
+  siteDataSource.textContent = `Horizonte: ${site.horizonSource} · Efemérides: ${site.ephemSource === 'jpl_horizons' ? 'JPL Horizons DE441' : 'IAU 2000 local'}`;
+  const radarLabel =
+    site.horizonSource === 'analytic_flat'
+      ? 'Analítico'
+      : site.isRealLola
+        ? 'LOLA real'
+        : 'Aproximado';
+  $('radar-source-badge').textContent = radarLabel;
+
+  const quickMapUrl = getQuickMapUrl(site);
+  const moonTrekUrl = getMoonTrekUrl(site);
+  const quickMapLink = $('btn-open-quickmap');
+  const moonTrekLink = $('btn-open-moontrek');
+  if (quickMapLink) quickMapLink.href = quickMapUrl;
+  if (moonTrekLink) moonTrekLink.href = moonTrekUrl;
+  updateTrekModalContent(site, quickMapUrl, moonTrekUrl);
+
+  siteSelect.value = site.id;
+  mastSelect.value = String(state.mastHeightM);
+  panelSelect.value = state.panelType;
+  profileSelect.value = state.profileId;
+}
+
+function updateTrekModalContent(site, quickMapUrl, moonTrekUrl) {
+  if (!site) return;
+  const setText = (id, value) => {
+    const element = $(id);
+    if (element) element.textContent = value;
+  };
+  setText('trek-modal-site-name', site.name);
+  setText('trek-modal-program', site.program);
+  setText(
+    'trek-modal-coords',
+    `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`
+  );
+  setText('trek-modal-elev', `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`);
+  setText('trek-modal-slope', `${Number(site.maxSlopeDeg).toFixed(1)}°`);
+  setText('trek-modal-ice', `${site.distToIceTrapKm.toFixed(1)} km`);
+  setText('trek-modal-geology', site.geology ?? site.description);
+  const quickMapButton = $('trek-modal-quickmap-btn');
+  const moonTrekButton = $('trek-modal-moontrek-btn');
+  if (quickMapButton) quickMapButton.href = quickMapUrl;
+  if (moonTrekButton) moonTrekButton.href = moonTrekUrl;
+}
+
+function initModelLayerControls() {
+  const layerButtons = document.querySelectorAll('.layer-btn');
+  layerButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      layerButtons.forEach((other) => other.classList.remove('active'));
+      button.classList.add('active');
+      moonScene.setLayer(button.dataset.layer);
     });
   });
 
-  // Custom coordinate input handlers
-  document.getElementById('apply-custom-btn').addEventListener('click', () => {
-    const lat = parseFloat(document.getElementById('custom-lat').value);
-    const lon = parseFloat(document.getElementById('custom-lon').value);
-    if (!isNaN(lat) && !isNaN(lon)) {
-      const custom = getCustomSite(lat, lon);
-      setLandingSite(custom);
-    }
-  });
-
-  // Register sites in 3D scene
-  moonScene.setLandingSites(LANDING_SITES, (siteId) => {
-    const found = LANDING_SITES.find((s) => s.id === siteId);
-    if (found) {
-      setLandingSite(found);
-    }
-  });
-}
-
-/**
- * Switches the active landing site.
- */
-function setLandingSite(site) {
-  state.currentSite = site;
-  siteProgramBadge.textContent = site.program;
-  siteDescription.textContent = site.description;
-  siteSlopeVal.textContent = `${site.maxSlopeDeg}°`;
-  siteElevVal.textContent = `${site.elevationKm > 0 ? '+' : ''}${site.elevationKm.toFixed(1)} km`;
-  if (siteIceVal) siteIceVal.textContent = `${site.distToIceTrapKm.toFixed(1)} km`;
-
-  hudSiteName.textContent = site.name;
-  hudCoords.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
-
-  // Sync Pill selection state
-  document.querySelectorAll('#site-pills-bar .pill-btn').forEach((p) => {
-    if (p.getAttribute('data-site') === site.id) {
-      p.classList.add('active');
-    } else {
-      p.classList.remove('active');
-    }
-  });
-
-  if (siteSelect) siteSelect.value = site.id;
-
-  moonScene.setActiveSite(site);
-  updateHorizonsUrlDisplay();
-  calculateSeriesAndEvaluate();
-}
-
-/**
- * Recalculates 30-day time series and runs the Neural Network evaluation.
- */
-function calculateSeriesAndEvaluate() {
-  const site = state.currentSite;
-
-  // Compute 30-day ephemeris time series at 2-hour intervals (360 data points)
-  state.currentSeries = calculateEphemerisSeries(state.baseDate, site.lat, site.lon, state.seriesDays, 2);
-
-  // Derive mission statistical features across the period
-  let sunUpCount = 0;
-  let earthUpCount = 0;
-  let maxConsecutiveShadowHours = 0;
-  let curShadowHours = 0;
-  let sunElSum = 0;
-
-  state.currentSeries.forEach((pt) => {
-    const topoSun = site.horizonProfile ? site.horizonProfile(pt.sunAz) : 0;
-    const topoEarth = site.horizonProfile ? site.horizonProfile(pt.earthAz) : 0;
-
-    const sunUp = pt.sunEl > topoSun;
-    const earthUp = pt.earthEl > topoEarth;
-
-    if (sunUp) {
-      sunUpCount++;
-      sunElSum += pt.sunEl;
-      curShadowHours = 0;
-    } else {
-      curShadowHours += 2;
-      if (curShadowHours > maxConsecutiveShadowHours) {
-        maxConsecutiveShadowHours = curShadowHours;
+  const reliefButtons = document.querySelectorAll('.relief-btn');
+  reliefButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      reliefButtons.forEach((other) => other.classList.remove('active'));
+      button.classList.add('active');
+      moonScene.setElevationExaggeration(Number.parseFloat(button.dataset.relief));
+      if (state.currentSite && state.analysis) {
+        moonScene.updateSiteStatus(state.currentSite.id, state.analysis.scorePercent);
       }
-    }
-
-    if (earthUp) {
-      earthUpCount++;
-    }
+    });
   });
-
-  const totalPoints = state.currentSeries.length;
-  const solarCoverage = sunUpCount / totalPoints;
-  const earthCoverage = earthUpCount / totalPoints;
-  const meanSunEl = sunUpCount > 0 ? sunElSum / sunUpCount : -1.0;
-
-  // Run Deep Neural Network (LunarLandNet)
-  const evalResult = evaluateLandingSite({
-    maxSlopeDeg: site.maxSlopeDeg,
-    roughnessIndex: site.roughnessIndex,
-    solarCoverage,
-    meanSolarElev: meanSunEl,
-    earthCoverage,
-    maxShadowGapHours: maxConsecutiveShadowHours,
-    distToIceTrapKm: site.distToIceTrapKm,
-    elevationKm: site.elevationKm
-  });
-
-  state.currentEvaluation = evalResult;
-
-  // Update Neural Network UI Card
-  updateNeuralUI(evalResult);
-
-  // Update 3D Marker pin status color
-  moonScene.updateSiteStatus(site.id, evalResult.scorePercent);
-
-  // Update current point simulation
-  updateSimulation();
 }
 
-/**
- * Updates UI elements for the Neural Network evaluation results.
- */
-function updateNeuralUI(evalResult) {
-  scoreNumber.textContent = evalResult.scorePercent;
+function updateDecisionUI(analysis) {
+  scoreNumber.textContent = analysis.scorePercent;
+  scoreCircle.className = `gauge-ring ${analysis.badgeClass}`;
+  classificationBadge.className = `badge-go-nogo ${analysis.badgeClass}`;
+  classificationBadge.textContent = analysis.status;
+  classificationText.textContent = analysis.statusText;
 
-  // Update circular gauge status class
-  scoreCircle.className = `gauge-ring ${evalResult.badgeClass}`;
-  classificationBadge.className = `badge-go-nogo ${evalResult.badgeClass}`;
-  classificationBadge.textContent = evalResult.status;
-  classificationText.textContent = evalResult.statusText;
+  const bars = [
+    [energyScore, energyFill, analysis.components.energy],
+    [eclipseScore, eclipseFill, analysis.components.dark],
+    [dteScore, dteFill, analysis.components.dte],
+    [commsScore, commsFill, analysis.components.comms]
+  ];
+  for (const [label, fill, value] of bars) {
+    const pct = Math.round(value * 100);
+    label.textContent = `${pct}%`;
+    fill.style.width = `${pct}%`;
+  }
 
-  // Sub-scores
-  terrainScore.textContent = `${evalResult.terrainStability}%`;
-  terrainFill.style.width = `${evalResult.terrainStability}%`;
-
-  powerScore.textContent = `${evalResult.powerFeasibility}%`;
-  powerFill.style.width = `${evalResult.powerFeasibility}%`;
-
-  commScore.textContent = `${evalResult.commReliability}%`;
-  commFill.style.width = `${evalResult.commReliability}%`;
-
-  scienceScore.textContent = `${evalResult.scienceValue}%`;
-  scienceFill.style.width = `${evalResult.scienceValue}%`;
-
-  // Explainability XAI factors
   xaiItems.innerHTML = '';
-  evalResult.attributions.forEach((attr) => {
+  for (const attr of analysis.attributions) {
     const item = document.createElement('div');
     item.className = 'xai-item';
     item.innerHTML = `
@@ -294,415 +335,555 @@ function updateNeuralUI(evalResult) {
       <span class="xai-impact ${attr.positive ? 'impact-pos' : 'impact-neg'}">${attr.impact}</span>
     `;
     xaiItems.appendChild(item);
-  });
+  }
 
-  // Update Neural Network visualizer
-  networkVisualizer.update(evalResult);
+  renderDecisionModel(analysis);
+  moonScene.updateSiteStatus(analysis.site.id, analysis.scorePercent);
 }
 
-/**
- * Updates ephemeris for the exact current date/time and refreshes all views.
- */
+function renderDecisionModel(analysis) {
+  const components = [
+    ['Energía', `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`, analysis.profile.weights.energy, analysis.components.energy],
+    ['Eclipse', `${analysis.metrics.dMaxHours.toFixed(1)} h`, analysis.profile.weights.dark, analysis.components.dark],
+    ['DTE', `${analysis.metrics.dteCenterPct.toFixed(0)}%`, analysis.profile.weights.dte, analysis.components.dte],
+    ['Comms', `${analysis.metrics.gMaxHours.toFixed(1)} h`, analysis.profile.weights.comms, analysis.components.comms]
+  ];
+  const container = $('decision-components');
+  if (container) {
+    container.innerHTML = components
+      .map(([name, raw, weight, term]) => {
+        const pct = Math.round(term * 100);
+        return `<div class="decision-row">
+          <span class="name">${name}</span>
+          <span class="raw">${raw}</span>
+          <span class="weight">w=${weight}</span>
+          <span class="term ${term >= 0.75 ? 'good' : term >= 0.5 ? '' : 'bad'}">${pct}/100</span>
+        </div>`;
+      })
+      .join('');
+  }
+  const profileEl = $('decision-profile');
+  if (profileEl) {
+    profileEl.textContent = `${analysis.profile.name}: energía ≥ ${analysis.profile.energyReqKWhM2} kWh/m²; eclipse ≤ ${analysis.profile.dMaxTolHours} h; DTE ≥ ${analysis.profile.dteReqPct}%; corte DTE ≤ ${analysis.profile.gMaxTolHours} h. Panel: ${PANELS[analysis.panelType].label}; mástil: ${analysis.mastHeightM.toFixed(1)} m.`;
+  }
+}
+
 function updateSimulation() {
+  if (!state.currentSite || !state.analysis) return;
   const site = state.currentSite;
-  const date = state.currentDate;
+  const bodies = sampleSite(site, state.currentDate.getTime());
+  const sky = makeSky(site, bodies, state.mastHeightM);
+  state.currentSky = sky;
 
-  // Calculate high-precision lunar ephemeris
-  const eph = calculateLunarEphemeris(date, site.lat, site.lon);
-  state.currentEphemeris = eph;
+  clockDisplay.textContent = utcLabel(state.currentDate);
+  scoreWindowLabel.textContent = `Ventana: ${WINDOW_DAYS} d desde ${utcLabel(state.baseDate)} · instante ${utcLabel(state.currentDate)}`;
+  hudSunElev.textContent = `${sky.sun.elDeg >= 0 ? '+' : ''}${sky.sun.elDeg.toFixed(2)}° Elev`;
+  hudEarthElev.textContent = `${sky.earth.elDeg >= 0 ? '+' : ''}${sky.earth.elDeg.toFixed(2)}° Elev`;
 
-  // Update Clock HUD
-  const pad = (n) => String(n).padStart(2, '0');
-  const dStr = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(
-    date.getUTCHours()
-  )}:${pad(date.getUTCMinutes())} UTC`;
-  clockDisplay.textContent = dStr;
+  const panelAzimuth = analysisPanelAzimuth(state.analysis);
+  const irradiance = panelIrradianceWm2(
+    state.panelType,
+    sky.sun.azDeg,
+    sky.sun.elDeg,
+    sky.sun.distance,
+    sky.sunVisibleFraction,
+    panelAzimuth
+  );
+  solarEffVal.textContent = `Irradiancia panel: ${irradiance.toFixed(0)} W/m² · f☉ ${(sky.sunVisibleFraction * 100).toFixed(0)}%`;
+  sunHorizonVal.textContent = `Horizonte LOLA: ${sky.sunHorizonDeg.toFixed(2)}° · despeje ${(sky.sun.elDeg - sky.sunHorizonDeg).toFixed(2)}°`;
+  earthHorizonVal.textContent = `Horizonte LOLA: ${sky.earthHorizonDeg.toFixed(2)}° · despeje ${(sky.earth.elDeg - sky.earthHorizonDeg).toFixed(2)}°`;
+  commLinkStatus.textContent = sky.dteCenter ? 'DTE: centro de Tierra visible' : 'DTE: bloqueada por el horizonte';
+  commLinkStatus.style.color = sky.dteCenter ? 'var(--color-cyan)' : 'var(--color-red)';
 
-  // Update HUD
-  hudSunElev.textContent = `${eph.sun.el >= 0 ? '+' : ''}${eph.sun.el.toFixed(2)}° Elev`;
-  hudEarthElev.textContent = `${eph.earth.el >= 0 ? '+' : ''}${eph.earth.el.toFixed(2)}° Elev`;
+  state.events = findNextEvents(
+    state.series,
+    state.currentDate.getTime(),
+    site,
+    state.mastHeightM,
+    (ms) => sampleSite(site, ms)
+  );
+  formatCountdowns(state.events);
 
-  // Solar Flux estimation (~1361 W/m2 at 1 AU * sin(elevation))
-  const topoSun = site.horizonProfile ? site.horizonProfile(eph.sun.az) : 0;
-  const topoEarth = site.horizonProfile ? site.horizonProfile(eph.earth.az) : 0;
+  skyDomeRadar.update(
+    site,
+    { sun: { az: sky.sun.azDeg, el: sky.sun.elDeg }, earth: { az: sky.earth.azDeg, el: sky.earth.elDeg } },
+    state.series
+  );
+  timelineChart.update(state.series, site, state.currentDate.getTime());
 
-  const sunIsUp = eph.sun.el > topoSun;
-  const earthIsUp = eph.earth.el > topoEarth;
+  moonScene.updateEphemeris(
+    {
+      sunDirMCMF: azElToMcmf(site.lat, site.lon, sky.sun.azDeg, sky.sun.elDeg),
+      earthDirMCMF: azElToMcmf(site.lat, site.lon, sky.earth.azDeg, sky.earth.elDeg),
+      sun: { az: sky.sun.azDeg, el: sky.sun.elDeg },
+      earth: { az: sky.earth.azDeg, el: sky.earth.elDeg },
+      sunHorizonDeg: sky.sunHorizonDeg,
+      earthHorizonDeg: sky.earthHorizonDeg
+    },
+    site
+  );
 
-  const solarEfficiencyPct = sunIsUp ? Math.round(Math.sin((eph.sun.el * Math.PI) / 180) * 100) : 0;
-  const solarFlux = sunIsUp ? Math.round(1361 * Math.sin((eph.sun.el * Math.PI) / 180)) : 0;
+  if (state.panoramaOpen) updatePanorama();
 
-  solarEffVal.textContent = `Eficiencia: ${solarEfficiencyPct}% (${solarFlux} W/m²)`;
-
-  commLinkStatus.textContent = earthIsUp ? '✓ Enlace DTE Activo' : '⚠ Señal Obstruida (LOLA)';
-  commLinkStatus.style.color = earthIsUp ? 'var(--color-cyan)' : 'var(--color-red)';
-
-  // Calculate Operational Event Countdowns
-  const countdowns = calculateEventCountdowns(date, site.lat, site.lon, site.horizonProfile);
-  formatCountdowns(countdowns);
-
-  // Update 3D Moon Scene
-  moonScene.updateEphemeris(eph, site);
-
-  // Update 2D Sky Dome Radar
-  skyDomeRadar.update(site, eph, state.currentSeries);
-
-  // Update Timeline Chart
-  timelineChart.update(state.currentSeries, site, date.getTime());
-
-  // Update Time Scrubber position
-  const hoursFromBase = (date.getTime() - state.baseDate.getTime()) / 3600000;
-  timeScrubber.value = Math.max(0, Math.min(720, Math.round(hoursFromBase)));
-  const currentDay = Math.floor(hoursFromBase / 24) + 1;
-  scrubberDayLabel.textContent = `Día ${currentDay} / 30`;
+  updateDateTimeInput();
+  const hoursFromBase = (state.currentDate.getTime() - state.baseDate.getTime()) / 3_600_000;
+  timeScrubber.value = String(clamp(Math.round(hoursFromBase), 0, WINDOW_HOURS));
+  const day = Math.min(WINDOW_DAYS, Math.floor(hoursFromBase / 24) + 1);
+  scrubberDayLabel.textContent = `Día ${day} / ${WINDOW_DAYS}`;
 }
 
-/**
- * Formats countdown timers into readable hours and minutes.
- */
-function formatCountdowns(cd) {
-  function fmtMs(ms) {
-    if (!ms || ms <= 0) return '0h 00m';
-    const totalMinutes = Math.floor(ms / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    const days = Math.floor(hours / 24);
-    if (days >= 2) {
-      return `${days}d ${hours % 24}h ${mins}m`;
-    }
-    return `${hours}h ${String(mins).padStart(2, '0')}m`;
+function analysisPanelAzimuth(analysis) {
+  if (!analysis) return 0;
+  if (state.panelType === 'vertical_fixed') return analysis.site.optimalPanelAzimuthDeg || 0;
+  return 0;
+}
+
+function formatCountdowns(events) {
+  if (!events) {
+    sunsetLabel.textContent = 'Próximo evento solar:';
+    sunsetCountdown.textContent = '—';
+    sunsetSub.textContent = 'Sin datos de eventos.';
+    earthsetLabel.textContent = 'Próximo evento DTE:';
+    earthsetCountdown.textContent = '—';
+    earthsetSub.textContent = 'Sin datos de eventos.';
+    return;
   }
 
-  if (cd.sunIsUp) {
-    if (cd.nextSunset) {
-      sunsetCountdown.textContent = fmtMs(cd.nextSunset.msRemaining);
-      sunsetSub.textContent = `Ocaso a las ${cd.nextSunset.date.toISOString().substring(11, 16)} UTC`;
+  if (events.sunIsUp) {
+    sunsetLabel.textContent = 'Próximo ocaso solar:';
+    if (events.nextSunset) {
+      sunsetCountdown.textContent = formatDurationMs(events.nextSunset.msRemaining);
+      sunsetSub.textContent = `Ocaso a las ${utcLabel(events.nextSunset.date).slice(11)} UTC`;
     } else {
-      sunsetCountdown.textContent = 'Sol Permanente';
-      sunsetSub.textContent = 'Pico de Luz Eterna (PEL) en esta estación';
+      sunsetCountdown.textContent = 'Sin ocaso';
+      sunsetSub.textContent = 'No hay ocaso solar en la ventana de 28 días.';
     }
   } else {
-    if (cd.nextSunrise) {
-      sunsetCountdown.textContent = `En Sombra (${fmtMs(cd.nextSunrise.msRemaining)})`;
-      sunsetSub.textContent = `Amanecer a las ${cd.nextSunrise.date.toISOString().substring(11, 16)} UTC`;
+    sunsetLabel.textContent = 'Próximo amanecer:';
+    if (events.nextSunrise) {
+      sunsetCountdown.textContent = formatDurationMs(events.nextSunrise.msRemaining);
+      sunsetSub.textContent = `Amanecer a las ${utcLabel(events.nextSunrise.date).slice(11)} UTC`;
     } else {
-      sunsetCountdown.textContent = 'Noche Polar Continua';
-      sunsetSub.textContent = 'Zona en sombra total';
+      sunsetCountdown.textContent = 'Sin amanecer';
+      sunsetSub.textContent = 'No hay amanecer solar en la ventana de 28 días.';
     }
   }
 
-  if (cd.earthIsUp) {
-    if (cd.nextEarthset) {
-      earthsetCountdown.textContent = fmtMs(cd.nextEarthset.msRemaining);
-      earthsetSub.textContent = `Pérdida a las ${cd.nextEarthset.date.toISOString().substring(11, 16)} UTC`;
+  if (events.earthIsUp) {
+    earthsetLabel.textContent = 'Próxima pérdida DTE:';
+    if (events.nextEarthset) {
+      earthsetCountdown.textContent = formatDurationMs(events.nextEarthset.msRemaining);
+      earthsetSub.textContent = `Pérdida a las ${utcLabel(events.nextEarthset.date).slice(11)} UTC`;
     } else {
-      earthsetCountdown.textContent = 'Visibilidad Continua';
-      earthsetSub.textContent = 'Sin pérdida de comunicación durante libración';
+      earthsetCountdown.textContent = 'DTE continua';
+      earthsetSub.textContent = 'Sin pérdida del centro de la Tierra en 28 días.';
     }
   } else {
-    if (cd.nextEarthrise) {
-      earthsetCountdown.textContent = `Sin Señal (${fmtMs(cd.nextEarthrise.msRemaining)})`;
-      earthsetSub.textContent = `Reaparición a las ${cd.nextEarthrise.date.toISOString().substring(11, 16)} UTC`;
+    earthsetLabel.textContent = 'Próximo Earthrise:';
+    if (events.nextEarthrise) {
+      earthsetCountdown.textContent = formatDurationMs(events.nextEarthrise.msRemaining);
+      earthsetSub.textContent = `Reaparición a las ${utcLabel(events.nextEarthrise.date).slice(11)} UTC`;
     } else {
-      earthsetCountdown.textContent = 'Oclusión Permanente';
-      earthsetSub.textContent = 'Tierra debajo del relieve montañoso';
+      earthsetCountdown.textContent = 'Sin Earthrise';
+      earthsetSub.textContent = 'Sin reaparición del centro de la Tierra en 28 días.';
     }
   }
 }
 
-/**
- * Synchronizes the datetime HTML input with state.currentDate.
- */
-function updateDateTimeInput() {
-  const d = state.currentDate;
-  const pad = (n) => String(n).padStart(2, '0');
-  const localIso = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(
-    d.getUTCHours()
-  )}:${pad(d.getUTCMinutes())}`;
-  datetimeInput.value = localIso;
+async function calculateSeriesAndEvaluate() {
+  if (!state.currentSite) return;
+  const token = ++state.evaluationToken;
+  setLoading(true, 'Calculando ventana de 28 días con LOLA + Horizons…');
+  await ensureEphemeris(state.currentSite);
+  if (token !== state.evaluationToken) return;
+  try {
+    const analysis = analyzeSite({
+      site: state.currentSite,
+      startMs: state.baseDate.getTime(),
+      mastHeightM: state.mastHeightM,
+      panelType: state.panelType,
+      profileId: state.profileId,
+      sampleAt: (ms) => sampleSite(state.currentSite, ms)
+    });
+    if (token !== state.evaluationToken) return;
+    state.analysis = analysis;
+    state.series = analysis.series;
+    updateDecisionUI(analysis);
+    updateSimulation();
+  } catch (error) {
+    console.error('No se pudo evaluar el sitio.', error);
+    classificationBadge.textContent = 'SIN DATOS';
+    classificationBadge.className = 'badge-go-nogo status-danger';
+    classificationText.textContent = `No se pudo evaluar: ${error.message}`;
+    scoreNumber.textContent = '—';
+  } finally {
+    if (token === state.evaluationToken) setLoading(false);
+  }
 }
 
-/**
- * Date/Time controller listeners.
- */
+function populateSiteSelector(sites) {
+  siteSelect.innerHTML = '';
+  for (const site of sites) {
+    const option = document.createElement('option');
+    option.value = site.id;
+    option.textContent = `${site.name} · ${site.dataQuality}`;
+    siteSelect.appendChild(option);
+  }
+  if (state.customSite) {
+    const option = document.createElement('option');
+    option.value = 'custom-site';
+    option.textContent = `${state.customSite.name} · aproximado`;
+    siteSelect.appendChild(option);
+  }
+
+  sitePillsBar.innerHTML = '';
+  const pillOrder = ['site23', 'site01', 'site04', 'site07', 'site11', 'site20', 'control_eq'];
+  for (const id of pillOrder) {
+    const site = sites.find((candidate) => candidate.id === id);
+    if (!site) continue;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pill-btn';
+    button.dataset.site = site.id;
+    button.textContent = site.shortName;
+    button.addEventListener('click', () => prepareSite(site));
+    sitePillsBar.appendChild(button);
+  }
+}
+
+function updateActivePill(siteId) {
+  for (const pill of sitePillsBar.querySelectorAll('.pill-btn')) {
+    pill.classList.toggle('active', pill.dataset.site === siteId);
+  }
+}
+
+async function prepareSite(site) {
+  if (!site) return;
+  state.currentSite = site;
+  state.evaluationToken += 1;
+  setMastHeight(allSites(), state.mastHeightM);
+  updateSitePanel(site);
+  updateActivePill(site.id);
+  const sitesForScene = allSites();
+  moonScene.setLandingSites(sitesForScene, (siteId) => {
+    const found = allSites().find((s) => s.id === siteId);
+    if (found) prepareSite(found);
+  });
+  moonScene.setActiveSite(site);
+  moonScene.viewSite(site);
+  await calculateSeriesAndEvaluate();
+}
+
+function initSiteSelector(sites) {
+  populateSiteSelector(sites);
+  siteSelect.addEventListener('change', () => {
+    const found = allSites().find((s) => s.id === siteSelect.value);
+    if (found) prepareSite(found);
+  });
+  $('apply-custom-btn').addEventListener('click', () => {
+    const lat = Number.parseFloat($('custom-lat').value);
+    const lon = Number.parseFloat($('custom-lon').value);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    state.customSite = getCustomSite(lat, lon);
+    populateSiteSelector(state.sites);
+    siteSelect.value = 'custom-site';
+    prepareSite(state.customSite);
+  });
+}
+
+function initConfigControls() {
+  mastSelect.addEventListener('change', () => {
+    state.mastHeightM = Number.parseFloat(mastSelect.value);
+    setMastHeight(allSites(), state.mastHeightM);
+    calculateSeriesAndEvaluate();
+  });
+  panelSelect.addEventListener('change', () => {
+    state.panelType = panelSelect.value;
+    calculateSeriesAndEvaluate();
+  });
+  profileSelect.addEventListener('change', () => {
+    state.profileId = profileSelect.value;
+    calculateSeriesAndEvaluate();
+  });
+}
+
 function initTimeControls() {
   updateDateTimeInput();
+  datetimeInput.min = '2026-01-01T00:00';
+  datetimeInput.max = '2029-01-01T00:00';
 
-  datetimeInput.addEventListener('change', (e) => {
-    if (e.target.value) {
-      state.currentDate = new Date(e.target.value + ':00Z');
-      state.baseDate = new Date(state.currentDate);
-      calculateSeriesAndEvaluate();
-    }
-  });
-
-  // Time preset switcher
-  presetSelect.addEventListener('change', (e) => {
-    const val = e.target.value;
-    if (val === 'artemis-2026') {
-      state.currentDate = new Date(Date.UTC(2026, 10, 14, 0, 0, 0));
-    } else if (val === 'clps-summer') {
-      state.currentDate = new Date(Date.UTC(2026, 11, 21, 12, 0, 0)); // Southern Summer Solstice
-    } else if (val === 'clps-winter') {
-      state.currentDate = new Date(Date.UTC(2026, 5, 21, 12, 0, 0)); // Southern Winter Solstice
-    } else if (val === 'now') {
-      state.currentDate = new Date();
-    }
-    state.baseDate = new Date(state.currentDate);
-    updateDateTimeInput();
+  datetimeInput.addEventListener('change', (event) => {
+    if (!event.target.value) return;
+    const next = new Date(`${event.target.value}:00Z`);
+    if (Number.isNaN(next.getTime())) return;
+    state.baseDate = next;
+    state.currentDate = new Date(next);
     calculateSeriesAndEvaluate();
   });
 
-  // Step buttons (-1d, -1h, +1h, +1d)
-  document.getElementById('step-back-day').addEventListener('click', () => {
-    state.currentDate = new Date(state.currentDate.getTime() - 86400000);
-    updateDateTimeInput();
-    updateSimulation();
+  presetSelect.addEventListener('change', () => {
+    const value = presetSelect.value;
+    if (value === 'artemis-2026') state.baseDate = new Date(Date.UTC(2026, 10, 14, 0, 0, 0));
+    else if (value === 'clps-summer') state.baseDate = new Date(Date.UTC(2026, 11, 21, 12, 0, 0));
+    else if (value === 'clps-winter') state.baseDate = new Date(Date.UTC(2026, 5, 21, 12, 0, 0));
+    else state.baseDate = new Date();
+    state.currentDate = new Date(state.baseDate);
+    calculateSeriesAndEvaluate();
   });
-  document.getElementById('step-back-hour').addEventListener('click', () => {
-    state.currentDate = new Date(state.currentDate.getTime() - 3600000);
-    updateDateTimeInput();
+
+  const stepCurrent = (hours) => {
+    const max = addDays(state.baseDate, WINDOW_DAYS);
+    state.currentDate = clampDate(new Date(state.currentDate.getTime() + hours * 3_600_000), state.baseDate, max);
+    if (state.currentDate.getTime() >= max.getTime()) state.currentDate = new Date(max);
     updateSimulation();
-  });
-  document.getElementById('step-fwd-hour').addEventListener('click', () => {
-    state.currentDate = new Date(state.currentDate.getTime() + 3600000);
-    updateDateTimeInput();
-    updateSimulation();
-  });
-  document.getElementById('step-fwd-day').addEventListener('click', () => {
-    state.currentDate = new Date(state.currentDate.getTime() + 86400000);
-    updateDateTimeInput();
+  };
+
+  $('step-back-day').addEventListener('click', () => stepCurrent(-24));
+  $('step-back-hour').addEventListener('click', () => stepCurrent(-1));
+  $('step-fwd-hour').addEventListener('click', () => stepCurrent(1));
+  $('step-fwd-day').addEventListener('click', () => stepCurrent(24));
+
+  timeScrubber.addEventListener('input', () => {
+    const hours = Number.parseInt(timeScrubber.value, 10);
+    state.currentDate = new Date(state.baseDate.getTime() + hours * 3_600_000);
     updateSimulation();
   });
 
-  // Time Scrubber slider
-  timeScrubber.addEventListener('input', (e) => {
-    const hours = parseInt(e.target.value, 10);
-    state.currentDate = new Date(state.baseDate.getTime() + hours * 3600000);
-    updateDateTimeInput();
-    updateSimulation();
-  });
-
-  // Play / Pause Simulation
   playPauseBtn.addEventListener('click', () => {
     state.isPlaying = !state.isPlaying;
     playIcon.textContent = state.isPlaying ? '⏸' : '▶';
     playText.textContent = state.isPlaying ? 'Pausa' : 'Simular';
   });
 
-  // Speed selectors (1x, 10x, 60x)
-  document.querySelectorAll('.speed-chip').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.speed-chip').forEach((b) => b.classList.remove('active'));
-      e.target.classList.add('active');
-      state.playbackSpeed = parseInt(e.target.getAttribute('data-speed'), 10);
+  for (const button of document.querySelectorAll('.speed-chip')) {
+    button.addEventListener('click', () => {
+      for (const other of document.querySelectorAll('.speed-chip')) other.classList.remove('active');
+      button.classList.add('active');
+      state.playbackSpeed = Number.parseInt(button.dataset.speed, 10);
     });
-  });
+  }
 
-  // Timeline Drawer Toggle
-  timelineToggleBtn.addEventListener('click', () => {
-    const isHidden = chartDrawer.classList.contains('hidden');
-    if (isHidden) {
-      chartDrawer.classList.remove('hidden');
-      timelineArrow.classList.add('rotated');
-      setTimeout(() => timelineChart.resize(), 50);
-    } else {
-      chartDrawer.classList.add('hidden');
-      timelineArrow.classList.remove('rotated');
-    }
-  });
+  const toggleChart = (open) => {
+    const shouldOpen = open ?? chartDrawer.classList.contains('hidden');
+    chartDrawer.classList.toggle('hidden', !shouldOpen);
+    timelineToggleBtn.setAttribute('aria-expanded', String(shouldOpen));
+    timelineArrow.classList.toggle('rotated', shouldOpen);
+    if (shouldOpen) setTimeout(() => timelineChart.resize(), 50);
+  };
+  timelineToggleBtn.addEventListener('click', () => toggleChart());
+  closeChartBtn.addEventListener('click', () => toggleChart(false));
 
-  // Simulation tick loop (~60 fps)
   let lastTick = performance.now();
   function simulationLoop(now) {
     const deltaMs = now - lastTick;
     lastTick = now;
-
-    if (state.isPlaying) {
-      // Advance by playback speed: 1x = 1 simulated hour every 2 seconds
-      const simulatedHoursToAdd = (deltaMs / 2000) * state.playbackSpeed;
-      state.currentDate = new Date(state.currentDate.getTime() + simulatedHoursToAdd * 3600000);
-
-      // Loop over 30 days
-      const maxMs = state.baseDate.getTime() + 30 * 86400000;
-      if (state.currentDate.getTime() > maxMs) {
-        state.currentDate = new Date(state.baseDate);
-      }
-
-      updateDateTimeInput();
+    if (state.isPlaying && state.analysis) {
+      const simulatedHours = (deltaMs / 2000) * state.playbackSpeed;
+      const max = addDays(state.baseDate, WINDOW_DAYS);
+      let next = new Date(state.currentDate.getTime() + simulatedHours * 3_600_000);
+      if (next.getTime() >= max.getTime()) next = new Date(max);
+      state.currentDate = next;
       updateSimulation();
+      if (next.getTime() >= max.getTime()) {
+        state.isPlaying = false;
+        playIcon.textContent = '▶';
+        playText.textContent = 'Simular';
+      }
     }
-
     requestAnimationFrame(simulationLoop);
   }
   requestAnimationFrame(simulationLoop);
 }
 
-/**
- * Camera View buttons on Floating Camera Bar
- */
 function initCameraHUDControls() {
-  const camButtons = [
+  const cameraButtons = [
     { id: 'hud-view-south-pole', action: () => moonScene.viewSouthPole() },
     { id: 'hud-view-site', action: () => moonScene.viewSite(state.currentSite) },
     { id: 'hud-view-global', action: () => moonScene.viewGlobal() }
   ];
-
-  camButtons.forEach(({ id, action }) => {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      camButtons.forEach((c) => document.getElementById(c.id)?.classList.remove('active'));
-      btn.classList.add('active');
+  for (const { id, action } of cameraButtons) {
+    const button = $(id);
+    if (!button) continue;
+    button.addEventListener('click', () => {
+      for (const other of cameraButtons) $(other.id)?.classList.remove('active');
+      button.classList.add('active');
       action();
     });
+  }
+}
+
+function initPanorama() {
+  const canvas = $('panorama-canvas');
+  if (!canvas) return;
+  panorama = new Panorama25D(canvas);
+  panorama.setMode(state.panoramaMode);
+  panorama.setDiskScale(state.panoramaDiskScale);
+
+  const setPressed = (button, pressed) => button.setAttribute('aria-pressed', String(pressed));
+  panoramaZoomBtn.addEventListener('click', () => {
+    state.panoramaMode = 'zoom';
+    panorama.setMode('zoom');
+    setPressed(panoramaZoomBtn, true);
+    setPressed(panoramaFullBtn, false);
+    updatePanorama();
+  });
+  panoramaFullBtn.addEventListener('click', () => {
+    state.panoramaMode = 'full';
+    panorama.setMode('full');
+    setPressed(panoramaZoomBtn, false);
+    setPressed(panoramaFullBtn, true);
+    updatePanorama();
+  });
+  panoramaDiskBtn.addEventListener('click', () => {
+    state.panoramaDiskScale = state.panoramaDiskScale === 'enlarged' ? 'true' : 'enlarged';
+    panorama.setDiskScale(state.panoramaDiskScale);
+    setPressed(panoramaDiskBtn, state.panoramaDiskScale === 'true');
+    panoramaDiskBtn.textContent = state.panoramaDiskScale === 'true' ? 'Discos ampliados' : 'Discos a escala real';
+    updatePanorama();
+  });
+
+  openPanoramaBtn.addEventListener('click', () => {
+    panoramaModal.classList.remove('hidden');
+    state.panoramaOpen = true;
+    panorama.resize();
+    updatePanorama();
+  });
+  closePanoramaModal.addEventListener('click', () => {
+    panoramaModal.classList.add('hidden');
+    state.panoramaOpen = false;
+  });
+  window.addEventListener('resize', () => {
+    if (state.panoramaOpen) panorama.resize();
   });
 }
 
-/**
- * Initializes Modals (Comparison, JPL Horizons, Neural Network Visualizer)
- */
-function initModals() {
-  // Multi-Site Comparison Modal
-  openComparisonBtn.addEventListener('click', () => {
-    // Evaluate all candidate sites for the current date
-    const siteEvaluations = LANDING_SITES.map((site) => {
-      const series = calculateEphemerisSeries(state.currentDate, site.lat, site.lon, 14, 3);
-      let sunUpCount = 0;
-      let earthUpCount = 0;
-      let maxShadow = 0;
-      let curShadow = 0;
-      let sunSum = 0;
+function updatePanorama() {
+  if (!panorama || !state.currentSite || !state.currentSky) return;
+  panorama.update({
+    site: state.currentSite,
+    sky: state.currentSky,
+    series: state.series,
+    currentTimeMs: state.currentDate.getTime(),
+    mastHeightM: state.mastHeightM,
+    dateLabel: utcLabel(state.currentDate)
+  });
+  panoramaSiteLabel.textContent = `${state.currentSite.name} · ${utcLabel(state.currentDate)} · ${state.currentSite.dataQuality}`;
+  panoramaSun.textContent = formatAzEl(state.currentSky.sun.azDeg, state.currentSky.sun.elDeg);
+  panoramaEarth.textContent = formatAzEl(state.currentSky.earth.azDeg, state.currentSky.earth.elDeg);
+  panoramaSunHorizon.textContent = `${state.currentSky.sunHorizonDeg.toFixed(2)}°`;
+  panoramaEarthHorizon.textContent = `${state.currentSky.earthHorizonDeg.toFixed(2)}°`;
+  panoramaMast.textContent = `${state.mastHeightM.toFixed(1)} m`;
+}
 
-      series.forEach((pt) => {
-        const topoSun = site.horizonProfile ? site.horizonProfile(pt.sunAz) : 0;
-        const topoEarth = site.horizonProfile ? site.horizonProfile(pt.earthAz) : 0;
-        if (pt.sunEl > topoSun) {
-          sunUpCount++;
-          sunSum += pt.sunEl;
-          curShadow = 0;
-        } else {
-          curShadow += 3;
-          if (curShadow > maxShadow) maxShadow = curShadow;
-        }
-        if (pt.earthEl > topoEarth) earthUpCount++;
-      });
-
-      const solarCov = sunUpCount / series.length;
-      const earthCov = earthUpCount / series.length;
-      const meanSun = sunUpCount > 0 ? sunSum / sunUpCount : -1;
-
-      const evaluation = evaluateLandingSite({
-        maxSlopeDeg: site.maxSlopeDeg,
-        roughnessIndex: site.roughnessIndex,
-        solarCoverage: solarCov,
-        meanSolarElev: meanSun,
-        earthCoverage: earthCov,
-        maxShadowGapHours: maxShadow,
-        distToIceTrapKm: site.distToIceTrapKm,
-        elevationKm: site.elevationKm
-      });
-
-      return {
+async function openComparison() {
+  if (!state.currentSite) return;
+  setLoading(true, 'Evaluando todos los sitios con la misma ventana y supuestos…');
+  try {
+    const sites = allSites();
+    await Promise.all(sites.map(ensureEphemeris));
+    const analyses = sites.map((site) =>
+      analyzeSite({
         site,
-        solarCoverage: solarCov,
-        earthCoverage: earthCov,
-        maxShadowGapHours: maxShadow,
-        evaluation
-      };
-    });
-
-    renderComparisonTable(comparisonModalBody, siteEvaluations, (selectedSiteId) => {
-      const found = LANDING_SITES.find((s) => s.id === selectedSiteId);
-      if (found) {
-        setLandingSite(found);
-        comparisonModal.classList.add('hidden');
+        startMs: state.baseDate.getTime(),
+        mastHeightM: state.mastHeightM,
+        panelType: state.panelType,
+        profileId: state.profileId,
+        sampleAt: (ms) => sampleSite(site, ms)
+      })
+    );
+    renderComparisonTable(
+      comparisonModalBody,
+      analyses,
+      {
+        startMs: state.baseDate.getTime(),
+        windowDays: WINDOW_DAYS,
+        profile: PROFILE_BY_ID[state.profileId],
+        mastHeightM: state.mastHeightM,
+        panelType: state.panelType,
+        panelLabel: PANELS[state.panelType].label
+      },
+      (siteId) => {
+        const found = allSites().find((site) => site.id === siteId);
+        if (found) {
+          comparisonModal.classList.add('hidden');
+          prepareSite(found);
+        }
       }
-    });
-
+    );
     comparisonModal.classList.remove('hidden');
-  });
+  } catch (error) {
+    console.error('No se pudo comparar los sitios.', error);
+    comparisonModalBody.innerHTML = `<p class="data-note">No se pudo completar la comparación: ${error.message}</p>`;
+    comparisonModal.classList.remove('hidden');
+  } finally {
+    setLoading(false);
+  }
+}
 
-  closeComparisonModal.addEventListener('click', () => {
-    comparisonModal.classList.add('hidden');
-  });
-
-  // JPL Horizons Inspector Modal
-  openHorizonsBtn.addEventListener('click', () => {
-    updateHorizonsUrlDisplay();
-    horizonsModal.classList.remove('hidden');
-  });
-
-  closeHorizonsModal.addEventListener('click', () => {
-    horizonsModal.classList.add('hidden');
-  });
-
-  testHorizonsFetchBtn.addEventListener('click', async () => {
-    horizonsFetchStatus.textContent = 'Consultando api de JPL Horizons en tiempo real...';
-    horizonsFetchStatus.style.color = 'var(--color-cyan)';
-
-    const result = await queryHorizons({
-      body: '10',
-      lat: state.currentSite.lat,
-      lon: state.currentSite.lon,
-      startTime: state.currentDate,
-      stopTime: new Date(state.currentDate.getTime() + 86400000 * 2)
-    });
-
-    if (result.ok && result.data && result.data.length > 0) {
-      horizonsFetchStatus.textContent = `✓ Respuesta exitosa de NASA Horizons: ${result.data.length} registros recibidos.`;
-      horizonsFetchStatus.style.color = 'var(--color-green)';
-    } else {
-      horizonsFetchStatus.textContent = `ℹ Modo fuera de línea / CORS: Utilizando Motor de Precisión IAU 2000 sincronizado (${result.source}).`;
-      horizonsFetchStatus.style.color = 'var(--color-gold)';
-    }
-  });
-
-  // Neural Network Architecture Modal
+function initModals() {
+  openComparisonBtn.addEventListener('click', openComparison);
+  closeComparisonModal.addEventListener('click', () => comparisonModal.classList.add('hidden'));
+  openHorizonsBtn.addEventListener('click', () => horizonsModal.classList.remove('hidden'));
+  closeHorizonsModal.addEventListener('click', () => horizonsModal.classList.add('hidden'));
   toggleNnViewBtn.addEventListener('click', () => {
     nnModal.classList.remove('hidden');
-    networkVisualizer.resize();
+    if (state.analysis) renderDecisionModel(state.analysis);
   });
+  closeNnModal.addEventListener('click', () => nnModal.classList.add('hidden'));
 
-  closeNnModal.addEventListener('click', () => {
-    nnModal.classList.add('hidden');
-  });
-
-  // Region Scan Heatmap Button
-  document.getElementById('scan-region-btn').addEventListener('click', () => {
-    const site = state.currentSite;
-    const scan = scanRegionWithNeuralNet(site.lat, site.lon, 1.2, 12);
-    alert(
-      `✓ Escaneo de Relieve con Red Neuronal completado:\n\n` +
-        `• Centro: ${site.name} (${site.lat.toFixed(2)}°, ${site.lon.toFixed(2)}°)\n` +
-        `• Nodos topográficos LOLA analizados: ${scan.steps * scan.steps}\n` +
-        `• Algoritmo de Inferencia: LunarLandNet v2.6 (Geotecnia, DTE & Solar)\n` +
-        `• Resultado: Corredor de aproximación validado con índice de seguridad del ${state.currentEvaluation.scorePercent}% (${state.currentEvaluation.status}).`
+  const trekModal = $('trek-modal');
+  const closeTrekModal = $('close-trek-modal');
+  const openTrek = () => {
+    if (!state.currentSite || !trekModal) return;
+    updateTrekModalContent(
+      state.currentSite,
+      getQuickMapUrl(state.currentSite),
+      getMoonTrekUrl(state.currentSite)
     );
-  });
+    trekModal.classList.remove('hidden');
+  };
+  $('btn-open-dossier')?.addEventListener('click', openTrek);
+  $('open-trek-modal-btn')?.addEventListener('click', openTrek);
+  closeTrekModal?.addEventListener('click', () => trekModal?.classList.add('hidden'));
+
+  for (const modal of [comparisonModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.add('hidden');
+    });
+  }
 }
 
-function updateHorizonsUrlDisplay() {
-  const url = buildHorizonsUrl({
-    body: '10',
-    lat: state.currentSite.lat,
-    lon: state.currentSite.lon,
-    altitudeKm: state.currentSite.elevationKm,
-    startTime: state.currentDate,
-    stopTime: new Date(state.currentDate.getTime() + 86400000 * 2)
-  });
-  horizonsUrlBox.textContent = url;
-}
-
-// App Initialization
-function bootstrap() {
-  initSiteSelector();
-  initTimeControls();
-  initCameraHUDControls();
-  initModals();
-
-  // Set default initial site and run first evaluation
-  setLandingSite(state.currentSite);
+async function bootstrap() {
+  try {
+    const sites = await loadLandingSites();
+    state.sites = sites;
+    state.currentSite = sites.find((site) => site.id === 'site23') ?? sites[0];
+    initSiteSelector(sites);
+    initConfigControls();
+    initTimeControls();
+    initCameraHUDControls();
+    initModelLayerControls();
+    initModals();
+    initPanorama();
+    await ensureEphemeris(state.currentSite);
+    updateSitePanel(state.currentSite);
+    updateActivePill(state.currentSite.id);
+    moonScene.setLandingSites(allSites(), (siteId) => {
+      const found = allSites().find((site) => site.id === siteId);
+      if (found) prepareSite(found);
+    });
+    moonScene.setActiveSite(state.currentSite);
+    moonScene.viewSite(state.currentSite);
+    await calculateSeriesAndEvaluate();
+    setLoading(false);
+  } catch (error) {
+    console.error('No se pudo inicializar la aplicación.', error);
+    setLoading(true, `No se pudieron cargar los datos LOLA: ${error.message}`);
+    const strong = loadingOverlay.querySelector('strong');
+    if (strong) strong.textContent = 'Error cargando LOLA + Horizons';
+    classificationBadge.textContent = 'SIN DATOS';
+    classificationText.textContent = error.message;
+  }
 }
 
 window.addEventListener('DOMContentLoaded', bootstrap);
