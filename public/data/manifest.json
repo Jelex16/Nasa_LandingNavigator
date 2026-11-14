@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.1",
+  "generatedUtc": "2026-11-14T18:26:48Z",
+  "dataMode": "real",
+  "horizonModel": "Hybrid LOLA profile: 5 m/px landing-site DEM near field + 80 m/px LOLA 80S regional DEM to R=100 km; lunar curvature term r^2/(2R_Moon); five mast heights 0.5, 2, 5, 10, 20 m.",
+  "ephemSource": "JPL Horizons API, DE441, apparent topocentric az/el and distance, 1 h step",
+  "crs": "LOLA DEMs: spherical south polar stereographic, R=1737400 m, MOON_ME/DE421. Horizons: Moon body-fixed GEODETIC observer frame, DE441.",
+  "transformations": [
+    "Site coordinates derived from each GeoTIFF CRS (not typed).",
+    "Bilinear DEM sampling: 5 m/px near field + 80 m/px far field to 100 km.",
+    "Lunar curvature term r^2/(2R_Moon) inside the horizon arctangent.",
+    "Median far-field datum offset estimated in the near/far overlap ring.",
+    "Horizon rows forced non-increasing with mast height.",
+    "Ephemerides stored as little-endian float32 arrays; header in lib/types.ts.",
+    "Vertical-fixed panel azimuth chosen by a 1-degree energy search over 2026-2028.",
+    "Azimuth origin corrected by +180 deg (360 bins) for all LOLA horizon rows: the source pipeline used the pole-facing direction as north, which is geographic south at the lunar south pole. Bin 0 = true north."
+  ],
+  "inputs": [
+    {
+      "path": "pipeline\\data\\dem\\Site01_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_surf.tif",
+      "bytes": 40980810,
+      "sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+      "downloadedUtc": "2026-11-14T17:17:31Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\Site04_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_surf.tif",
+      "bytes": 40980806,
+      "sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+      "downloadedUtc": "2026-11-14T17:17:31Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\Site07_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_surf.tif",
+      "bytes": 40980808,
+      "sha256": "38aaee10bb4da4d63e7427aa1ca25c79bdbc649d212079a04990e135462091f8",
+      "downloadedUtc": "2026-11-14T17:17:31Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\Site11_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_surf.tif",
+      "bytes": 40980806,
+      "sha256": "58f3372c35bbd6baf38ffd5633c1c96b59bd89dbd252150581d12893a43136e5",
+      "downloadedUtc": "2026-11-14T17:17:31Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\Site20_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_surf.tif",
+      "bytes": 40980802,
+      "sha256": "e51451f3629ba7cd5cfc1b32c8c0ee3c5c454607488b00ea00cd06a9e301a892",
+      "downloadedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\Site23_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_surf.tif",
+      "bytes": 70586804,
+      "sha256": "12d280a59cd7580415f6bada638d0abe025ce6727541fddf68d5dc371a6c94cf",
+      "downloadedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\LDEM_80S_80MPP_ADJ.TIF",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF",
+      "bytes": 189158392,
+      "sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a",
+      "downloadedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "pipeline\\data\\dem\\README_LOLA_5mpp.txt",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/README",
+      "bytes": 1829,
+      "sha256": "e985a2337c9de1cd665b0ddad8b7f1fac88d65c96d1e47d1b975a91c8e53e7bd",
+      "downloadedUtc": "2026-11-14T17:17:32Z"
+    }
+  ],
+  "coverage": {
+    "startUtc": "2026-01-01T00:00:00Z",
+    "endUtc": "2029-02-01T00:00:00Z",
+    "stepHours": 1,
+    "cosmicTargets": [
+      "Sun (10)",
+      "Earth (399)"
+    ]
+  },
+  "files": [
+    {
+      "path": "ephem/control_eq.bin",
+      "bytes": 649220,
+      "sha256": "c389b5739a3c8bde4cf09809d968bc7e06d602c06f47d77c34a545cc0a7f4d16",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "ephem/site01.bin",
+      "bytes": 649216,
+      "sha256": "bb5a30eae625d7f902107591ab5295b5130242baa172bd4639815c0e2b4d8c2e",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "ephem/site04.bin",
+      "bytes": 649216,
+      "sha256": "88eea4af8a4dfe94ba64ba5373fece5dfd54dc7c3ed8cc19efc9cd4c8c9ff9ab",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "ephem/site07.bin",
+      "bytes": 649216,
+      "sha256": "a42eb0039d292eaa7cd15394e348427cef3b287c85fe3a4b2d99111a9ba539fd",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "ephem/site11.bin",
+      "bytes": 649216,
+      "sha256": "ca49604d4a37a2ad0aafd0573fc0befe256bb70d729cc51b9320b8dc98c1c90f",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "ephem/site20.bin",
+      "bytes": 649216,
+      "sha256": "833485e11a8a5ee69a6f6ff5e8cbbea42060ae3888efbd510723dbe5636f3b87",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "ephem/site23.bin",
+      "bytes": 649216,
+      "sha256": "2520dbecbc3e0f7897f0a03556a6155f799e8d87ce46fecb8c6894debb8791d0",
+      "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/control_eq.json",
+      "bytes": 25611,
+      "sha256": "2d60f565aaf329dbb4593617ded533e5b63afe242abf8890840f2c7894841c21",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/site01.json",
+      "bytes": 39169,
+      "sha256": "105a41d74f479f6345add89e9bd207e684e447ff27d07765f2544c5220e8f6b7",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/site04.json",
+      "bytes": 38537,
+      "sha256": "eac42b781747a3bc564a39b48877e269e784c071a5ed0c58de257b1e440fa07b",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/site07.json",
+      "bytes": 39930,
+      "sha256": "81478030621c0f6079463f9ca988a5b6d811b771b8c3eda1d7f8fd685d5a2208",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/site11.json",
+      "bytes": 39466,
+      "sha256": "6cde88a5af2b276af63dae5c4584237cb9a0ec08e5b3eb6fa052a7c2aeec0668",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/site20.json",
+      "bytes": 38502,
+      "sha256": "d183ae3e6b282a680851b8d2c786abf7a7dfb03b99e485983f96fa43ec3310cf",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/site23.json",
+      "bytes": 38029,
+      "sha256": "fdbde87f2f285de642709ad2fc8da7c600ae6f200b255b209000964f3a37e769",
+      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/control_eq.json",
+      "bytes": 322223,
+      "sha256": "a4e4630cc85097266d8c930712f898222b3d4e5d9b657e79ad31ee6ccf61711d",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/site01.json",
+      "bytes": 322036,
+      "sha256": "67351b40baa2214c0c874c1bb298e3e481abef0646c68001700c19b74a90b6ee",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/site04.json",
+      "bytes": 260475,
+      "sha256": "8c8670846b188b2c7b894deef29e30d8ae485824405d9390b1d920656b663515",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/site07.json",
+      "bytes": 322156,
+      "sha256": "8183cf007392e970b8da02ce617be791037d5e2c2a06d39ab8ec4bcb31942f03",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/site11.json",
+      "bytes": 328578,
+      "sha256": "f084ffac4ff04bdececf0bb355bcdfe2c02cc2453d60e5b88092410f59582c36",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/site20.json",
+      "bytes": 316586,
+      "sha256": "58bd30701258da10a1eb9f660903d94268462ab048617309ab8a5b738c9688a0",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "metrics/site23.json",
+      "bytes": 320189,
+      "sha256": "06076fbf6979104410aadfe8a8be948eb10702e23e9ab236c8960e8a55df1ab4",
+      "source": "SUNDIAL pipeline; precomputed from Horizons + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "sites.json",
+      "bytes": 10637,
+      "sha256": "5d660ea1955f8a66c66e9be8670b1399d2af970b76be5b64a0f3954492c71598",
+      "source": "SUNDIAL pipeline; site coordinates derived from PGDA GeoTIFF CRS",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 4850,
+      "sha256": "5398b7996e5475801e843bc5642cf9b37a4fce3b7ab88d220019498b3667699d",
+      "source": "SUNDIAL validation pipeline; direct JPL Horizons off-grid samples + LOLA",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "horizon/nobile_rim_1.json",
+      "bytes": 38634,
+      "sha256": "f9f630b5a07e3db06382b583bf7869c3fa6141a7e489219819296fb844fb11bf",
+      "source": "Regional LOLA 80 m/px; true-north azimuth",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/products/90",
+      "generatedUtc": "2026-11-14T18:26:48Z"
+    },
+    {
+      "path": "horizon/haworth_rim.json",
+      "bytes": 37903,
+      "sha256": "851dd8e80283020af1fd8ba26fb74ff3fbb054eb34f8faee519632e2ee1e19cb",
+      "source": "Regional LOLA 80 m/px; true-north azimuth",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/products/90",
+      "generatedUtc": "2026-11-14T18:26:48Z"
+    },
+    {
+      "path": "sites-extra.json",
+      "bytes": 4006,
+      "sha256": "836b56f8ce00a7cb8ca1777a98193aa5c8839c98c6218ac3dd55614cc746e8c0",
+      "source": "Regional LOLA 80 m/px site metadata",
+      "sourceUrl": "https://pgda.gsfc.nasa.gov/products/90",
+      "generatedUtc": "2026-11-14T18:26:48Z"
+    }
+  ],
+  "citations": [
+    {
+      "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+      "url": "https://doi.org/10.1016/j.pss.2020.105119"
+    },
+    {
+      "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+      "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+    },
+    {
+      "label": "NASA PGDA LOLA 5 m/px landing-site DEMs",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+    },
+    {
+      "label": "NASA PGDA LOLA 80S 80 m/px regional DEM",
+      "url": "https://pgda.gsfc.nasa.gov/products/90"
+    },
+    {
+      "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+      "url": "https://ssd.jpl.nasa.gov/horizons/"
+    }
+  ]
+}

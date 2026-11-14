@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-14T18:26:31Z",
+  "dataMode": "real",
+  "sites": [
+    {
+      "id": "nobile_rim_1",
+      "name": "Nobile Rim 1",
+      "shortName": "Nobile Rim 1",
+      "regionType": "polar",
+      "latDeg": -85.2,
+      "lonEastDeg": 36.1,
+      "elevationM": 6746.28,
+      "slopeDeg": 4.709,
+      "demSourceNear": "LDEM_80S_80MPP_ADJ.TIF",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Nobile crater rim candidate at 85.2 S, 36.1 E, on the high polar plateau west of Nobile where the DEM shows broad, rough highland relief rather than a single crater wall. Terrain data here is the regional 80 m/px LOLA DEM only (no 5 m/px near-field coverage), so the horizon is a 100 km regional profile sampled every 80 m.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_regional_80m",
+      "nearFieldRadiusKm": 0.0,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 0.0,
+      "dataQuality": "LOLA 80 m/px regional",
+      "horizonSource": "lola_80m_regional",
+      "ephemSource": "iau2000_local",
+      "role": "candidate",
+      "horizonFile": "horizon/nobile_rim_1.json"
+    },
+    {
+      "id": "haworth_rim",
+      "name": "Haworth Rim",
+      "shortName": "Haworth Rim",
+      "regionType": "polar",
+      "latDeg": -87.4,
+      "lonEastDeg": 354.8,
+      "elevationM": -3370.91,
+      "slopeDeg": 1.539,
+      "demSourceNear": "LDEM_80S_80MPP_ADJ.TIF",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Haworth crater candidate at 87.4 S, 354.8 E; on the regional 80 m/px LOLA DEM this coordinate lies inside the Haworth basin, whose walls dominate the skyline over most azimuths. Terrain data here is the regional 80 m/px LOLA DEM only (no 5 m/px near-field coverage), so the horizon is a 100 km regional profile sampled every 80 m.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_regional_80m",
+      "nearFieldRadiusKm": 0.0,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 0.0,
+      "dataQuality": "LOLA 80 m/px regional",
+      "horizonSource": "lola_80m_regional",
+      "ephemSource": "iau2000_local",
+      "role": "candidate",
+      "horizonFile": "horizon/haworth_rim.json"
+    }
+  ]
+}

@@ -1,10 +1,8 @@
 /**
- * Interactive Elevation Timeline Chart.
- * Displays Sun and Earth elevation curves over time with:
- * - Local topographic horizon cutoff
- * - Solar power generation daylight windows (shaded gold)
- * - Direct-to-Earth (DTE) communication visibility windows (shaded cyan)
- * - Interactive synchronized current time cursor
+ * Interactive elevation timeline for the 28-day mission window.
+ * Both the Sun and Earth curves are compared with the real LOLA terrain
+ * horizon at the corresponding azimuth. The shaded bands use the terrain
+ * horizon as their baseline (not 0°), so the visual matches the model.
  */
 
 export class TimelineChart {
@@ -20,9 +18,8 @@ export class TimelineChart {
     this.resize();
     window.addEventListener('resize', () => this.resize());
 
-    // Mouse / Touch interaction
-    this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    this.canvas.addEventListener('click', (e) => this.handleClick(e));
+    this.canvas.addEventListener('mousemove', (event) => this.handleMouseMove(event));
+    this.canvas.addEventListener('click', () => this.handleClick());
     this.canvas.addEventListener('mouseleave', () => {
       this.hoverPoint = null;
       this.draw();
@@ -46,10 +43,8 @@ export class TimelineChart {
       top: 20 * this.dpr,
       bottom: 25 * this.dpr
     };
-
     this.plotWidth = this.canvas.width - this.padding.left - this.padding.right;
     this.plotHeight = this.canvas.height - this.padding.top - this.padding.bottom;
-
     this.draw();
   }
 
@@ -60,18 +55,20 @@ export class TimelineChart {
     this.draw();
   }
 
-  handleMouseMove(e) {
+  handleMouseMove(event) {
     if (!this.series || this.series.length === 0) return;
     const rect = this.canvas.getBoundingClientRect();
-    const mouseX = (e.clientX - rect.left) * this.dpr;
-
+    const mouseX = (event.clientX - rect.left) * this.dpr;
     if (mouseX >= this.padding.left && mouseX <= this.padding.left + this.plotWidth) {
       const fraction = (mouseX - this.padding.left) / this.plotWidth;
-      const idx = Math.min(this.series.length - 1, Math.max(0, Math.round(fraction * (this.series.length - 1))));
+      const idx = Math.min(
+        this.series.length - 1,
+        Math.max(0, Math.round(fraction * (this.series.length - 1)))
+      );
       this.hoverPoint = {
         point: this.series[idx],
         canvasX: mouseX,
-        canvasY: (e.clientY - rect.top) * this.dpr
+        canvasY: (event.clientY - rect.top) * this.dpr
       };
       this.draw();
     } else {
@@ -80,42 +77,92 @@ export class TimelineChart {
     }
   }
 
-  handleClick(e) {
+  handleClick() {
     if (!this.hoverPoint || !this.onTimeSelect) return;
     this.onTimeSelect(new Date(this.hoverPoint.point.timeMs));
   }
 
+  horizonFor(point, body) {
+    if (Number.isFinite(point[`${body}Horizon`])) return point[`${body}Horizon`];
+    if (this.site?.horizonProfile) {
+      const az = body === 'sun' ? point.sunAz : point.earthAz;
+      return this.site.horizonProfile(az);
+    }
+    return 0;
+  }
+
+  drawVisibilityBand(ctx, points, timeToX, elToY, body, fillStyle) {
+    const visible = (point) =>
+      body === 'sun' ? point.sunlit ?? point.sunEl > this.horizonFor(point, 'sun') : point.dteCenter ?? point.earthEl > this.horizonFor(point, 'earth');
+    const elevation = (point) => (body === 'sun' ? point.sunEl : point.earthEl);
+    const horizon = (point) => this.horizonFor(point, body);
+    ctx.fillStyle = fillStyle;
+    ctx.beginPath();
+    let started = false;
+    let lastX = 0;
+    let lastY = 0;
+    for (const point of points) {
+      const x = timeToX(point.timeMs);
+      const y = elToY(elevation(point));
+      const baseY = elToY(horizon(point));
+      lastX = x;
+      lastY = baseY;
+      if (visible(point)) {
+        if (!started) {
+          ctx.moveTo(x, baseY);
+          started = true;
+        }
+        ctx.lineTo(x, y);
+      } else if (started) {
+        ctx.lineTo(x, baseY);
+        started = false;
+      }
+    }
+    if (started) ctx.lineTo(lastX, lastY);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  drawHorizonLine(ctx, points, timeToX, elToY, body, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2 * this.dpr;
+    ctx.setLineDash([3 * this.dpr, 3 * this.dpr]);
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      const x = timeToX(point.timeMs);
+      const y = elToY(this.horizonFor(point, body));
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
   draw() {
     const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    ctx.clearRect(0, 0, w, h);
+    const width = this.canvas.width;
+    ctx.clearRect(0, 0, width, this.canvas.height);
+    if (!this.series || this.series.length < 2) return;
 
-    if (!this.series || this.series.length === 0) return;
-
-    // Determine Y-range (min/max elevation with padding)
-    let minEl = -4;
-    let maxEl = 8;
-    this.series.forEach((pt) => {
-      minEl = Math.min(minEl, pt.sunEl, pt.earthEl);
-      maxEl = Math.max(maxEl, pt.sunEl, pt.earthEl);
-    });
+    let minEl = -6;
+    let maxEl = 10;
+    for (const point of this.series) {
+      minEl = Math.min(minEl, point.sunEl, point.earthEl, this.horizonFor(point, 'sun'), this.horizonFor(point, 'earth'));
+      maxEl = Math.max(maxEl, point.sunEl, point.earthEl, this.horizonFor(point, 'sun'), this.horizonFor(point, 'earth'));
+    }
     minEl = Math.floor(minEl - 1);
     maxEl = Math.ceil(maxEl + 1);
 
     const timeStart = this.series[0].timeMs;
     const timeEnd = this.series[this.series.length - 1].timeMs;
-    const timeSpan = timeEnd - timeStart;
-
-    const timeToX = (tMs) => this.padding.left + ((tMs - timeStart) / timeSpan) * this.plotWidth;
+    const timeSpan = Math.max(1, timeEnd - timeStart);
+    const timeToX = (ms) => this.padding.left + ((ms - timeStart) / timeSpan) * this.plotWidth;
     const elToY = (el) => this.padding.top + (1 - (el - minEl) / (maxEl - minEl)) * this.plotHeight;
 
-    // Draw Grid Lines & Elevation Labels
     ctx.font = `${10 * this.dpr}px monospace`;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1 * this.dpr;
-
     const stepEl = maxEl - minEl > 20 ? 5 : 2;
     for (let el = Math.ceil(minEl / stepEl) * stepEl; el <= maxEl; el += stepEl) {
       const y = elToY(el);
@@ -123,133 +170,85 @@ export class TimelineChart {
       ctx.moveTo(this.padding.left, y);
       ctx.lineTo(this.padding.left + this.plotWidth, y);
       ctx.stroke();
-
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       ctx.fillText(`${el}°`, this.padding.left - 6 * this.dpr, y);
     }
 
-    // Zero-degree Horizon line (Highlighted)
     const zeroY = elToY(0);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
     ctx.lineWidth = 1.5 * this.dpr;
     ctx.beginPath();
     ctx.moveTo(this.padding.left, zeroY);
     ctx.lineTo(this.padding.left + this.plotWidth, zeroY);
     ctx.stroke();
 
-    // Topographic horizon cutoff line for Sun azimuth
-    if (this.site && this.site.horizonProfile) {
-      ctx.strokeStyle = 'rgba(255, 64, 129, 0.5)';
-      ctx.lineWidth = 1.2 * this.dpr;
-      ctx.setLineDash([3 * this.dpr, 3 * this.dpr]);
-      ctx.beginPath();
-      this.series.forEach((pt, i) => {
-        const topoEl = this.site.horizonProfile(pt.sunAz);
-        const x = timeToX(pt.timeMs);
-        const y = elToY(topoEl);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
+    this.drawHorizonLine(ctx, this.series, timeToX, elToY, 'sun', 'rgba(255,64,129,0.6)');
+    this.drawHorizonLine(ctx, this.series, timeToX, elToY, 'earth', 'rgba(0,229,255,0.35)');
+    this.drawVisibilityBand(ctx, this.series, timeToX, elToY, 'sun', 'rgba(255,213,79,0.14)');
+    this.drawVisibilityBand(ctx, this.series, timeToX, elToY, 'earth', 'rgba(0,229,255,0.08)');
 
-    // Draw Shaded Sunlight Window (Area where Sun > local terrain)
-    ctx.fillStyle = 'rgba(255, 213, 79, 0.12)';
-    ctx.beginPath();
-    let inSunlight = false;
-    this.series.forEach((pt, i) => {
-      const topoEl = this.site && this.site.horizonProfile ? this.site.horizonProfile(pt.sunAz) : 0;
-      const x = timeToX(pt.timeMs);
-      const y = elToY(pt.sunEl);
-      const isUp = pt.sunEl > topoEl;
-
-      if (isUp) {
-        if (!inSunlight) {
-          ctx.moveTo(x, zeroY);
-          inSunlight = true;
-        }
-        ctx.lineTo(x, y);
-      } else {
-        if (inSunlight) {
-          ctx.lineTo(x, zeroY);
-          inSunlight = false;
-        }
-      }
-    });
-    if (inSunlight) {
-      ctx.lineTo(timeToX(timeEnd), zeroY);
-    }
-    ctx.fill();
-
-    // Earth Elevation Curve (Cyan)
     ctx.strokeStyle = '#00e5ff';
     ctx.lineWidth = 2 * this.dpr;
     ctx.beginPath();
-    this.series.forEach((pt, i) => {
-      const x = timeToX(pt.timeMs);
-      const y = elToY(pt.earthEl);
-      if (i === 0) ctx.moveTo(x, y);
+    this.series.forEach((point, index) => {
+      const x = timeToX(point.timeMs);
+      const y = elToY(point.earthEl);
+      if (index === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
-    // Sun Elevation Curve (Gold)
     ctx.strokeStyle = '#ffd54f';
     ctx.lineWidth = 2.2 * this.dpr;
     ctx.beginPath();
-    this.series.forEach((pt, i) => {
-      const x = timeToX(pt.timeMs);
-      const y = elToY(pt.sunEl);
-      if (i === 0) ctx.moveTo(x, y);
+    this.series.forEach((point, index) => {
+      const x = timeToX(point.timeMs);
+      const y = elToY(point.sunEl);
+      if (index === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
-    // Current Time Cursor
     if (this.currentTimeMs) {
       const cursorX = timeToX(this.currentTimeMs);
-      ctx.strokeStyle = '#ff1744';
-      ctx.lineWidth = 2 * this.dpr;
-      ctx.beginPath();
-      ctx.moveTo(cursorX, this.padding.top);
-      ctx.lineTo(cursorX, this.padding.top + this.plotHeight);
-      ctx.stroke();
-
-      // Top triangle indicator
-      ctx.fillStyle = '#ff1744';
-      ctx.beginPath();
-      ctx.moveTo(cursorX - 5 * this.dpr, this.padding.top - 2);
-      ctx.lineTo(cursorX + 5 * this.dpr, this.padding.top - 2);
-      ctx.lineTo(cursorX, this.padding.top + 5 * this.dpr);
-      ctx.fill();
+      if (cursorX >= this.padding.left && cursorX <= this.padding.left + this.plotWidth) {
+        ctx.strokeStyle = '#ff1744';
+        ctx.lineWidth = 2 * this.dpr;
+        ctx.beginPath();
+        ctx.moveTo(cursorX, this.padding.top);
+        ctx.lineTo(cursorX, this.padding.top + this.plotHeight);
+        ctx.stroke();
+        ctx.fillStyle = '#ff1744';
+        ctx.beginPath();
+        ctx.moveTo(cursorX - 5 * this.dpr, this.padding.top - 2);
+        ctx.lineTo(cursorX + 5 * this.dpr, this.padding.top - 2);
+        ctx.lineTo(cursorX, this.padding.top + 5 * this.dpr);
+        ctx.fill();
+      }
     }
 
-    // Time Axis Labels (Every ~3-5 days)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
     ctx.font = `${9 * this.dpr}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-
-    const numTimeMarks = 6;
-    for (let i = 0; i < numTimeMarks; i++) {
-      const frac = i / (numTimeMarks - 1);
-      const tMs = timeStart + frac * timeSpan;
-      const d = new Date(tMs);
-      const x = timeToX(tMs);
-      const label = `${d.getUTCDate()}/${d.getUTCMonth() + 1}`;
-      ctx.fillText(label, x, this.padding.top + this.plotHeight + 6 * this.dpr);
+    const numTimeMarks = 8;
+    for (let index = 0; index < numTimeMarks; index += 1) {
+      const frac = index / (numTimeMarks - 1);
+      const ms = timeStart + frac * timeSpan;
+      const date = new Date(ms);
+      const label = `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+      ctx.fillText(label, timeToX(ms), this.padding.top + this.plotHeight + 6 * this.dpr);
     }
 
-    // Hover Tooltip
     if (this.hoverPoint) {
-      const pt = this.hoverPoint.point;
-      const d = new Date(pt.timeMs);
+      const point = this.hoverPoint.point;
+      const date = new Date(point.timeMs);
       const x = this.hoverPoint.canvasX;
+      const sunHorizon = this.horizonFor(point, 'sun');
+      const earthHorizon = this.horizonFor(point, 'earth');
 
-      // Vertical guide
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
       ctx.lineWidth = 1 * this.dpr;
       ctx.setLineDash([2 * this.dpr, 2 * this.dpr]);
       ctx.beginPath();
@@ -258,21 +257,12 @@ export class TimelineChart {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Tooltip Card
-      const dateStr = d.toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
-      const sunStr = `Sol: ${pt.sunEl.toFixed(2)}° (Az: ${pt.sunAz.toFixed(1)}°)`;
-      const earthStr = `Tierra: ${pt.earthEl.toFixed(2)}° (Az: ${pt.earthAz.toFixed(1)}°)`;
-      const powerStr = `Eficiencia Solar: ${Math.round(pt.powerEff * 100)}%`;
-
-      const tipW = 200 * this.dpr;
-      const tipH = 75 * this.dpr;
+      const tipW = 220 * this.dpr;
+      const tipH = 98 * this.dpr;
       let tipX = x + 10 * this.dpr;
-      if (tipX + tipW > this.canvas.width - 10) {
-        tipX = x - tipW - 10 * this.dpr;
-      }
+      if (tipX + tipW > this.canvas.width - 10) tipX = x - tipW - 10 * this.dpr;
       const tipY = this.padding.top + 10 * this.dpr;
-
-      ctx.fillStyle = 'rgba(10, 16, 28, 0.92)';
+      ctx.fillStyle = 'rgba(10,16,28,0.94)';
       ctx.strokeStyle = '#00e5ff';
       ctx.lineWidth = 1.2 * this.dpr;
       ctx.beginPath();
@@ -280,20 +270,20 @@ export class TimelineChart {
       ctx.fill();
       ctx.stroke();
 
+      const dateStr = `${date.toISOString().replace('T', ' ').slice(0, 16)} UTC`;
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${10 * this.dpr}px monospace`;
       ctx.textAlign = 'left';
       ctx.fillText(dateStr, tipX + 8 * this.dpr, tipY + 16 * this.dpr);
-
       ctx.fillStyle = '#ffd54f';
       ctx.font = `${9.5 * this.dpr}px monospace`;
-      ctx.fillText(sunStr, tipX + 8 * this.dpr, tipY + 32 * this.dpr);
-
+      ctx.fillText(`Sol: ${point.sunEl.toFixed(2)}° · horizonte ${sunHorizon.toFixed(2)}°`, tipX + 8 * this.dpr, tipY + 32 * this.dpr);
       ctx.fillStyle = '#00e5ff';
-      ctx.fillText(earthStr, tipX + 8 * this.dpr, tipY + 47 * this.dpr);
-
+      ctx.fillText(`Tierra: ${point.earthEl.toFixed(2)}° · horizonte ${earthHorizon.toFixed(2)}°`, tipX + 8 * this.dpr, tipY + 48 * this.dpr);
       ctx.fillStyle = '#69f0ae';
-      ctx.fillText(powerStr, tipX + 8 * this.dpr, tipY + 62 * this.dpr);
+      ctx.fillText(`f☉ ${(point.sunVisibleFraction * 100).toFixed(0)}% · f⊕ ${(point.earthVisibleFraction * 100).toFixed(0)}%`, tipX + 8 * this.dpr, tipY + 64 * this.dpr);
+      ctx.fillStyle = '#b18cf2';
+      ctx.fillText(`Energía: ${point.energyWm2?.toFixed(0) ?? '—'} W/m²`, tipX + 8 * this.dpr, tipY + 80 * this.dpr);
     }
   }
 }

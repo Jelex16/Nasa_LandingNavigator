@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /**
- * Generates a procedural high-fidelity lunar surface texture map and bump map.
- * Includes highlands, basaltic maria, rayed impact craters (Tycho, Copernicus),
- * and calibrated South Pole craters (Shackleton, Malapert, Haworth, Cabeus).
+ * Generates a procedural lunar albedo/bump texture for the background globe.
+ * It is deliberately decorative: the real LOLA topography is rendered in the
+ * 2.5D panorama and the polar horizon radar, not in this Three.js sphere.
+ * Crater positions are approximate context markers, not a LOLA mesh.
  */
 function createProceduralMoonTextures() {
   const width = 2048;
@@ -246,7 +247,7 @@ export class MoonScene {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -284,8 +285,10 @@ export class MoonScene {
   }
 
   initLighting() {
-    // Ambient light simulating subtle starlight & earthshine
-    this.ambientLight = new THREE.AmbientLight(0x182436, 0.35);
+    // Ambient light simulating subtle starlight, earthshine and enough
+    // base visibility for the site markers even when the Sun is below the
+    // local horizon. The real lighting model remains the directional Sun.
+    this.ambientLight = new THREE.AmbientLight(0x22344f, 0.55);
     this.scene.add(this.ambientLight);
 
     // Dynamic Directional Sun Light

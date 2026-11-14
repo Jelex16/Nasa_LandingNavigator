@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-14T17:08:56Z",
+  "acceptance": {
+    "rmsDeg": 0.01,
+    "maxErrorDeg": 0.05
+  },
+  "passed": true,
+  "records": [
+    {
+      "siteId": "site01",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 5e-06,
+      "maxErrorDeg": 1.7e-05,
+      "p95ErrorDeg": 1.3e-05
+    },
+    {
+      "siteId": "site01",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 3e-06,
+      "maxErrorDeg": 9e-06,
+      "p95ErrorDeg": 6e-06
+    },
+    {
+      "siteId": "site04",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 5e-06,
+      "maxErrorDeg": 1.7e-05,
+      "p95ErrorDeg": 1.2e-05
+    },
+    {
+      "siteId": "site04",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 3e-06,
+      "maxErrorDeg": 8e-06,
+      "p95ErrorDeg": 7e-06
+    },
+    {
+      "siteId": "site07",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 3e-06,
+      "maxErrorDeg": 1.5e-05,
+      "p95ErrorDeg": 6e-06
+    },
+    {
+      "siteId": "site07",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 3e-06,
+      "maxErrorDeg": 8e-06,
+      "p95ErrorDeg": 6e-06
+    },
+    {
+      "siteId": "site11",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 4e-06,
+      "maxErrorDeg": 1.6e-05,
+      "p95ErrorDeg": 8e-06
+    },
+    {
+      "siteId": "site11",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 1e-06,
+      "maxErrorDeg": 4e-06,
+      "p95ErrorDeg": 3e-06
+    },
+    {
+      "siteId": "site20",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 2e-06,
+      "maxErrorDeg": 8e-06,
+      "p95ErrorDeg": 5e-06
+    },
+    {
+      "siteId": "site20",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 6e-06,
+      "maxErrorDeg": 1.8e-05,
+      "p95ErrorDeg": 1.3e-05
+    },
+    {
+      "siteId": "site23",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 3e-06,
+      "maxErrorDeg": 9e-06,
+      "p95ErrorDeg": 6e-06
+    },
+    {
+      "siteId": "site23",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 4e-06,
+      "maxErrorDeg": 1.6e-05,
+      "p95ErrorDeg": 1.1e-05
+    },
+    {
+      "siteId": "control_eq",
+      "body": "sun",
+      "samples": 288,
+      "rmsDeg": 1.2e-05,
+      "maxErrorDeg": 0.000122,
+      "p95ErrorDeg": 1.6e-05
+    },
+    {
+      "siteId": "control_eq",
+      "body": "earth",
+      "samples": 288,
+      "rmsDeg": 5e-06,
+      "maxErrorDeg": 1.6e-05,
+      "p95ErrorDeg": 1.2e-05
+    }
+  ],
+  "temporal": {
+    "samples": 4032,
+    "rmsDeg": 5e-06,
+    "maxErrorDeg": 0.000122
+  },
+  "sensitivity": [
+    {
+      "label": "Spatial sensitivity · Connecting Ridge",
+      "description": "2 m horizon difference: mean 0.33°, max 2.31°; reference window 2027-06-15.",
+      "illuminationPctDelta": 0.048,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": 0.0
+    },
+    {
+      "label": "Spatial sensitivity · Shackleton Rim",
+      "description": "2 m horizon difference: mean 6.86°, max 26.78°; reference window 2027-06-15.",
+      "illuminationPctDelta": 16.221,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": -51.0
+    },
+    {
+      "label": "Spatial sensitivity · Peak near Shackleton",
+      "description": "2 m horizon difference: mean 0.57°, max 3.93°; reference window 2027-06-15.",
+      "illuminationPctDelta": 0.031,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": 0.0
+    },
+    {
+      "label": "Spatial sensitivity · de Gerlache Rim",
+      "description": "2 m horizon difference: mean 0.93°, max 3.89°; reference window 2027-06-15.",
+      "illuminationPctDelta": 0.004,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": 0.0
+    },
+    {
+      "label": "Spatial sensitivity · Leibnitz Beta",
+      "description": "2 m horizon difference: mean 0.01°, max 0.77°; reference window 2027-06-15.",
+      "illuminationPctDelta": 0.0,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": 0.0
+    },
+    {
+      "label": "Spatial sensitivity · Malapert Massif",
+      "description": "2 m horizon difference: mean 0.00°, max 0.00°; reference window 2027-06-15.",
+      "illuminationPctDelta": 0.0,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": 0.0
+    },
+    {
+      "label": "Spatial sensitivity · Apollo 11 (equator)",
+      "description": "Analytic flat horizon; no DEM truncation to test.",
+      "illuminationPctDelta": 0.0,
+      "dteCenterPctDelta": 0.0,
+      "dMaxHoursDelta": 0.0
+    }
+  ],
+  "notes": "Off-grid validation uses JPL Horizons at 15-minute cadence on four seasonal windows per site/body. Spatial sensitivity compares the hybrid LOLA profile with a 5 m/px near-field-only profile at a reference 28-day window."
+}

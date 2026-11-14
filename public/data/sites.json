@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-14T15:57:14Z",
+  "dataMode": "real",
+  "sites": [
+    {
+      "id": "site01",
+      "name": "Connecting Ridge",
+      "shortName": "Connecting Ridge",
+      "regionType": "polar",
+      "latDeg": -89.46316283403667,
+      "lonEastDeg": 222.51044707800082,
+      "elevationM": 1944.29,
+      "slopeDeg": 5.09,
+      "demSourceNear": "Site01_final_adj_5mpp_surf.tif",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "High-illumination ridge linking Shackleton crater with de Gerlache. A leading candidate because it combines long solar exposure with a short path to permanently shadowed terrain.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_hybrid",
+      "nearFieldRadiusKm": 7.2,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 78.0
+    },
+    {
+      "id": "site04",
+      "name": "Shackleton Rim",
+      "shortName": "Shackleton Rim",
+      "regionType": "polar",
+      "latDeg": -89.76681145214992,
+      "lonEastDeg": 188.13010235415598,
+      "elevationM": 767.98,
+      "slopeDeg": 32.096,
+      "demSourceNear": "Site04_final_adj_5mpp_surf.tif",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Rim of Shackleton crater at the south pole. Access to polar volatiles inside the PSR is balanced by a terrain horizon that truncates low solar elevations.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_hybrid",
+      "nearFieldRadiusKm": 7.2,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 77.0
+    },
+    {
+      "id": "site07",
+      "name": "Peak near Shackleton",
+      "shortName": "Peak near Shackleton",
+      "regionType": "polar",
+      "latDeg": -88.81100807350457,
+      "lonEastDeg": 123.69006752597979,
+      "elevationM": 1645.5,
+      "slopeDeg": 3.086,
+      "demSourceNear": "Site07_final_adj_5mpp_surf.tif",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Elevated promontory near Shackleton with an unobstructed skyline over a wide azimuth range, at the cost of a steeper local surface.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_hybrid",
+      "nearFieldRadiusKm": 7.2,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 354.0
+    },
+    {
+      "id": "site11",
+      "name": "de Gerlache Rim",
+      "shortName": "de Gerlache Rim",
+      "regionType": "polar",
+      "latDeg": -88.68341815077613,
+      "lonEastDeg": 292.0678995624102,
+      "elevationM": 1793.65,
+      "slopeDeg": 4.728,
+      "demSourceNear": "Site11_final_adj_5mpp_surf.tif",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Elevated rim with a mixed illumination and direct-to-Earth regime. Well suited to studying launch-slip sensitivity.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_hybrid",
+      "nearFieldRadiusKm": 7.2,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 343.0
+    },
+    {
+      "id": "site20",
+      "name": "Leibnitz Beta Plateau",
+      "shortName": "Leibnitz Beta",
+      "regionType": "polar",
+      "latDeg": -85.42657728044317,
+      "lonEastDeg": 31.7427611534189,
+      "elevationM": 6398.44,
+      "slopeDeg": 7.761,
+      "demSourceNear": "Site20_final_adj_5mpp_surf.tif",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Broad, low-slope plateau suitable for heavy landers. Its gentle relief trades peak illumination for predictable terrain.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_hybrid",
+      "nearFieldRadiusKm": 7.2,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 6.0
+    },
+    {
+      "id": "site23",
+      "name": "Malapert Massif",
+      "shortName": "Malapert Massif",
+      "regionType": "polar",
+      "latDeg": -85.99478468356075,
+      "lonEastDeg": 359.7642162301234,
+      "elevationM": 4783.64,
+      "slopeDeg": 5.028,
+      "demSourceNear": "Site23_final_adj_5mpp_surf.tif",
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "High massif with a long view toward the 0-degree meridian, historically proposed for its direct Earth visibility.",
+      "citations": [
+        {
+          "label": "Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites",
+          "url": "https://doi.org/10.1016/j.pss.2020.105119"
+        },
+        {
+          "label": "Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography",
+          "url": "https://doi.org/10.1016/j.icarus.2010.10.030"
+        },
+        {
+          "label": "NASA PGDA, LOLA South Pole landing-site DEMs (5 m/px)",
+          "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/"
+        },
+        {
+          "label": "NASA PGDA, LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "lola_hybrid",
+      "nearFieldRadiusKm": 9.45,
+      "farFieldRadiusKm": 100.0,
+      "optimalPanelAzimuthDeg": 2.0
+    },
+    {
+      "id": "control_eq",
+      "name": "Apollo 11 — Mare Tranquillitatis",
+      "shortName": "Apollo 11 (equator)",
+      "regionType": "equatorial_control",
+      "latDeg": 0.674,
+      "lonEastDeg": 23.473,
+      "elevationM": -1930.0,
+      "slopeDeg": 0.5,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Equatorial control site (0.674 N, 23.473 E). Its analytic flat horizon isolates the effect of the Moon's 1.54-degree axial tilt and exposes how different the polar lighting geometry is.",
+      "citations": [
+        {
+          "label": "NASA Apollo 11 landing site coordinates (0.674 N, 23.473 E)",
+          "url": "https://www.nasa.gov/mission/apollo-11/"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0.0,
+      "farFieldRadiusKm": 0.0,
+      "optimalPanelAzimuthDeg": 269.0
+    }
+  ]
+}

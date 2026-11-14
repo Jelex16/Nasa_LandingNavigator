@@ -1,20 +1,85 @@
-/**
- * Multi-Site Trade-Off Comparison View.
- * Enables mission planners to rapidly compare candidate sites side-by-side.
- */
+function formatDateUtc(ms) {
+  return new Date(ms).toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+}
 
-export function renderComparisonTable(containerElement, siteEvaluations, onSelectSite) {
+function badgeClass(analysis) {
+  if (analysis.site.role === 'reference') return 'badge-reference';
+  if (analysis.badgeClass === 'status-safe') return 'badge-safe';
+  if (analysis.badgeClass === 'status-warning') return 'badge-warning';
+  return 'badge-danger';
+}
+
+function termClass(value, threshold = 0.5) {
+  if (value >= 0.75) return 'metric-good';
+  if (value >= threshold) return 'metric-warn';
+  return 'metric-danger';
+}
+
+function limitClass(value, limit) {
+  return value > limit ? 'metric-danger' : 'metric-good';
+}
+
+export function renderComparisonTable(containerElement, analyses, context, onSelectSite) {
   if (!containerElement) return;
+  const profile = context.profile;
+  const rows = analyses
+    .map((analysis) => {
+      const site = analysis.site;
+      const metrics = analysis.metrics;
+      const comps = analysis.components;
+      const isReference = site.role === 'reference';
+      const statusShort = analysis.status.split(' ')[0];
+      const scoreLabel = isReference ? 'REFERENCIA' : `${statusShort} · ${analysis.scorePercent}%`;
+      return `
+        <tr class="comparison-row" data-site-id="${site.id}" tabindex="0" role="button"
+            aria-label="Seleccionar ${site.name}">
+          <td>
+            <div class="site-cell-name"><strong>${site.name}</strong></div>
+            <div class="site-cell-program">${site.program} · ${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E</div>
+            <div class="site-cell-quality">${site.dataQuality} · ${site.ephemSource === 'jpl_horizons' ? 'Horizons' : 'IAU 2000'}</div>
+          </td>
+          <td><span class="badge ${badgeClass(analysis)}">${scoreLabel}</span></td>
+          <td class="${termClass(comps.energy)}">
+            <strong>${(metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²</strong>
+            <div class="site-cell-meta">${Math.round(comps.energy * 100)}/100 · req ${profile.energyReqKWhM2}</div>
+          </td>
+          <td class="${limitClass(metrics.dMaxHours, profile.dMaxTolHours)}">
+            <strong>${metrics.dMaxHours.toFixed(1)} h</strong>
+            <div class="site-cell-meta">tol ${profile.dMaxTolHours} h · ${Math.round(comps.dark * 100)}/100</div>
+          </td>
+          <td class="${termClass(comps.dte)}">
+            <strong>${metrics.dteCenterPct.toFixed(0)}%</strong>
+            <div class="site-cell-meta">req ${profile.dteReqPct}% · ${Math.round(comps.dte * 100)}/100</div>
+          </td>
+          <td class="${limitClass(metrics.gMaxHours, profile.gMaxTolHours)}">
+            <strong>${metrics.gMaxHours.toFixed(1)} h</strong>
+            <div class="site-cell-meta">tol ${profile.gMaxTolHours} h · ${Math.round(comps.comms * 100)}/100</div>
+          </td>
+          <td class="${site.maxSlopeDeg < 10 ? 'metric-good' : site.maxSlopeDeg < 20 ? 'metric-warn' : 'metric-danger'}">
+            <strong>${site.maxSlopeDeg.toFixed(1)}°</strong>
+            <div class="site-cell-meta">${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km</div>
+          </td>
+        </tr>
+      `;
+    })
+    .join('');
 
-  const html = `
+  containerElement.innerHTML = `
     <div class="comparison-card">
       <div class="comparison-header">
         <div class="title-with-badge">
-          <h3>Matriz Comparativa de Sitios de Alunizaje (Trade-Off Matrix)</h3>
-          <span class="matrix-badge">Evaluación Red Neuronal LOLA + Horizons</span>
+          <h3>Matriz comparativa de sitios de alunizaje</h3>
+          <span class="matrix-badge">LOLA + Horizons · modelo transparente</span>
         </div>
-        <p class="comparison-subtitle">
-          Análisis comparativo multi-criterio para selección de sitios de contingencia ante retrasos de lanzamiento o restricciones térmicas y de telemetría.
+        <div class="comparison-context">
+          <span><b>Ventana:</b> ${context.windowDays} días desde ${formatDateUtc(context.startMs)}</span>
+          <span><b>Perfil:</b> ${profile.name}</span>
+          <span><b>Panel:</b> ${context.panelLabel}</span>
+          <span><b>Mástil:</b> ${context.mastHeightM.toFixed(1)} m</span>
+        </div>
+        <p class="comparison-note">
+          Todas las filas usan la misma fecha de inicio, ventana, perfil, panel y altura de mástil que el panel principal.
+          El score es un índice de decisión, no una certificación de aterrizaje. Haz clic en una fila para seleccionar el sitio.
         </p>
       </div>
 
@@ -22,66 +87,32 @@ export function renderComparisonTable(containerElement, siteEvaluations, onSelec
         <table class="comparison-table">
           <thead>
             <tr>
-              <th>Sitio / Misión</th>
-              <th>Puntuación Red Neuronal</th>
-              <th>Pendiente Máx. (LOLA)</th>
-              <th>Ventana Solar (%)</th>
-              <th>Comms Tierra DTE (%)</th>
-              <th>Brecha Sombra Máx.</th>
-              <th>Dist. Hielo Volátil</th>
-              <th>Acción</th>
+              <th>Sitio / datos</th>
+              <th>Score</th>
+              <th>Energía (28 d)</th>
+              <th>Eclipse continuo</th>
+              <th>DTE centro</th>
+              <th>Corte DTE</th>
+              <th>Pendiente local</th>
             </tr>
           </thead>
-          <tbody>
-            ${siteEvaluations
-              .map((item) => {
-                const s = item.site;
-                const e = item.evaluation;
-                const statusBadge =
-                  e.scorePercent >= 75
-                    ? `<span class="badge badge-safe">GO (${e.scorePercent}%)</span>`
-                    : e.scorePercent >= 50
-                    ? `<span class="badge badge-warning">CAUTION (${e.scorePercent}%)</span>`
-                    : `<span class="badge badge-danger">NO-GO (${e.scorePercent}%)</span>`;
-
-                const slopeClass = s.maxSlopeDeg < 8 ? 'metric-good' : s.maxSlopeDeg < 12 ? 'metric-warn' : 'metric-danger';
-                const solarClass = item.solarCoverage > 0.65 ? 'metric-good' : item.solarCoverage > 0.4 ? 'metric-warn' : 'metric-danger';
-                const commClass = item.earthCoverage > 0.75 ? 'metric-good' : item.earthCoverage > 0.4 ? 'metric-warn' : 'metric-danger';
-
-                return `
-                <tr class="comparison-row" data-site-id="${s.id}">
-                  <td>
-                    <div class="site-cell-name"><strong>${s.name}</strong></div>
-                    <div class="site-cell-program">${s.program} (${s.lat.toFixed(1)}°, ${s.lon.toFixed(1)}°)</div>
-                  </td>
-                  <td>${statusBadge}</td>
-                  <td class="${slopeClass}"><strong>${s.maxSlopeDeg.toFixed(1)}°</strong> <small>(avg ${s.avgSlopeDeg.toFixed(1)}°)</small></td>
-                  <td class="${solarClass}"><strong>${Math.round(item.solarCoverage * 100)}%</strong></td>
-                  <td class="${commClass}"><strong>${Math.round(item.earthCoverage * 100)}%</strong></td>
-                  <td>${Math.round(item.maxShadowGapHours)}h</td>
-                  <td><strong>${s.distToIceTrapKm.toFixed(1)} km</strong></td>
-                  <td>
-                    <button class="btn btn-sm btn-outline select-site-btn" data-site-id="${s.id}">
-                      Seleccionar
-                    </button>
-                  </td>
-                </tr>
-              `;
-              })
-              .join('')}
-          </tbody>
+          <tbody>${rows}</tbody>
         </table>
       </div>
     </div>
   `;
 
-  containerElement.innerHTML = html;
-
-  // Add click handlers
-  containerElement.querySelectorAll('.select-site-btn').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      const siteId = e.currentTarget.getAttribute('data-site-id');
-      if (onSelectSite) onSelectSite(siteId);
+  containerElement.querySelectorAll('.comparison-row').forEach((row) => {
+    const select = () => {
+      const siteId = row.getAttribute('data-site-id');
+      if (siteId && onSelectSite) onSelectSite(siteId);
+    };
+    row.addEventListener('click', select);
+    row.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        select();
+      }
     });
   });
 }
