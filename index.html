@@ -32,8 +32,6 @@
         </div>
       </div>
 
-      <div class="site-quick-pills" id="site-pills-bar" aria-label="Selección rápida de sitio"></div>
-
       <div class="nav-right">
         <div class="clock-chip">
           <span id="clock-display" class="clock-text">—</span>
@@ -71,7 +69,14 @@
             <span class="panel-eyebrow">EVALUACIÓN DE SITIO</span>
             <h2 id="hud-site-name">Cargando catálogo LOLA…</h2>
           </div>
-          <span class="status-chip chip-program" id="site-program-badge">—</span>
+          <div class="panel-header-actions">
+            <span class="status-chip chip-program" id="site-program-badge">—</span>
+            <button class="panel-collapse-btn" type="button" data-panel-toggle="left-panel" data-label="evaluación del sitio" aria-expanded="true" aria-controls="left-panel" aria-label="Contraer evaluación del sitio" title="Contraer evaluación del sitio">
+              <svg class="chevron-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+                <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="site-select-row">
@@ -209,7 +214,14 @@
             <span class="panel-eyebrow">HORIZONTE Y BÓVEDA CELESTE</span>
             <h2>Radar local LOLA (360°)</h2>
           </div>
-          <span class="status-chip chip-radar" id="radar-source-badge">Relieve LOLA</span>
+          <div class="panel-header-actions">
+            <span class="status-chip chip-radar" id="radar-source-badge">Relieve LOLA</span>
+            <button class="panel-collapse-btn" type="button" data-panel-toggle="right-panel" data-label="radar local" aria-expanded="true" aria-controls="right-panel" aria-label="Contraer radar local" title="Contraer radar local">
+              <svg class="chevron-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+                <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="radar-box">

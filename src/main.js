@@ -59,7 +59,6 @@ const state = {
 const $ = (id) => document.getElementById(id);
 
 const siteSelect = $('site-select');
-const sitePillsBar = $('site-pills-bar');
 const cameraBar = document.querySelector('.floating-camera-bar');
 const siteProgramBadge = $('site-program-badge');
 const siteDescription = $('site-description');
@@ -547,18 +546,6 @@ function populateSiteSelector(sites) {
     option.textContent = `${state.customSite.name} · aproximado`;
     siteSelect.appendChild(option);
   }
-
-  sitePillsBar.innerHTML = '';
-  for (const site of sites) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'pill-btn';
-    button.dataset.site = site.id;
-    button.textContent = site.shortName;
-    button.addEventListener('click', () => prepareSite(site));
-    sitePillsBar.appendChild(button);
-  }
-  updateScrollAffordance(sitePillsBar);
 }
 
 function initScrollAffordances() {
@@ -571,19 +558,12 @@ function updateScrollAffordance(element) {
   element.classList.toggle('is-scrollable', element.scrollWidth > element.clientWidth + 1);
 }
 
-function updateActivePill(siteId) {
-  for (const pill of sitePillsBar.querySelectorAll('.pill-btn')) {
-    pill.classList.toggle('active', pill.dataset.site === siteId);
-  }
-}
-
 async function prepareSite(site) {
   if (!site) return;
   state.currentSite = site;
   state.evaluationToken += 1;
   setMastHeight(allSites(), state.mastHeightM);
   updateSitePanel(site);
-  updateActivePill(site.id);
   const sitesForScene = allSites();
   moonScene.setLandingSites(sitesForScene, (siteId) => {
     const found = allSites().find((s) => s.id === siteId);
@@ -795,7 +775,6 @@ function initPanorama() {
   });
   window.addEventListener('resize', () => {
     if (state.panoramaOpen) panorama.resize();
-    updateScrollAffordance(sitePillsBar);
   });
 }
 
@@ -912,6 +891,28 @@ function initModalKeys() {
   });
 }
 
+function initPanelCollapse() {
+  for (const button of document.querySelectorAll('[data-panel-toggle]')) {
+    const panel = $(button.dataset.panelToggle);
+    if (!panel) continue;
+    const name = button.dataset.label ?? 'panel';
+    button.addEventListener('click', () => {
+      const collapsed = panel.classList.toggle('is-collapsed');
+      const label = `${collapsed ? 'Expandir' : 'Contraer'} ${name}`;
+      button.setAttribute('aria-expanded', String(!collapsed));
+      button.setAttribute('aria-label', label);
+      button.title = label;
+      if (!collapsed) {
+        // Redibuja canvas (radar) al volver a mostrarse
+        requestAnimationFrame(() => {
+          window.dispatchEvent(new Event('resize'));
+          updateSimulation();
+        });
+      }
+    });
+  }
+}
+
 function initModals() {
   openComparisonBtn.addEventListener('click', openComparison);
   closeComparisonModal.addEventListener('click', () => closeModal(comparisonModal));
@@ -956,12 +957,12 @@ async function bootstrap() {
     initCameraHUDControls();
     initModelLayerControls();
     initModals();
+    initPanelCollapse();
     initModalKeys();
     initPanorama();
     initScrollAffordances();
     await ensureEphemeris(state.currentSite);
     updateSitePanel(state.currentSite);
-    updateActivePill(state.currentSite.id);
     moonScene.setLandingSites(allSites(), (siteId) => {
       const found = allSites().find((site) => site.id === siteId);
       if (found) prepareSite(found);

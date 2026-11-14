@@ -2547,3 +2547,81 @@ html, body {
   .loading-spinner::after { animation: none; width: 100%; }
   .toggle-arrow.rotated { transform: none; }
 }
+
+/* Paneles contraíbles */
+.panel-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+.panel-collapse-btn {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+.panel-collapse-btn:hover {
+  border-color: var(--accent-line);
+  color: var(--ink);
+  background: var(--surface-raised);
+}
+.panel-collapse-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Chevron SVG: hereda color y rota al colapsar */
+.panel-collapse-btn .chevron-icon {
+  display: block;
+  color: currentColor;
+  transition: transform 0.2s ease;
+  transform-origin: center;
+}
+
+/* Compatibilidad: si aún quedara algún span con el glifo antiguo */
+.panel-collapse-btn span {
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+/* Colapsado: solo queda el encabezado. Los hijos se ocultan sin usar
+   display:none para que los canvas conserven su tamaño y no se rompan. */
+.glass-panel.is-collapsed { gap: 0; }
+.glass-panel.is-collapsed > :not(.panel-header-row) {
+  max-height: 0;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.glass-panel.is-collapsed .panel-collapse-btn span,
+.glass-panel.is-collapsed .panel-collapse-btn .chevron-icon {
+  transform: rotate(-90deg);
+}
+
+/* Panel colapsado: se ajusta a la altura de su encabezado */
+.ui-overlay-container .glass-panel.is-collapsed {
+  height: auto;
+  min-height: 0;
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+/* Más separación entre los paneles y el dock inferior (~16 px extra) */
+.ui-overlay-container {
+  height: calc(101vh - 154px);
+}
+
+@media (max-width: 900px) {
+  .ui-overlay-container {
+    height: calc(101vh - 276px);
+  }
+}
