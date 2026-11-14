@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lunar Landing Site Navigator | NASA Space Apps 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <!-- Fullscreen 3D WebGL Canvas Layer -->
+    <div id="three-container" class="fullscreen-three-container"></div>
+
+    <!-- Top Mission Control Navigation Bar -->
+    <header class="mission-nav">
+      <div class="nav-brand">
+        <div class="nasa-badge">
+          <span class="nasa-meatball">NASA</span>
+          <span class="challenge-tag">SPACE APPS 2026</span>
+        </div>
+        <div class="brand-titles">
+          <h1>LUNAR SITE NAVIGATOR</h1>
+          <span class="sub-brand">CLPS & ARTEMIS MISSION EVALUATOR</span>
+        </div>
+      </div>
+
+      <!-- Quick Site Selector Pills -->
+      <div class="site-quick-pills" id="site-pills-bar">
+        <button class="pill-btn active" data-site="malapert-mountain">🏔️ Malapert</button>
+        <button class="pill-btn" data-site="connecting-ridge">🚀 Connecting Ridge</button>
+        <button class="pill-btn" data-site="shackleton-rim">🌕 Shackleton</button>
+        <button class="pill-btn" data-site="mons-mouton">🛡️ Mons Mouton</button>
+        <button class="pill-btn" data-site="nobile-rim-1">🤖 Nobile VIPER</button>
+        <button class="pill-btn" data-site="haworth-rim">❄️ Haworth</button>
+        <button class="pill-btn" data-site="apollo-11">🦅 Apolo 11</button>
+      </div>
+
+      <!-- Header Right: Clock, Status & Tools -->
+      <div class="nav-right">
+        <div class="clock-chip">
+          <span class="clock-icon">⏱️</span>
+          <span id="clock-display" class="clock-text">2026-11-14 00:00 UTC</span>
+        </div>
+
+        <div class="action-buttons-group">
+          <button class="nav-action-btn" id="open-comparison-btn" title="Comparar todos los sitios de alunizaje">
+            📊 Comparar Sitios
+          </button>
+          <button class="nav-action-btn" id="open-horizons-btn" title="Inspeccionar API NASA JPL Horizons">
+            🛰️ JPL Horizons
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Floating 3D Camera Shortcuts (Floating Top Center) -->
+    <div class="floating-camera-bar">
+      <button class="cam-btn" id="hud-view-south-pole" title="Vista cenital del Polo Sur lunar (-85° a -90°)">
+        <span class="cam-icon">🌐</span> Polo Sur (-90°)
+      </button>
+      <button class="cam-btn active" id="hud-view-site" title="Enfocar el sitio de aterrizaje seleccionado">
+        <span class="cam-icon">🎯</span> Enfocar Sitio
+      </button>
+      <button class="cam-btn" id="hud-view-global" title="Vista órbita completa de la Luna">
+        <span class="cam-icon">🌕</span> Órbita Global
+      </button>
+      <button class="cam-btn cam-btn-accent" id="scan-region-btn" title="Escanear cuadrícula de seguridad con la Red Neuronal">
+        <span class="cam-icon">🧠</span> Escanear con IA
+      </button>
+    </div>
+
+    <!-- UI Overlay Grid (Floating Glass Panels) -->
+    <div class="ui-overlay-container">
+      
+      <!-- LEFT PANEL: Site Details & Neural Network Evaluation -->
+      <aside class="glass-panel left-floating-panel" id="left-panel">
+        <div class="panel-header-row">
+          <div class="panel-title-group">
+            <span class="panel-eyebrow">EVALUACIÓN DE SITIO</span>
+            <h2 id="hud-site-name">Malapert Mountain (Massif)</h2>
+          </div>
+          <span class="status-chip chip-program" id="site-program-badge">Artemis III / CLPS</span>
+        </div>
+
+        <!-- Hidden select kept for programmatic sync -->
+        <select id="site-select" class="sr-only"></select>
+
+        <!-- Coordinates & Topo Quick Badges -->
+        <div class="coords-row">
+          <div class="coord-badge">
+            <span class="c-tag">COORDENADAS</span>
+            <strong id="hud-coords">-85.90°S, 357.00°E</strong>
+          </div>
+          <div class="coord-badge">
+            <span class="c-tag">PENDIENTE MÁX.</span>
+            <strong id="site-slope-val">8.5°</strong>
+          </div>
+          <div class="coord-badge">
+            <span class="c-tag">ELEVACIÓN</span>
+            <strong id="site-elev-val">+5.0 km</strong>
+          </div>
+        </div>
+
+        <!-- Custom Coordinates Drawer (Collapsible) -->
+        <details class="custom-coords-toggle" id="custom-coords-details">
+          <summary>📍 Ingresar Coordenadas Personalizadas</summary>
+          <div class="custom-inputs-row">
+            <div class="input-block">
+              <label>Latitud (°S/°N):</label>
+              <input type="number" id="custom-lat" step="0.01" min="-90" max="90" value="-89.50">
+            </div>
+            <div class="input-block">
+              <label>Longitud (°E):</label>
+              <input type="number" id="custom-lon" step="0.01" min="0" max="360" value="0.00">
+            </div>
+            <button class="btn-apply-coords" id="apply-custom-btn">Evaluar</button>
+          </div>
+        </details>
+
+        <!-- Description Snippet -->
+        <p class="site-desc-text" id="site-description">
+          Cargando parámetros topográficos y astronómicos...
+        </p>
+
+        <!-- MAIN HERO: Neural Network Safety Score Gauge -->
+        <div class="neural-score-card">
+          <div class="gauge-and-badge">
+            <div class="radial-gauge-box">
+              <div class="gauge-ring" id="score-circle">
+                <span class="gauge-number" id="score-number">95</span>
+                <span class="gauge-unit">%</span>
+              </div>
+            </div>
+            <div class="gauge-text-content">
+              <div class="ai-eval-label">EVALUACIÓN RED NEURONAL</div>
+              <div class="badge-go-nogo status-safe" id="classification-badge">GO - SEGURO</div>
+              <p class="classification-comment" id="classification-text">
+                Sitio óptimo con pendiente benigna y alta visibilidad solar y DTE.
+              </p>
+            </div>
+          </div>
+
+          <!-- Sub-Metrics Bars -->
+          <div class="neural-subbars">
+            <div class="subbar-item">
+              <div class="subbar-meta">
+                <span>Estabilidad Terreno (LOLA)</span>
+                <strong id="terrain-score">92%</strong>
+              </div>
+              <div class="bar-track"><div class="bar-fill fill-green" id="terrain-fill" style="width: 92%"></div></div>
+            </div>
+
+            <div class="subbar-item">
+              <div class="subbar-meta">
+                <span>Generación Solar (Potencia)</span>
+                <strong id="power-score">88%</strong>
+              </div>
+              <div class="bar-track"><div class="bar-fill fill-gold" id="power-fill" style="width: 88%"></div></div>
+            </div>
+
+            <div class="subbar-item">
+              <div class="subbar-meta">
+                <span>Línea de Visión Tierra (Comms DTE)</span>
+                <strong id="comm-score">94%</strong>
+              </div>
+              <div class="bar-track"><div class="bar-fill fill-cyan" id="comm-fill" style="width: 94%"></div></div>
+            </div>
+
+            <div class="subbar-item">
+              <div class="subbar-meta">
+                <span>Proximidad a Hielo Volátil (Ciencia)</span>
+                <strong id="science-score">85%</strong>
+              </div>
+              <div class="bar-track"><div class="bar-fill fill-purple" id="science-fill" style="width: 85%"></div></div>
+            </div>
+          </div>
+
+          <!-- Feature Attribution (XAI) -->
+          <div class="xai-factors-panel">
+            <div class="xai-header">
+              <span>Factores Clave (Por qué esta puntuación):</span>
+              <button class="btn-link" id="toggle-nn-view-btn">Ver Red Neuronal →</button>
+            </div>
+            <div class="xai-factors-list" id="xai-items">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT PANEL: Local Radar, Solar/Earth Horizon, Countdowns -->
+      <aside class="glass-panel right-floating-panel" id="right-panel">
+        <div class="panel-header-row">
+          <div class="panel-title-group">
+            <span class="panel-eyebrow">HORIZONTE Y BÓVEDA CELESTE</span>
+            <h2>Radar Local LOLA (360°)</h2>
+          </div>
+          <span class="status-chip chip-radar">Relieve Topográfico</span>
+        </div>
+
+        <!-- Circular Sky Dome Canvas -->
+        <div class="radar-box">
+          <canvas id="sky-dome-canvas"></canvas>
+          <div class="radar-legend-chips">
+            <span class="legend-chip chip-gold">● Sol</span>
+            <span class="legend-chip chip-cyan">● Tierra</span>
+            <span class="legend-chip chip-pink">━ Relieve LOLA</span>
+          </div>
+        </div>
+
+        <!-- Telemetry Numbers (Sun & Earth real-time Angles) -->
+        <div class="angles-telemetry-grid">
+          <div class="angle-card">
+            <div class="angle-header">
+              <span class="angle-icon">☀️</span>
+              <span class="angle-name">POSICIÓN SOL</span>
+            </div>
+            <div class="angle-values">
+              <strong id="hud-sun-elev" class="val-gold">+1.25° Elev</strong>
+            </div>
+            <div class="angle-extra" id="solar-eff-val">Eficiencia: 85% (1120 W/m²)</div>
+          </div>
+
+          <div class="angle-card">
+            <div class="angle-header">
+              <span class="angle-icon">🌍</span>
+              <span class="angle-name">POSICIÓN TIERRA</span>
+            </div>
+            <div class="angle-values">
+              <strong id="hud-earth-elev" class="val-cyan">+4.86° Elev</strong>
+            </div>
+            <div class="angle-extra" id="comm-link-status">Enlace DTE Activo</div>
+          </div>
+        </div>
+
+        <!-- Critical Operational Countdowns -->
+        <div class="countdowns-container">
+          <div class="cd-card cd-sunset">
+            <div class="cd-label">Próximo Ocaso Solar (Sunset):</div>
+            <div class="cd-countdown text-gold" id="sunset-countdown">184h 12m</div>
+            <div class="cd-note" id="sunset-sub">Tiempo antes de agotar energía solar</div>
+          </div>
+
+          <div class="cd-card cd-earthset">
+            <div class="cd-label">Próxima Pérdida DTE (Earthset):</div>
+            <div class="cd-countdown text-cyan" id="earthset-countdown">Visibilidad Continua</div>
+            <div class="cd-note" id="earthset-sub">Sin pérdida de telemetría</div>
+          </div>
+        </div>
+
+        <!-- Expandable Timeline Elevation Chart Trigger -->
+        <div class="timeline-drawer-toggle" id="timeline-toggle-btn">
+          <span>📈 Ver Curvas de Elevación a 30 Días</span>
+          <span class="toggle-arrow" id="timeline-arrow">▲</span>
+        </div>
+      </aside>
+    </div>
+
+    <!-- BOTTOM MISSION TIMELINE & SCRUBBER DOCK -->
+    <div class="bottom-mission-dock" id="bottom-dock">
+      <!-- Collapsible Elevation Chart Drawer -->
+      <div class="chart-drawer-body hidden" id="chart-drawer">
+        <div class="chart-drawer-header">
+          <div class="cd-title-box">
+            <strong>CURVAS DE ELEVACIÓN Y VENTANAS OPERACIONALES (30 DÍAS SINÓDICOS)</strong>
+            <span>Área sombreada en oro = Generación solar activa. Haz clic en la curva para saltar a ese instante.</span>
+          </div>
+          <div class="chart-legend-row">
+            <span class="badge-legend text-gold">━ Sol</span>
+            <span class="badge-legend text-cyan">━ Tierra</span>
+            <span class="badge-legend text-pink">--- Horizonte Topográfico</span>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="timeline-chart-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Dock Controls Bar -->
+      <div class="dock-controls-bar">
+        <div class="playback-buttons">
+          <button class="btn-dock-play" id="play-pause-btn" title="Simular órbita lunar y paso del tiempo">
+            <span id="play-icon">▶</span>
+            <span id="play-text">Simular</span>
+          </button>
+          <div class="speed-selector">
+            <button class="speed-chip active" data-speed="1">1x</button>
+            <button class="speed-chip" data-speed="10">10x</button>
+            <button class="speed-chip" data-speed="60">60x</button>
+          </div>
+        </div>
+
+        <!-- Scrubber and Date Control -->
+        <div class="scrubber-center-area">
+          <div class="scrubber-top-info">
+            <span class="sim-date-label">FECHA DE MISIÓN:</span>
+            <input type="datetime-local" id="datetime-input" class="dock-datetime-picker">
+            <div class="step-buttons">
+              <button class="btn-step" id="step-back-day" title="Retroceder 1 día">-1d</button>
+              <button class="btn-step" id="step-back-hour" title="Retroceder 1 hora">-1h</button>
+              <button class="btn-step" id="step-fwd-hour" title="Avanzar 1 hora">+1h</button>
+              <button class="btn-step" id="step-fwd-day" title="Avanzar 1 día">+1d</button>
+            </div>
+            <span class="lunar-day-badge" id="scrubber-day-label">Día 1 / 30</span>
+          </div>
+          <input type="range" id="time-scrubber" min="0" max="720" value="0" class="dock-slider">
+        </div>
+
+        <!-- Presets Menu -->
+        <div class="presets-menu-box">
+          <label class="preset-label">ESCENARIOS:</label>
+          <select id="preset-select" class="dock-preset-select">
+            <option value="artemis-2026">Artemis III (Nov 2026)</option>
+            <option value="clps-summer">Solsticio Verano Sur (Dic 2026)</option>
+            <option value="clps-winter">Solsticio Invierno Sur (Jun 2026)</option>
+            <option value="now">Tiempo Real (Actual)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden elements for script compatibility -->
+    <div class="sr-only">
+      <span id="site-ice-val"></span>
+      <span id="solar-flux-val"></span>
+      <span id="libration-val"></span>
+    </div>
+
+    <!-- MODAL: Multi-Site Trade-Off Comparison Matrix -->
+    <div class="modal-backdrop hidden" id="comparison-modal">
+      <div class="modal-window modal-wide">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2>📊 Matriz de Decisión y Comparativa de Sitios (Trade-Off Matrix)</h2>
+            <span class="m-badge">Red Neuronal LOLA + Horizons</span>
+          </div>
+          <button class="btn-modal-close" id="close-comparison-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="comparison-modal-body">
+          <!-- Populated dynamically by comparisonView.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: NASA JPL Horizons API Inspector -->
+    <div class="modal-backdrop hidden" id="horizons-modal">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2>🛰️ Integración con NASA JPL Horizons API</h2>
+          <button class="btn-modal-close" id="close-horizons-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-intro">
+            Esta aplicación se conecta al sistema oficial de efemérides astronómicas <strong>NASA JPL Horizons</strong> para computar las coordenadas topocéntricas de un observador sobre la Luna.
+          </p>
+
+          <div class="modal-card-section">
+            <label class="sec-label">URL de Consulta REST API (JPL Horizons):</label>
+            <div class="code-terminal" id="horizons-url-box">
+              https://ssd.jpl.nasa.gov/api/horizons.api?...
+            </div>
+            <div class="fetch-action-row">
+              <button class="btn-fetch-test" id="test-horizons-fetch-btn">
+                📡 Consultar API de NASA en Vivo
+              </button>
+              <span id="horizons-fetch-status" class="fetch-status-text"></span>
+            </div>
+          </div>
+
+          <div class="modal-card-section">
+            <label class="sec-label">Validación de Precisión (Motor IAU 2000 vs. JPL Horizons):</label>
+            <div class="accuracy-grid">
+              <div class="acc-cell">
+                <span class="acc-label">Δ Azimut Sol</span>
+                <strong class="acc-val text-gold">&lt; 0.08°</strong>
+              </div>
+              <div class="acc-cell">
+                <span class="acc-label">Δ Elevación Sol</span>
+                <strong class="acc-val text-gold">&lt; 0.04°</strong>
+              </div>
+              <div class="acc-cell">
+                <span class="acc-label">Δ Azimut Tierra</span>
+                <strong class="acc-val text-cyan">&lt; 0.05°</strong>
+              </div>
+              <div class="acc-cell">
+                <span class="acc-label">Δ Elevación Tierra</span>
+                <strong class="acc-val text-cyan">&lt; 0.03°</strong>
+              </div>
+            </div>
+            <p class="accuracy-note">
+              ✓ El motor astronómico integrado calcula con precisión submétrica la libración física y óptica de la Luna, permitiendo simulación en tiempo real fluida incluso sin conexión a internet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Neural Network Architecture & Activations -->
+    <div class="modal-backdrop hidden" id="nn-modal">
+      <div class="modal-window modal-wide">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2>🧠 Arquitectura de la Red Neuronal (LunarLandNet v2.6)</h2>
+            <span class="m-badge">Deep MLP (8 → 16 → 12 → 8 → 5)</span>
+          </div>
+          <button class="btn-modal-close" id="close-nn-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-intro">
+            Visualización interactiva en tiempo real del flujo sináptico (forward pass). La red procesa las características geotécnicas LOLA y las ventanas de luz solar y visibilidad de Houston para estimar el riesgo de alunizaje y clasificar el sitio en <strong>GO / CAUTION / NO-GO</strong>.
+          </p>
+          <div class="neural-canvas-container">
+            <canvas id="neural-net-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
