@@ -14,6 +14,8 @@ import * as THREE from 'three';
  * - Arizona State University / NASA LROC QuickMap
  */
 
+const TEXTURE_BASE = `${import.meta.env.BASE_URL}textures/moon/`;
+
 export const LUNAR_LAYERS = [
   {
     id: 'lroc',
@@ -22,10 +24,10 @@ export const LUNAR_LAYERS = [
     icon: '🛰️',
     description: 'Mosaico fotográfico global de albedo de la cámara de gran angular (LROC WAC). Captura la reflectancia visual real de la superficie lunar y los mares basálticos.',
     source: 'NASA LRO / Arizona State University (ASU)',
-    resolution: '100 m/px (WAC Global Mosaic v02)',
+    resolution: 'Vista previa 2k (2048×1024); la capa LROC WAC completa está en QuickMap',
     trekLayer: 'LRO_WAC_Mosaic_Global_303ppd_v02',
     isSingleFile: true,
-    url: '/textures/moon/lroc_color_2k.jpg'
+    url: `${TEXTURE_BASE}lroc_color_2k.jpg`
   },
   {
     id: 'lola_color',
@@ -34,10 +36,10 @@ export const LUNAR_LAYERS = [
     icon: '🌈',
     description: 'Elevación topográfica codificada por colores por el altímetro láser LOLA. Azul/violeta para cuencas profundas, verde/amarillo para elevaciones medias y rojo/blanco para cumbres y macizos polares.',
     source: 'NASA Goddard Space Flight Center / LOLA Science Team',
-    resolution: '128 ppd (~237 m/px)',
+    resolution: 'Vista previa 1024×512; el DEM LOLA 128 ppd completo está en Moon Trek',
     trekLayer: 'LRO_LOLA_ClrShade_Global_128ppd_v04',
     isSingleFile: false,
-    tileFolder: '/textures/moon/tiles/lola_clr_shade'
+    tileFolder: `${TEXTURE_BASE}tiles/lola_clr_shade`
   },
   {
     id: 'lola_hillshade',
@@ -46,10 +48,10 @@ export const LUNAR_LAYERS = [
     icon: '⛰️',
     description: 'Modelo de sombras de relieve derivado del modelo digital de elevación (DEM) LOLA. Resalta la morfología de bordes de cráteres, crestas y paredes escarpadas.',
     source: 'NASA GSFC / LRO Project',
-    resolution: '128 ppd (~237 m/px)',
+    resolution: 'Vista previa 1024×512; el hillshade LOLA completo está en Moon Trek',
     trekLayer: 'LRO_LOLA_Shade_Global_128ppd_v04',
     isSingleFile: false,
-    tileFolder: '/textures/moon/tiles/lola_hillshade'
+    tileFolder: `${TEXTURE_BASE}tiles/lola_hillshade`
   },
   {
     id: 'lola_slope',
@@ -58,10 +60,10 @@ export const LUNAR_LAYERS = [
     icon: '⚠️',
     description: 'Clasificación de pendientes topográficas calculadas con LOLA. Fundamental para evaluar estabilidad del tren de aterrizaje y riesgo de vuelco (<8° seguro, >15° crítico).',
     source: 'NASA Solar System Treks / LOLA Team',
-    resolution: '16 ppd (~1.9 km/px)',
+    resolution: 'Vista previa 1024×512; el mapa de pendientes LOLA 16 ppd está en Moon Trek',
     trekLayer: 'LRO_LOLA_ClrSlope_Global_16ppd',
     isSingleFile: false,
-    tileFolder: '/textures/moon/tiles/lola_slope'
+    tileFolder: `${TEXTURE_BASE}tiles/lola_slope`
   }
 ];
 
@@ -82,7 +84,7 @@ export class LunarTextureManager {
 
     return new Promise((resolve) => {
       this.textureLoader.load(
-        '/textures/moon/ldem_displacement_1k.jpg',
+        `${TEXTURE_BASE}ldem_displacement_1k.jpg`,
         (tex) => {
           tex.wrapS = THREE.RepeatWrapping;
           tex.wrapT = THREE.ClampToEdgeWrapping;

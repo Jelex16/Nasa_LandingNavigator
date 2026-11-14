@@ -1,12 +1,15 @@
 {
-  "name": "nasa",
-  "version": "0.0.0",
+  "name": "lunar-landing-site-navigator",
+  "version": "1.0.0",
   "private": true,
+  "description": "Lunar south-pole landing-site decision tool with real NASA LOLA terrain and JPL Horizons ephemerides (NASA Space Apps 2026).",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "data:fix-azimuth": "node scripts/fix_horizon_azimuth.mjs",
+    "data:regional-horizons": "python scripts/build_regional_horizons.py --north-mode true"
   },
   "devDependencies": {
     "vite": "^8.3.6"

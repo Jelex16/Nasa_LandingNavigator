@@ -4,16 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Lunar Landing Site Navigator: comparación de sitios de alunizaje con topografía LOLA y efemérides JPL Horizons."
+    />
     <title>Lunar Landing Site Navigator | NASA Space Apps 2026</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <!-- Fullscreen 3D WebGL Canvas Layer -->
-    <div id="three-container" class="fullscreen-three-container"></div>
+    <div id="three-container" class="fullscreen-three-container" aria-hidden="true"></div>
 
-    <!-- Top Mission Control Navigation Bar -->
     <header class="mission-nav">
       <div class="nav-brand">
         <div class="nasa-badge">
@@ -22,306 +27,289 @@
         </div>
         <div class="brand-titles">
           <h1>LUNAR SITE NAVIGATOR</h1>
-          <span class="sub-brand">CLPS & ARTEMIS MISSION EVALUATOR</span>
+          <span class="sub-brand">LOLA + JPL HORIZONS</span>
         </div>
       </div>
 
-      <!-- Quick Site Selector Pills -->
-      <div class="site-quick-pills" id="site-pills-bar">
-        <button class="pill-btn active" data-site="malapert-mountain">🏔️ Malapert</button>
-        <button class="pill-btn" data-site="connecting-ridge">🚀 Connecting Ridge</button>
-        <button class="pill-btn" data-site="shackleton-rim">🌕 Shackleton</button>
-        <button class="pill-btn" data-site="mons-mouton">🛡️ Mons Mouton</button>
-        <button class="pill-btn" data-site="nobile-rim-1">🤖 Nobile VIPER</button>
-        <button class="pill-btn" data-site="haworth-rim">❄️ Haworth</button>
-        <button class="pill-btn" data-site="apollo-11">🦅 Apolo 11</button>
-      </div>
+      <div class="site-quick-pills" id="site-pills-bar" aria-label="Selección rápida de sitio"></div>
 
-      <!-- Header Right: Clock, Status & Tools -->
       <div class="nav-right">
         <div class="clock-chip">
-          <span class="clock-icon">⏱️</span>
-          <span id="clock-display" class="clock-text">2026-11-14 00:00 UTC</span>
+          <span class="clock-icon" aria-hidden="true">⏱️</span>
+          <span id="clock-display" class="clock-text">—</span>
         </div>
-
         <div class="action-buttons-group">
-          <button class="nav-action-btn nav-btn-highlight" id="open-trek-modal-btn" title="Explorador científico NASA Moon Trek y LROC QuickMap">
-            🗺️ Moon Trek & QuickMap
+          <button class="nav-action-btn" id="open-comparison-btn" type="button" title="Comparar sitios con la misma ventana temporal">
+            📊 Comparar
           </button>
-          <button class="nav-action-btn" id="open-comparison-btn" title="Comparar todos los sitios de alunizaje">
-            📊 Comparar Sitios
-          </button>
-          <button class="nav-action-btn" id="open-horizons-btn" title="Inspeccionar API NASA JPL Horizons">
-            🛰️ JPL Horizons
+          <button class="nav-action-btn" id="open-horizons-btn" type="button" title="Fuentes de datos NASA y validación">
+            🛰️ Datos NASA
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Floating 3D Camera Shortcuts & Real Lunar Model Controls -->
-    <div class="floating-controls-wrapper">
-      <div class="floating-camera-bar">
-        <button class="cam-btn" id="hud-view-south-pole" title="Vista cenital del Polo Sur lunar (-85° a -90°)">
-          <span class="cam-icon">🌐</span> Polo Sur (-90°)
-        </button>
-        <button class="cam-btn active" id="hud-view-site" title="Enfocar el sitio de aterrizaje seleccionado">
-          <span class="cam-icon">🎯</span> Enfocar Sitio
-        </button>
-        <button class="cam-btn" id="hud-view-global" title="Vista órbita completa de la Luna">
-          <span class="cam-icon">🌕</span> Órbita Global
-        </button>
-        <button class="cam-btn cam-btn-accent" id="scan-region-btn" title="Escanear cuadrícula de seguridad con la Red Neuronal">
-          <span class="cam-icon">🧠</span> Escanear con IA
-        </button>
-      </div>
-
-      <!-- Real Lunar Model Layer & 3D Topography Controls -->
-      <div class="floating-layer-bar">
-        <div class="layer-bar-group">
-          <span class="bar-label">MODELO REAL:</span>
-          <button class="layer-btn active" data-layer="lroc" title="Fotografía real LROC WAC (NASA LRO 100m/px)">
-            <span class="l-icon">🛰️</span> LROC Foto Real
-          </button>
-          <button class="layer-btn" data-layer="lola_color" title="Topografía y elevación en color LOLA DEM (USGS/NASA)">
-            <span class="l-icon">🌈</span> LOLA Topografía
-          </button>
-          <button class="layer-btn" data-layer="lola_hillshade" title="Relieve y sombras de cráteres LOLA (128ppd)">
-            <span class="l-icon">⛰️</span> LOLA Relieve
-          </button>
-          <button class="layer-btn" data-layer="lola_slope" title="Mapa de pendientes y riesgos de alunizaje LOLA">
-            <span class="l-icon">⚠️</span> LOLA Pendiente
-          </button>
-        </div>
-
-        <div class="relief-bar-group">
-          <span class="bar-label">RELIEVE 3D:</span>
-          <button class="relief-btn" data-relief="1" title="Relieve topográfico escala real 1:1">1x</button>
-          <button class="relief-btn active" data-relief="2.5" title="Relieve científico equilibrado (2.5x)">2.5x</button>
-          <button class="relief-btn" data-relief="5" title="Relieve exagerado para resaltar cráteres y montañas polares (5x)">5x</button>
-          <button class="relief-btn" data-relief="0" title="Desactivar desplazamiento 3D (Esfera suave)">Plano</button>
-        </div>
-      </div>
+    <div class="floating-camera-bar">
+      <button class="cam-btn" id="hud-view-south-pole" type="button" title="Vista cenital del Polo Sur lunar">
+        <span class="cam-icon" aria-hidden="true">🌐</span> Polo Sur
+      </button>
+      <button class="cam-btn active" id="hud-view-site" type="button" title="Enfocar el sitio de aterrizaje seleccionado">
+        <span class="cam-icon" aria-hidden="true">🎯</span> Enfocar sitio
+      </button>
+      <button class="cam-btn" id="hud-view-global" type="button" title="Vista de órbita completa de la Luna">
+        <span class="cam-icon" aria-hidden="true">🌕</span> Órbita global
+      </button>
+      <button class="cam-btn cam-btn-accent" id="open-panorama-btn" type="button" title="Panorama 2.5D del horizonte LOLA">
+        <span class="cam-icon" aria-hidden="true">🏔️</span> Panorama 2.5D
+      </button>
     </div>
 
-    <!-- UI Overlay Grid (Floating Glass Panels) -->
     <div class="ui-overlay-container">
-      
-      <!-- LEFT PANEL: Site Details & Neural Network Evaluation -->
       <aside class="glass-panel left-floating-panel" id="left-panel">
         <div class="panel-header-row">
           <div class="panel-title-group">
             <span class="panel-eyebrow">EVALUACIÓN DE SITIO</span>
-            <h2 id="hud-site-name">Malapert Mountain (Massif)</h2>
+            <h2 id="hud-site-name">Cargando catálogo LOLA…</h2>
           </div>
-          <span class="status-chip chip-program" id="site-program-badge">Artemis III / CLPS</span>
+          <span class="status-chip chip-program" id="site-program-badge">—</span>
         </div>
 
-        <!-- Hidden select kept for programmatic sync -->
-        <select id="site-select" class="sr-only"></select>
+        <div class="site-select-row">
+          <label for="site-select">Sitio LOLA</label>
+          <select id="site-select" class="site-select"></select>
+        </div>
 
-        <!-- Coordinates & Topo Quick Badges -->
         <div class="coords-row">
           <div class="coord-badge">
             <span class="c-tag">COORDENADAS</span>
-            <strong id="hud-coords">-85.90°S, 357.00°E</strong>
+            <strong id="hud-coords">—</strong>
           </div>
           <div class="coord-badge">
-            <span class="c-tag">PENDIENTE MÁX.</span>
-            <strong id="site-slope-val">8.5°</strong>
+            <span class="c-tag">PENDIENTE LOCAL</span>
+            <strong id="site-slope-val">—</strong>
           </div>
           <div class="coord-badge">
             <span class="c-tag">ELEVACIÓN</span>
-            <strong id="site-elev-val">+5.0 km</strong>
+            <strong id="site-elev-val">—</strong>
           </div>
         </div>
 
-        <!-- Custom Coordinates Drawer (Collapsible) -->
+        <div class="data-source-line">
+          <span class="data-quality-badge" id="site-data-quality">—</span>
+          <span id="site-data-source">Cargando fuentes…</span>
+        </div>
+
         <details class="custom-coords-toggle" id="custom-coords-details">
-          <summary>📍 Ingresar Coordenadas Personalizadas</summary>
+          <summary>📍 Ingresar coordenadas personalizadas</summary>
           <div class="custom-inputs-row">
             <div class="input-block">
-              <label>Latitud (°S/°N):</label>
-              <input type="number" id="custom-lat" step="0.01" min="-90" max="90" value="-89.50">
+              <label for="custom-lat">Latitud (°S/°N):</label>
+              <input type="number" id="custom-lat" step="0.01" min="-90" max="90" value="-89.5" />
             </div>
             <div class="input-block">
-              <label>Longitud (°E):</label>
-              <input type="number" id="custom-lon" step="0.01" min="0" max="360" value="0.00">
+              <label for="custom-lon">Longitud (°E):</label>
+              <input type="number" id="custom-lon" step="0.01" min="0" max="360" value="0" />
             </div>
-            <button class="btn-apply-coords" id="apply-custom-btn">Evaluar</button>
+            <button class="btn-apply-coords" id="apply-custom-btn" type="button">Evaluar</button>
           </div>
         </details>
 
-        <!-- Description Snippet -->
-        <p class="site-desc-text" id="site-description">
-          Cargando parámetros topográficos y astronómicos...
-        </p>
+        <p class="site-desc-text" id="site-description">Cargando topografía LOLA y efemérides…</p>
 
-        <!-- NASA Orbital Analysis Quick Bar (LROC QuickMap & NASA Moon Trek) -->
-        <div class="nasa-tools-card">
-          <div class="nasa-tools-title">
-            <span class="nt-tag">ANÁLISIS ORBITAL NASA</span>
-            <span class="nt-sub">LROC &amp; MOON TREK</span>
+        <div class="model3d-card" id="model3d-card">
+          <div class="model3d-header">
+            <span class="model3d-eyebrow">MODELO 3D · LRO / LOLA</span>
+            <span class="model3d-note">texturas preview</span>
           </div>
-          <div class="nasa-tools-actions">
-            <a id="btn-open-quickmap" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer" class="btn-nasa-tool" title="Inspeccionar en LROC QuickMap (Resolución hasta 0.5m/px con LROC NAC)">
-              <span class="tool-icon">🔭</span> LROC QuickMap ↗
-            </a>
-            <a id="btn-open-moontrek" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer" class="btn-nasa-tool" title="Explorar en NASA Solar System Treks (Moon Trek 3D GIS)">
-              <span class="tool-icon">🌐</span> NASA Moon Trek ↗
-            </a>
-            <button id="btn-open-dossier" class="btn-nasa-tool btn-nasa-dossier" title="Ver dossier científico y capas WMTS oficiales de la NASA">
-              <span class="tool-icon">📋</span> Capas &amp; DEM
-            </button>
+          <div class="layer-buttons" role="group" aria-label="Capa del globo lunar">
+            <button class="layer-btn active" type="button" data-layer="lroc" title="Fotografía LROC WAC (vista previa 2k)">LROC</button>
+            <button class="layer-btn" type="button" data-layer="lola_color" title="Topografía LOLA en color (vista previa)">Topo</button>
+            <button class="layer-btn" type="button" data-layer="lola_hillshade" title="Relieve sombreado LOLA (vista previa)">Relieve</button>
+            <button class="layer-btn" type="button" data-layer="lola_slope" title="Pendientes LOLA (vista previa)">Pendiente</button>
+          </div>
+          <div class="model3d-relief-row">
+            <span class="model3d-label">Relieve</span>
+            <button class="relief-btn" type="button" data-relief="1" title="Escala 1:1">1x</button>
+            <button class="relief-btn active" type="button" data-relief="2.5" title="Exageración 2.5x">2.5x</button>
+            <button class="relief-btn" type="button" data-relief="5" title="Exageración 5x">5x</button>
+            <button class="relief-btn" type="button" data-relief="0" title="Desactivar desplazamiento">Plano</button>
+          </div>
+          <div class="nasa-links-row">
+            <a id="btn-open-quickmap" class="btn-nasa-tool" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer">LROC QuickMap ↗</a>
+            <a id="btn-open-moontrek" class="btn-nasa-tool" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer">Moon Trek ↗</a>
+            <button id="btn-open-dossier" class="btn-nasa-tool" type="button">Capas &amp; DEM</button>
           </div>
         </div>
 
-        <!-- MAIN HERO: Neural Network Safety Score Gauge -->
+        <div class="mission-config-row">
+          <div class="config-block">
+            <label for="mast-select">Mástil</label>
+            <select id="mast-select">
+              <option value="0.5">0.5 m</option>
+              <option value="2" selected>2 m</option>
+              <option value="5">5 m</option>
+              <option value="10">10 m</option>
+              <option value="20">20 m</option>
+            </select>
+          </div>
+          <div class="config-block">
+            <label for="panel-select">Panel</label>
+            <select id="panel-select">
+              <option value="vertical_tracker" selected>Vertical tracker</option>
+              <option value="vertical_fixed">Vertical fijo</option>
+              <option value="horizontal">Horizontal</option>
+            </select>
+          </div>
+          <div class="config-block">
+            <label for="profile-select">Perfil de misión</label>
+            <select id="profile-select">
+              <option value="technology_demo" selected>Demo DTE</option>
+              <option value="night_survivor">Rover nocturno</option>
+              <option value="crewed_outpost">Tripulado</option>
+              <option value="relay_store_forward">Relé</option>
+            </select>
+          </div>
+        </div>
+
         <div class="neural-score-card">
           <div class="gauge-and-badge">
             <div class="radial-gauge-box">
-              <div class="gauge-ring" id="score-circle">
-                <span class="gauge-number" id="score-number">95</span>
+              <div class="gauge-ring status-safe" id="score-circle">
+                <span class="gauge-number" id="score-number">—</span>
                 <span class="gauge-unit">%</span>
               </div>
             </div>
             <div class="gauge-text-content">
-              <div class="ai-eval-label">EVALUACIÓN RED NEURONAL</div>
-              <div class="badge-go-nogo status-safe" id="classification-badge">GO - SEGURO</div>
+              <div class="ai-eval-label">MODELO MULTICRITERIO</div>
+              <div class="badge-go-nogo status-safe" id="classification-badge">CARGANDO</div>
               <p class="classification-comment" id="classification-text">
-                Sitio óptimo con pendiente benigna y alta visibilidad solar y DTE.
+                Calculando métricas LOLA + Horizons…
               </p>
             </div>
           </div>
 
-          <!-- Sub-Metrics Bars -->
+          <div class="score-window-label" id="score-window-label">
+            Ventana: 28 días desde — · instante —
+          </div>
+
           <div class="neural-subbars">
             <div class="subbar-item">
               <div class="subbar-meta">
-                <span>Estabilidad Terreno (LOLA)</span>
-                <strong id="terrain-score">92%</strong>
+                <span>Energía específica (28 días)</span>
+                <strong id="energy-score">—</strong>
               </div>
-              <div class="bar-track"><div class="bar-fill fill-green" id="terrain-fill" style="width: 92%"></div></div>
+              <div class="bar-track"><div class="bar-fill fill-gold" id="energy-fill" style="width: 0%"></div></div>
             </div>
-
             <div class="subbar-item">
               <div class="subbar-meta">
-                <span>Generación Solar (Potencia)</span>
-                <strong id="power-score">88%</strong>
+                <span>Supervivencia al eclipse</span>
+                <strong id="eclipse-score">—</strong>
               </div>
-              <div class="bar-track"><div class="bar-fill fill-gold" id="power-fill" style="width: 88%"></div></div>
+              <div class="bar-track"><div class="bar-fill fill-red" id="eclipse-fill" style="width: 0%"></div></div>
             </div>
-
             <div class="subbar-item">
               <div class="subbar-meta">
-                <span>Línea de Visión Tierra (Comms DTE)</span>
-                <strong id="comm-score">94%</strong>
+                <span>Visibilidad Tierra DTE</span>
+                <strong id="dte-score">—</strong>
               </div>
-              <div class="bar-track"><div class="bar-fill fill-cyan" id="comm-fill" style="width: 94%"></div></div>
+              <div class="bar-track"><div class="bar-fill fill-cyan" id="dte-fill" style="width: 0%"></div></div>
             </div>
-
             <div class="subbar-item">
               <div class="subbar-meta">
-                <span>Proximidad a Hielo Volátil (Ciencia)</span>
-                <strong id="science-score">85%</strong>
+                <span>Comunicaciones (corte máximo)</span>
+                <strong id="comms-score">—</strong>
               </div>
-              <div class="bar-track"><div class="bar-fill fill-purple" id="science-fill" style="width: 85%"></div></div>
+              <div class="bar-track"><div class="bar-fill fill-purple" id="comms-fill" style="width: 0%"></div></div>
             </div>
           </div>
 
-          <!-- Feature Attribution (XAI) -->
           <div class="xai-factors-panel">
             <div class="xai-header">
-              <span>Factores Clave (Por qué esta puntuación):</span>
-              <button class="btn-link" id="toggle-nn-view-btn">Ver Red Neuronal →</button>
+              <span>Factores clave (modelo transparente):</span>
+              <button class="btn-link" id="toggle-nn-view-btn" type="button">Ver modelo →</button>
             </div>
-            <div class="xai-factors-list" id="xai-items">
-              <!-- Dynamically populated -->
-            </div>
+            <div class="xai-factors-list" id="xai-items"></div>
           </div>
         </div>
       </aside>
 
-      <!-- RIGHT PANEL: Local Radar, Solar/Earth Horizon, Countdowns -->
       <aside class="glass-panel right-floating-panel" id="right-panel">
         <div class="panel-header-row">
           <div class="panel-title-group">
             <span class="panel-eyebrow">HORIZONTE Y BÓVEDA CELESTE</span>
-            <h2>Radar Local LOLA (360°)</h2>
+            <h2>Radar local LOLA (360°)</h2>
           </div>
-          <span class="status-chip chip-radar">Relieve Topográfico</span>
+          <span class="status-chip chip-radar" id="radar-source-badge">Relieve LOLA</span>
         </div>
 
-        <!-- Circular Sky Dome Canvas -->
         <div class="radar-box">
           <canvas id="sky-dome-canvas"></canvas>
           <div class="radar-legend-chips">
             <span class="legend-chip chip-gold">● Sol</span>
             <span class="legend-chip chip-cyan">● Tierra</span>
-            <span class="legend-chip chip-pink">━ Relieve LOLA</span>
+            <span class="legend-chip chip-pink">━ Horizonte LOLA</span>
           </div>
         </div>
 
-        <!-- Telemetry Numbers (Sun & Earth real-time Angles) -->
         <div class="angles-telemetry-grid">
           <div class="angle-card">
             <div class="angle-header">
-              <span class="angle-icon">☀️</span>
+              <span class="angle-icon" aria-hidden="true">☀️</span>
               <span class="angle-name">POSICIÓN SOL</span>
             </div>
             <div class="angle-values">
-              <strong id="hud-sun-elev" class="val-gold">+1.25° Elev</strong>
+              <strong id="hud-sun-elev" class="val-gold">—</strong>
             </div>
-            <div class="angle-extra" id="solar-eff-val">Eficiencia: 85% (1120 W/m²)</div>
+            <div class="angle-extra" id="solar-eff-val">Irradiancia panel: —</div>
+            <div class="angle-extra angle-extra-muted" id="sun-horizon-val">Horizonte LOLA: —</div>
           </div>
 
           <div class="angle-card">
             <div class="angle-header">
-              <span class="angle-icon">🌍</span>
+              <span class="angle-icon" aria-hidden="true">🌍</span>
               <span class="angle-name">POSICIÓN TIERRA</span>
             </div>
             <div class="angle-values">
-              <strong id="hud-earth-elev" class="val-cyan">+4.86° Elev</strong>
+              <strong id="hud-earth-elev" class="val-cyan">—</strong>
             </div>
-            <div class="angle-extra" id="comm-link-status">Enlace DTE Activo</div>
+            <div class="angle-extra" id="comm-link-status">Enlace DTE: —</div>
+            <div class="angle-extra angle-extra-muted" id="earth-horizon-val">Horizonte LOLA: —</div>
           </div>
         </div>
 
-        <!-- Critical Operational Countdowns -->
         <div class="countdowns-container">
           <div class="cd-card cd-sunset">
-            <div class="cd-label">Próximo Ocaso Solar (Sunset):</div>
-            <div class="cd-countdown text-gold" id="sunset-countdown">184h 12m</div>
-            <div class="cd-note" id="sunset-sub">Tiempo antes de agotar energía solar</div>
+            <div class="cd-label" id="sunset-label">Próximo evento solar:</div>
+            <div class="cd-countdown text-gold" id="sunset-countdown">—</div>
+            <div class="cd-note" id="sunset-sub">Calculando desde la ventana de 28 días…</div>
           </div>
 
           <div class="cd-card cd-earthset">
-            <div class="cd-label">Próxima Pérdida DTE (Earthset):</div>
-            <div class="cd-countdown text-cyan" id="earthset-countdown">Visibilidad Continua</div>
-            <div class="cd-note" id="earthset-sub">Sin pérdida de telemetría</div>
+            <div class="cd-label" id="earthset-label">Próximo evento DTE:</div>
+            <div class="cd-countdown text-cyan" id="earthset-countdown">—</div>
+            <div class="cd-note" id="earthset-sub">Calculando desde la ventana de 28 días…</div>
           </div>
         </div>
 
-        <!-- Expandable Timeline Elevation Chart Trigger -->
-        <div class="timeline-drawer-toggle" id="timeline-toggle-btn">
-          <span>📈 Ver Curvas de Elevación a 30 Días</span>
+        <button class="timeline-drawer-toggle" id="timeline-toggle-btn" type="button" aria-expanded="false">
+          <span>📈 Ver curvas de elevación y ventanas (28 días)</span>
           <span class="toggle-arrow" id="timeline-arrow">▲</span>
-        </div>
+        </button>
       </aside>
     </div>
 
-    <!-- BOTTOM MISSION TIMELINE & SCRUBBER DOCK -->
     <div class="bottom-mission-dock" id="bottom-dock">
-      <!-- Collapsible Elevation Chart Drawer -->
       <div class="chart-drawer-body hidden" id="chart-drawer">
         <div class="chart-drawer-header">
           <div class="cd-title-box">
-            <strong>CURVAS DE ELEVACIÓN Y VENTANAS OPERACIONALES (30 DÍAS SINÓDICOS)</strong>
-            <span>Área sombreada en oro = Generación solar activa. Haz clic en la curva para saltar a ese instante.</span>
+            <strong>CURVAS DE ELEVACIÓN Y VENTANAS OPERACIONALES (28 DÍAS)</strong>
+            <span>Área dorada = Sol visible; área cian = Tierra visible; línea rosa = horizonte LOLA del Sol; línea cian = horizonte LOLA de la Tierra. Haz clic en la curva para saltar a ese instante.</span>
           </div>
           <div class="chart-legend-row">
             <span class="badge-legend text-gold">━ Sol</span>
             <span class="badge-legend text-cyan">━ Tierra</span>
-            <span class="badge-legend text-pink">--- Horizonte Topográfico</span>
+            <span class="badge-legend text-pink">--- Horizonte</span>
+            <button class="chart-close-btn" id="close-chart-btn" type="button" aria-label="Cerrar curvas">×</button>
           </div>
         </div>
         <div class="chart-canvas-wrapper">
@@ -329,280 +317,341 @@
         </div>
       </div>
 
-      <!-- Dock Controls Bar -->
       <div class="dock-controls-bar">
         <div class="playback-buttons">
-          <button class="btn-dock-play" id="play-pause-btn" title="Simular órbita lunar y paso del tiempo">
+          <button class="btn-dock-play" id="play-pause-btn" type="button" title="Simular el paso del tiempo dentro de la ventana">
             <span id="play-icon">▶</span>
             <span id="play-text">Simular</span>
           </button>
           <div class="speed-selector">
-            <button class="speed-chip active" data-speed="1">1x</button>
-            <button class="speed-chip" data-speed="10">10x</button>
-            <button class="speed-chip" data-speed="60">60x</button>
+            <button class="speed-chip active" data-speed="1" type="button">1x</button>
+            <button class="speed-chip" data-speed="10" type="button">10x</button>
+            <button class="speed-chip" data-speed="60" type="button">60x</button>
           </div>
         </div>
 
-        <!-- Scrubber and Date Control -->
         <div class="scrubber-center-area">
           <div class="scrubber-top-info">
-            <span class="sim-date-label">FECHA DE MISIÓN:</span>
-            <input type="datetime-local" id="datetime-input" class="dock-datetime-picker">
+            <span class="sim-date-label" title="Cambiar esta fecha reinicia la ventana de evaluación de 28 días">FECHA DE MISIÓN (UTC):</span>
+            <input
+              type="datetime-local"
+              id="datetime-input"
+              class="dock-datetime-picker"
+              title="Cambiar esta fecha reinicia la ventana de evaluación de 28 días"
+            />
             <div class="step-buttons">
-              <button class="btn-step" id="step-back-day" title="Retroceder 1 día">-1d</button>
-              <button class="btn-step" id="step-back-hour" title="Retroceder 1 hora">-1h</button>
-              <button class="btn-step" id="step-fwd-hour" title="Avanzar 1 hora">+1h</button>
-              <button class="btn-step" id="step-fwd-day" title="Avanzar 1 día">+1d</button>
+              <button class="btn-step" id="step-back-day" type="button" title="Retroceder 1 día">-1d</button>
+              <button class="btn-step" id="step-back-hour" type="button" title="Retroceder 1 hora">-1h</button>
+              <button class="btn-step" id="step-fwd-hour" type="button" title="Avanzar 1 hora">+1h</button>
+              <button class="btn-step" id="step-fwd-day" type="button" title="Avanzar 1 día">+1d</button>
             </div>
-            <span class="lunar-day-badge" id="scrubber-day-label">Día 1 / 30</span>
+            <span class="lunar-day-badge" id="scrubber-day-label">Día 1 / 28</span>
           </div>
-          <input type="range" id="time-scrubber" min="0" max="720" value="0" class="dock-slider">
+          <input type="range" id="time-scrubber" min="0" max="672" value="0" class="dock-slider" />
         </div>
 
-        <!-- Presets Menu -->
         <div class="presets-menu-box">
-          <label class="preset-label">ESCENARIOS:</label>
+          <label class="preset-label" for="preset-select">ESCENARIOS:</label>
           <select id="preset-select" class="dock-preset-select">
-            <option value="artemis-2026">Artemis III (Nov 2026)</option>
-            <option value="clps-summer">Solsticio Verano Sur (Dic 2026)</option>
-            <option value="clps-winter">Solsticio Invierno Sur (Jun 2026)</option>
-            <option value="now">Tiempo Real (Actual)</option>
+            <option value="artemis-2026">Ventana de ejemplo (Nov 2026)</option>
+            <option value="clps-summer">Solsticio verano sur (Dic 2026)</option>
+            <option value="clps-winter">Solsticio invierno sur (Jun 2026)</option>
+            <option value="now">Tiempo real</option>
           </select>
         </div>
       </div>
     </div>
 
-    <!-- Hidden elements for script compatibility -->
-    <div class="sr-only">
-      <span id="site-ice-val"></span>
-      <span id="solar-flux-val"></span>
-      <span id="libration-val"></span>
-    </div>
-
-    <!-- MODAL: Multi-Site Trade-Off Comparison Matrix -->
-    <div class="modal-backdrop hidden" id="comparison-modal">
-      <div class="modal-window modal-wide">
-        <div class="modal-header">
-          <div class="modal-title-with-badge">
-            <h2>📊 Matriz de Decisión y Comparativa de Sitios (Trade-Off Matrix)</h2>
-            <span class="m-badge">Red Neuronal LOLA + Horizons</span>
-          </div>
-          <button class="btn-modal-close" id="close-comparison-modal">&times;</button>
-        </div>
-        <div class="modal-body" id="comparison-modal-body">
-          <!-- Populated dynamically by comparisonView.js -->
-        </div>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-card">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <strong>Cargando LOLA + Horizons</strong>
+        <span>Leyendo los horizontes reales y las efemérides precalculadas…</span>
       </div>
     </div>
 
-    <!-- MODAL: NASA JPL Horizons API Inspector -->
-    <div class="modal-backdrop hidden" id="horizons-modal">
-      <div class="modal-window">
+    <div class="modal-backdrop hidden" id="comparison-modal">
+      <div class="modal-window modal-wide modal-comparison">
         <div class="modal-header">
-          <h2>🛰️ Integración con NASA JPL Horizons API</h2>
-          <button class="btn-modal-close" id="close-horizons-modal">&times;</button>
+          <div class="modal-title-with-badge">
+            <h2>📊 Matriz de decisión y comparación de sitios</h2>
+            <span class="m-badge">Misma ventana · mismos supuestos</span>
+          </div>
+          <button class="btn-modal-close" id="close-comparison-modal" type="button" aria-label="Cerrar comparación">&times;</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id="comparison-modal-body"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="horizons-modal">
+      <div class="modal-window modal-data">
+        <div class="modal-header">
+          <h2>🛰️ Datos NASA: LOLA + JPL Horizons</h2>
+          <button class="btn-modal-close" id="close-horizons-modal" type="button" aria-label="Cerrar datos">&times;</button>
+        </div>
+        <div class="modal-body" id="data-modal-body">
           <p class="modal-intro">
-            Esta aplicación se conecta al sistema oficial de efemérides astronómicas <strong>NASA JPL Horizons</strong> para computar las coordenadas topocéntricas de un observador sobre la Luna.
+            La aplicación usa <strong>topografía LOLA real</strong> y <strong>efemérides aparentes de JPL Horizons</strong>.
+            No hay una “red neuronal” entrenada: el score es un índice multicriterio transparente con pesos y umbrales visibles.
           </p>
 
-          <div class="modal-card-section">
-            <label class="sec-label">URL de Consulta REST API (JPL Horizons):</label>
-            <div class="code-terminal" id="horizons-url-box">
-              https://ssd.jpl.nasa.gov/api/horizons.api?...
+          <div class="data-grid">
+            <div class="data-card">
+              <span class="data-card-label">HORIZONTE</span>
+              <strong>LOLA 5 m/px + 80 m/px</strong>
+              <span>Seis sitios con DEM local de 5 m/px y DEM regional de 80 m/px hasta 100 km. Nobile y Haworth usan solo el DEM regional de 80 m/px.</span>
             </div>
-            <div class="fetch-action-row">
-              <button class="btn-fetch-test" id="test-horizons-fetch-btn">
-                📡 Consultar API de NASA en Vivo
-              </button>
-              <span id="horizons-fetch-status" class="fetch-status-text"></span>
+            <div class="data-card">
+              <span class="data-card-label">EFEMÉRIDES</span>
+              <strong>JPL Horizons DE441</strong>
+              <span>Azimut, elevación y distancia aparentes del Sol y la Tierra, paso de 1 h, 2026–2029. Interpolación cúbica de Hermite en el cliente.</span>
+            </div>
+            <div class="data-card">
+              <span class="data-card-label">VALIDACIÓN</span>
+              <strong>RMS 1×10⁻⁵° · máx 1.2×10⁻⁴°</strong>
+              <span>Comparación fuera de malla contra Horizons (4.032 muestras) del pipeline SUNDIAL; el motor local IAU 2000 se usa solo como fallback.</span>
+            </div>
+            <div class="data-card">
+              <span class="data-card-label">MODELO</span>
+              <strong>Multicriterio transparente</strong>
+              <span>Energía, eclipse continuo, DTE y corte de comunicaciones. Los pesos y umbrales del perfil son visibles y editables en la UI.</span>
             </div>
           </div>
 
-          <div class="modal-card-section">
-            <label class="sec-label">Validación de Precisión (Motor IAU 2000 vs. JPL Horizons):</label>
-            <div class="accuracy-grid">
-              <div class="acc-cell">
-                <span class="acc-label">Δ Azimut Sol</span>
-                <strong class="acc-val text-gold">&lt; 0.08°</strong>
-              </div>
-              <div class="acc-cell">
-                <span class="acc-label">Δ Elevación Sol</span>
-                <strong class="acc-val text-gold">&lt; 0.04°</strong>
-              </div>
-              <div class="acc-cell">
-                <span class="acc-label">Δ Azimut Tierra</span>
-                <strong class="acc-val text-cyan">&lt; 0.05°</strong>
-              </div>
-              <div class="acc-cell">
-                <span class="acc-label">Δ Elevación Tierra</span>
-                <strong class="acc-val text-cyan">&lt; 0.03°</strong>
-              </div>
-            </div>
-            <p class="accuracy-note">
-              ✓ El motor astronómico integrado calcula con precisión submétrica la libración física y óptica de la Luna, permitiendo simulación en tiempo real fluida incluso sin conexión a internet.
+          <div class="data-section">
+            <label class="sec-label">Fuentes y procedencia:</label>
+            <ul class="data-source-list">
+              <li><a href="https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/" target="_blank" rel="noreferrer">NASA PGDA · LOLA 5 m/px landing-site DEMs</a></li>
+              <li><a href="https://pgda.gsfc.nasa.gov/products/90" target="_blank" rel="noreferrer">NASA PGDA · LOLA 80S 80 m/px regional DEM</a></li>
+              <li><a href="https://ssd-api.jpl.nasa.gov/doc/horizons.html" target="_blank" rel="noreferrer">NASA/JPL Horizons API · DE441</a></li>
+              <li><a href="https://doi.org/10.1016/j.pss.2020.105119" target="_blank" rel="noreferrer">Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites</a></li>
+              <li><a href="https://doi.org/10.1016/j.icarus.2010.10.030" target="_blank" rel="noreferrer">Mazarico et al. (2011), Illumination conditions of the lunar polar regions</a></li>
+            </ul>
+          </div>
+
+          <div class="data-section">
+            <label class="sec-label">Corrección de azimut:</label>
+            <p class="data-note">
+              Los horizontes híbridos heredados del pipeline SUNDIAL usaban como “norte” la dirección
+              hacia el polo sur lunar. En esta app se rotaron 180° (360 bins) para que el bin 0 sea el
+              norte geográfico y coincida con los azimuts de Horizons; el ajuste queda registrado en el
+              manifiesto y en las notas de cada horizonte.
+            </p>
+          </div>
+
+          <div class="data-section">
+            <label class="sec-label">Manifiesto de datos:</label>
+            <p class="data-note">
+              Los archivos derivados y sus checksums están en
+              <a href="/data/manifest.json" target="_blank" rel="noreferrer">/data/manifest.json</a>.
+              Los DEM originales no se distribuyen en este repositorio; los horizontes derivados sí.
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL: NASA Moon Trek & LROC QuickMap Scientific Explorer -->
     <div class="modal-backdrop hidden" id="trek-modal">
-      <div class="modal-window modal-wide">
+      <div class="modal-window modal-wide modal-trek">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2>🗺️ Explorador Científico: NASA Moon Trek &amp; LROC QuickMap</h2>
-            <span class="m-badge">Datos Oficiales NASA LRO / ASU</span>
+            <h2>NASA Moon Trek &amp; LROC QuickMap</h2>
+            <span class="m-badge">Enlaces oficiales · texturas preview</span>
           </div>
-          <button class="btn-modal-close" id="close-trek-modal">&times;</button>
+          <button class="btn-modal-close" id="close-trek-modal" type="button" aria-label="Cerrar explorador NASA">&times;</button>
         </div>
         <div class="modal-body">
           <p class="modal-intro">
-            Integración directa con los sistemas cartográficos y topográficos oficiales de la NASA. El modelo 3D de la Luna procesa datos del orbitador <strong>LRO</strong>: fotografía real de la cámara <strong>LROC WAC</strong> (albedo óptico 100m/px) y el altímetro láser <strong>LOLA</strong> (Digital Elevation Models con resolución de hasta 5 metros por píxel en el Polo Sur).
+            Abre la zona del sitio seleccionado en los visores oficiales de NASA/ASU. Las capas del globo 3D
+            incluidas aquí son <strong>vistas previas</strong> de LROC/LOLA; los horizontes y las efemérides que
+            alimentan el score se cargan desde <code>public/data</code>.
           </p>
 
-          <!-- Current Site Dossier Section -->
           <div class="trek-site-card">
             <div class="trek-site-header">
               <div>
-                <span class="trek-sub-tag">SITIO SELECCIONADO EN MISIÓN</span>
-                <h3 id="trek-modal-site-name">Malapert Mountain (Massif)</h3>
-                <span id="trek-modal-program" class="trek-prog-pill">Artemis III / CLPS</span>
+                <span class="trek-sub-tag">SITIO SELECCIONADO</span>
+                <h3 id="trek-modal-site-name">—</h3>
+                <span id="trek-modal-program" class="trek-prog-pill">—</span>
               </div>
               <div class="trek-direct-links">
-                <a id="trek-modal-quickmap-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-quickmap" title="Abrir LROC QuickMap en una nueva pestaña centrado en este sitio">
-                  🔭 Abrir en LROC QuickMap ↗
-                </a>
-                <a id="trek-modal-moontrek-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-moontrek" title="Abrir NASA Solar System Treks (Moon Trek 3D GIS)">
-                  🌐 Explorar en NASA Moon Trek ↗
-                </a>
+                <a id="trek-modal-quickmap-btn" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-quickmap">LROC QuickMap ↗</a>
+                <a id="trek-modal-moontrek-btn" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-moontrek">Moon Trek ↗</a>
               </div>
             </div>
-
             <div class="trek-coords-grid">
               <div class="trek-cell">
                 <span class="tc-label">Latitud / Longitud</span>
-                <strong id="trek-modal-coords">-85.90°S, 357.00°E</strong>
+                <strong id="trek-modal-coords">—</strong>
               </div>
               <div class="trek-cell">
-                <span class="tc-label">Elevación Datum LOLA</span>
-                <strong id="trek-modal-elev">+5.0 km</strong>
+                <span class="tc-label">Elevación</span>
+                <strong id="trek-modal-elev">—</strong>
               </div>
               <div class="trek-cell">
-                <span class="tc-label">Pendiente Máxima Local</span>
-                <strong id="trek-modal-slope">8.5°</strong>
+                <span class="tc-label">Pendiente local</span>
+                <strong id="trek-modal-slope">—</strong>
               </div>
               <div class="trek-cell">
-                <span class="tc-label">Proximidad a Trampa Fría</span>
-                <strong id="trek-modal-ice">12.4 km (Haworth/Shoemaker)</strong>
+                <span class="tc-label">Trampa fría cercana</span>
+                <strong id="trek-modal-ice">—</strong>
               </div>
             </div>
-
-            <p class="trek-geology-text" id="trek-modal-geology">
-              Macizo anortosítico elevado con cumbres de alta insolación y visibilidad directa ininterrumpida hacia las estaciones terrestres de Deep Space Network (DSN).
-            </p>
+            <p class="trek-geology-text" id="trek-modal-geology">—</p>
           </div>
 
-          <!-- QuickMap & Moon Trek Comparative Section -->
           <div class="systems-grid">
-            <!-- LROC QuickMap Card -->
             <div class="system-card">
               <div class="system-header">
                 <span class="sys-badge qm-badge">ASU / NASA LROC</span>
-                <h4>LROC QuickMap (Arizona State University)</h4>
+                <h4>LROC QuickMap</h4>
               </div>
               <p class="sys-desc">
-                Desarrollado por el equipo de cámaras <strong>LROC</strong>. Permite inspeccionar mosaicos globales y miles de imágenes de ángulo estrecho (NAC) con resolución de hasta <strong>0.5 metros por píxel</strong>, permitiendo identificar rocas, cráteres secundarios y las huellas de aterrizadores históricos.
+                Visor cartográfico de LROC con mosaicos WAC y miles de imágenes NAC. Permite inspeccionar
+                rocas, cráteres secundarios y huellas de misiones históricas a alta resolución.
               </p>
               <ul class="sys-features">
-                <li>✓ Proyección Polar Estereográfica calibrada para el Polo Sur (proj=10).</li>
-                <li>✓ Mosaicos morfológicos WAC + servidor cartográfico Lunaserv WMS.</li>
-                <li>✓ Herramientas de perfil de elevación y cálculo de rugosidad.</li>
+                <li>✓ Proyección polar estereográfica para el Polo Sur.</li>
+                <li>✓ Capas WAC/NAC y perfiles de elevación.</li>
+                <li>✓ Enlace centrado en el sitio seleccionado.</li>
               </ul>
             </div>
-
-            <!-- NASA Moon Trek Card -->
             <div class="system-card">
               <div class="system-header">
-                <span class="sys-badge mt-badge">NASA JPL SOLAR SYSTEM TREKS</span>
-                <h4>NASA Moon Trek (Solar System Treks)</h4>
+                <span class="sys-badge mt-badge">NASA / JPL</span>
+                <h4>Moon Trek</h4>
               </div>
               <p class="sys-desc">
-                Portal GIS oficial de la NASA y JPL para planificación de misiones Artemis y CLPS. Proporciona capas 3D y servicios estándar OGC RESTful Web Map Tile Service (WMTS) para elevación, pendientes, mineralogía y temperatura radiométrica Diviner.
+                Portal GIS de NASA Solar System Treks para explorar elevación, pendientes, mineralogía
+                y temperatura, con servicios WMTS de las capas LOLA.
               </p>
               <ul class="sys-features">
-                <li>✓ Capas WMTS globales con CORS habilitado para visualizadores 3D WebGL.</li>
-                <li>✓ DEM LOLA de 5 metros por píxel para regiones polares de Artemis.</li>
-                <li>✓ Modelos de insolación a lo largo de ciclos sinódicos de 29.5 días.</li>
+                <li>✓ DEM LOLA y mapas de pendientes.</li>
+                <li>✓ Contexto de planificación Artemis/CLPS.</li>
+                <li>✓ Enlace centrado en el sitio seleccionado.</li>
               </ul>
             </div>
           </div>
 
-          <!-- Active NASA Datasets Table -->
           <div class="datasets-section">
-            <h4 class="sec-title">📦 Conjuntos de Datos Activos en el Navegador 3D:</h4>
+            <h4 class="sec-title">Datos usados en esta app</h4>
             <div class="table-responsive">
               <table class="nasa-datasets-table">
                 <thead>
                   <tr>
                     <th>Capa</th>
-                    <th>Instrumento / Misión</th>
-                    <th>Resolución</th>
-                    <th>Uso en la Simulación</th>
+                    <th>Uso</th>
+                    <th>Resolución / estado</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td><strong>LROC WAC Mosaic v02</strong></td>
-                    <td>Lunar Reconnaissance Orbiter (LROC)</td>
-                    <td>100 m/px (303 ppd)</td>
-                    <td>Fotografía real, textura de albedo visual y mares basálticos</td>
+                    <td><strong>Horizontes LOLA</strong></td>
+                    <td>Energía, eclipse, DTE y panorama 2.5D</td>
+                    <td>5 m/px + 80 m/px en 6 sitios; 80 m/px regional en Nobile/Haworth</td>
                   </tr>
                   <tr>
-                    <td><strong>LOLA Global DEM</strong></td>
-                    <td>Lunar Orbiter Laser Altimeter (LOLA)</td>
-                    <td>128 ppd (~237 m)</td>
-                    <td>Desplazamiento 3D de vértices, cráteres de impacto y macizos</td>
+                    <td><strong>JPL Horizons DE441</strong></td>
+                    <td>Az/el/distancias del Sol y la Tierra</td>
+                    <td>Paso de 1 h, 2026–2029, interpolación Hermite</td>
                   </tr>
                   <tr>
-                    <td><strong>LOLA Color Hillshade</strong></td>
-                    <td>NASA GSFC / USGS Astrogeology</td>
-                    <td>128 ppd</td>
-                    <td>Topografía en rampa de color (azul=cuencas, rojo=cumbres)</td>
+                    <td><strong>LROC WAC</strong></td>
+                    <td>Textura fotográfica del globo 3D</td>
+                    <td>Vista previa 2048×1024; resolución completa en QuickMap</td>
                   </tr>
                   <tr>
-                    <td><strong>LOLA Slope Hazard Map</strong></td>
-                    <td>NASA Moon Trek / LOLA Team</td>
-                    <td>16 ppd</td>
-                    <td>Evaluación de estabilidad geotécnica y riesgo de vuelco de la nave</td>
+                    <td><strong>LOLA color / hillshade / slope</strong></td>
+                    <td>Capas visuales del globo 3D</td>
+                    <td>Vistas previas 1024×512; capas completas en Moon Trek</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <p class="data-note">
+              Las texturas del globo 3D no se usan para calcular el score: el análisis usa los horizontes
+              LOLA de <code>public/data/horizon</code> y las efemérides de <code>public/data/ephem</code>.
+            </p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL: Neural Network Architecture & Activations -->
     <div class="modal-backdrop hidden" id="nn-modal">
       <div class="modal-window modal-wide">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2>🧠 Arquitectura de la Red Neuronal (LunarLandNet v2.6)</h2>
-            <span class="m-badge">Deep MLP (8 → 16 → 12 → 8 → 5)</span>
+            <h2>Modelo de decisión multicriterio</h2>
+            <span class="m-badge">Sin red neuronal · supuestos visibles</span>
           </div>
-          <button class="btn-modal-close" id="close-nn-modal">&times;</button>
+          <button class="btn-modal-close" id="close-nn-modal" type="button" aria-label="Cerrar modelo">&times;</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id="decision-model-body">
           <p class="modal-intro">
-            Visualización interactiva en tiempo real del flujo sináptico (forward pass). La red procesa las características geotécnicas LOLA y las ventanas de luz solar y visibilidad de Houston para estimar el riesgo de alunizaje y clasificar el sitio en <strong>GO / CAUTION / NO-GO</strong>.
+            El score no es una probabilidad de éxito ni una certificación de aterrizaje. Es una suma ponderada de cuatro
+            términos normalizados; las métricas crudas y los umbrales se muestran al lado para que el resultado sea auditable.
           </p>
-          <div class="neural-canvas-container">
-            <canvas id="neural-net-canvas"></canvas>
+          <div class="decision-formula">
+            Score = 100 · (w<sub>E</sub>·E + w<sub>D</sub>·D + w<sub>C</sub>·C + w<sub>G</sub>·G) / Σw
           </div>
+          <div class="decision-components" id="decision-components"></div>
+          <div class="data-section">
+            <label class="sec-label">Perfil seleccionado:</label>
+            <div id="decision-profile" class="data-note"></div>
+          </div>
+          <div class="data-section">
+            <label class="sec-label">Limitaciones:</label>
+            <p class="data-note">
+              No modela rocas por debajo de la resolución del DEM, estado térmico, baterías, constelaciones de relé,
+              movilidad del rover ni la certificación de un punto de aterrizaje. El perfil “Relé / store-and-forward”
+              solo relaja las tolerancias de DTE/corte; no simula un relé concreto. El horizonte es una aproximación
+              1D por azimut; no sustituye un análisis de ingeniería.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="panorama-modal">
+      <div class="modal-window modal-panorama">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2>🏔️ Panorama 2.5D del horizonte LOLA</h2>
+            <span class="m-badge" id="panorama-site-label">—</span>
+          </div>
+          <button class="btn-modal-close" id="close-panorama-modal" type="button" aria-label="Cerrar panorama">&times;</button>
+        </div>
+        <div class="modal-body panorama-body">
+          <div class="chart-toolbar panorama-toolbar">
+            <div class="legend">
+              <span class="legend-item"><span class="legend-line" style="border-top-color: #f5b942"></span> Sol</span>
+              <span class="legend-item"><span class="legend-line" style="border-top-color: #5aa9e6"></span> Tierra</span>
+              <span class="legend-item"><span class="legend-swatch" style="background: #b08a5a"></span> Horizonte LOLA</span>
+              <span class="legend-item"><span class="legend-dash" style="border-top-color: #f5b942"></span> Trayectoria solar 24 h</span>
+              <span class="legend-item"><span class="legend-dash" style="border-top-color: #5aa9e6"></span> Bucle terrestre 28 d</span>
+            </div>
+            <div class="row panorama-controls">
+              <div class="segmented" role="group" aria-label="Rango de elevación">
+                <button id="panorama-zoom-btn" type="button" aria-pressed="true">Horizonte</button>
+                <button id="panorama-full-btn" type="button" aria-pressed="false">Cielo completo</button>
+              </div>
+              <button id="panorama-disk-btn" class="btn-outline" type="button" aria-pressed="false">Discos a escala real</button>
+            </div>
+          </div>
+          <div class="panorama-canvas-frame">
+            <canvas id="panorama-canvas" role="img" aria-label="Panorama 2.5D del horizonte LOLA del sitio seleccionado"></canvas>
+          </div>
+          <div class="panorama-readout" role="group" aria-label="Lectura del panorama">
+            <span class="sky-chip"><span class="label">Sol az/el</span><span class="value" id="panorama-sun">—</span></span>
+            <span class="sky-chip"><span class="label">Tierra az/el</span><span class="value" id="panorama-earth">—</span></span>
+            <span class="sky-chip"><span class="label">Horizonte Sol</span><span class="value" id="panorama-sun-horizon">—</span></span>
+            <span class="sky-chip"><span class="label">Horizonte Tierra</span><span class="value" id="panorama-earth-horizon">—</span></span>
+            <span class="sky-chip"><span class="label">Mástil</span><span class="value" id="panorama-mast">—</span></span>
+          </div>
+          <p class="data-note panorama-note">
+            El terreno se dibuja como un perfil 2.5D de 720 azimuts a partir del DEM LOLA; la altura del mástil cambia el
+            horizonte. Los discos se agrandan para legibilidad salvo que actives la escala angular real.
+          </p>
         </div>
       </div>
     </div>

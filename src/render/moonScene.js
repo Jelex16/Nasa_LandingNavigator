@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { LunarTextureManager, LUNAR_LAYERS } from './lunarTextureManager.js';
+import { LunarTextureManager } from './lunarTextureManager.js';
 
 /**
  * Creates a procedural Earth sphere texture with oceans, continents, and atmosphere.
@@ -71,7 +71,7 @@ export class MoonScene {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -81,7 +81,8 @@ export class MoonScene {
     this.controls.maxDistance = 70;
 
     this.moonRadius = 10;
-    this.displacementScale = 0.35; // Default 3D relief scale
+    // Matches the active 2.5x control: 0.22 * 2.5.
+    this.displacementScale = 0.55;
     this.displacementEnabled = true;
     this.currentLayerId = 'lroc';
     this.textureManager = new LunarTextureManager();
@@ -177,10 +178,9 @@ export class MoonScene {
     this.moonMesh.receiveShadow = true;
     this.moonMesh.castShadow = true;
 
-    // Rotate mesh around Y by -90° so NASA Equirectangular projection coordinates
-    // (u=0.5 at prime meridian 0° lon) align precisely with Selenographic +X standard
-    this.moonMesh.rotation.y = -Math.PI / 2;
-
+    // Three.js SphereGeometry maps texture u=0.5 to +X, the same convention as
+    // latLonToVector3's lon=0. Rotating the mesh here would shift the photo
+    // layer 90° away from the landing-site pins.
     this.scene.add(this.moonMesh);
 
     // Polar axis ring indicator (Subtle dashed line)
@@ -425,7 +425,7 @@ export class MoonScene {
   }
 
   /**
-   * Updates marker color based on Neural Network classification score.
+   * Updates marker color based on the transparent decision score.
    */
   updateSiteStatus(siteId, scorePercent) {
     const group = this.siteMarkers.get(siteId);
