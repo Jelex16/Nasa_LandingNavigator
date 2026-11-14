@@ -45,6 +45,9 @@
         </div>
 
         <div class="action-buttons-group">
+          <button class="nav-action-btn nav-btn-highlight" id="open-trek-modal-btn" title="Explorador científico NASA Moon Trek y LROC QuickMap">
+            🗺️ Moon Trek & QuickMap
+          </button>
           <button class="nav-action-btn" id="open-comparison-btn" title="Comparar todos los sitios de alunizaje">
             📊 Comparar Sitios
           </button>
@@ -55,20 +58,49 @@
       </div>
     </header>
 
-    <!-- Floating 3D Camera Shortcuts (Floating Top Center) -->
-    <div class="floating-camera-bar">
-      <button class="cam-btn" id="hud-view-south-pole" title="Vista cenital del Polo Sur lunar (-85° a -90°)">
-        <span class="cam-icon">🌐</span> Polo Sur (-90°)
-      </button>
-      <button class="cam-btn active" id="hud-view-site" title="Enfocar el sitio de aterrizaje seleccionado">
-        <span class="cam-icon">🎯</span> Enfocar Sitio
-      </button>
-      <button class="cam-btn" id="hud-view-global" title="Vista órbita completa de la Luna">
-        <span class="cam-icon">🌕</span> Órbita Global
-      </button>
-      <button class="cam-btn cam-btn-accent" id="scan-region-btn" title="Escanear cuadrícula de seguridad con la Red Neuronal">
-        <span class="cam-icon">🧠</span> Escanear con IA
-      </button>
+    <!-- Floating 3D Camera Shortcuts & Real Lunar Model Controls -->
+    <div class="floating-controls-wrapper">
+      <div class="floating-camera-bar">
+        <button class="cam-btn" id="hud-view-south-pole" title="Vista cenital del Polo Sur lunar (-85° a -90°)">
+          <span class="cam-icon">🌐</span> Polo Sur (-90°)
+        </button>
+        <button class="cam-btn active" id="hud-view-site" title="Enfocar el sitio de aterrizaje seleccionado">
+          <span class="cam-icon">🎯</span> Enfocar Sitio
+        </button>
+        <button class="cam-btn" id="hud-view-global" title="Vista órbita completa de la Luna">
+          <span class="cam-icon">🌕</span> Órbita Global
+        </button>
+        <button class="cam-btn cam-btn-accent" id="scan-region-btn" title="Escanear cuadrícula de seguridad con la Red Neuronal">
+          <span class="cam-icon">🧠</span> Escanear con IA
+        </button>
+      </div>
+
+      <!-- Real Lunar Model Layer & 3D Topography Controls -->
+      <div class="floating-layer-bar">
+        <div class="layer-bar-group">
+          <span class="bar-label">MODELO REAL:</span>
+          <button class="layer-btn active" data-layer="lroc" title="Fotografía real LROC WAC (NASA LRO 100m/px)">
+            <span class="l-icon">🛰️</span> LROC Foto Real
+          </button>
+          <button class="layer-btn" data-layer="lola_color" title="Topografía y elevación en color LOLA DEM (USGS/NASA)">
+            <span class="l-icon">🌈</span> LOLA Topografía
+          </button>
+          <button class="layer-btn" data-layer="lola_hillshade" title="Relieve y sombras de cráteres LOLA (128ppd)">
+            <span class="l-icon">⛰️</span> LOLA Relieve
+          </button>
+          <button class="layer-btn" data-layer="lola_slope" title="Mapa de pendientes y riesgos de alunizaje LOLA">
+            <span class="l-icon">⚠️</span> LOLA Pendiente
+          </button>
+        </div>
+
+        <div class="relief-bar-group">
+          <span class="bar-label">RELIEVE 3D:</span>
+          <button class="relief-btn" data-relief="1" title="Relieve topográfico escala real 1:1">1x</button>
+          <button class="relief-btn active" data-relief="2.5" title="Relieve científico equilibrado (2.5x)">2.5x</button>
+          <button class="relief-btn" data-relief="5" title="Relieve exagerado para resaltar cráteres y montañas polares (5x)">5x</button>
+          <button class="relief-btn" data-relief="0" title="Desactivar desplazamiento 3D (Esfera suave)">Plano</button>
+        </div>
+      </div>
     </div>
 
     <!-- UI Overlay Grid (Floating Glass Panels) -->
@@ -123,6 +155,25 @@
         <p class="site-desc-text" id="site-description">
           Cargando parámetros topográficos y astronómicos...
         </p>
+
+        <!-- NASA Orbital Analysis Quick Bar (LROC QuickMap & NASA Moon Trek) -->
+        <div class="nasa-tools-card">
+          <div class="nasa-tools-title">
+            <span class="nt-tag">ANÁLISIS ORBITAL NASA</span>
+            <span class="nt-sub">LROC &amp; MOON TREK</span>
+          </div>
+          <div class="nasa-tools-actions">
+            <a id="btn-open-quickmap" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer" class="btn-nasa-tool" title="Inspeccionar en LROC QuickMap (Resolución hasta 0.5m/px con LROC NAC)">
+              <span class="tool-icon">🔭</span> LROC QuickMap ↗
+            </a>
+            <a id="btn-open-moontrek" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer" class="btn-nasa-tool" title="Explorar en NASA Solar System Treks (Moon Trek 3D GIS)">
+              <span class="tool-icon">🌐</span> NASA Moon Trek ↗
+            </a>
+            <button id="btn-open-dossier" class="btn-nasa-tool btn-nasa-dossier" title="Ver dossier científico y capas WMTS oficiales de la NASA">
+              <span class="tool-icon">📋</span> Capas &amp; DEM
+            </button>
+          </div>
+        </div>
 
         <!-- MAIN HERO: Neural Network Safety Score Gauge -->
         <div class="neural-score-card">
@@ -392,6 +443,144 @@
             <p class="accuracy-note">
               ✓ El motor astronómico integrado calcula con precisión submétrica la libración física y óptica de la Luna, permitiendo simulación en tiempo real fluida incluso sin conexión a internet.
             </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: NASA Moon Trek & LROC QuickMap Scientific Explorer -->
+    <div class="modal-backdrop hidden" id="trek-modal">
+      <div class="modal-window modal-wide">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2>🗺️ Explorador Científico: NASA Moon Trek &amp; LROC QuickMap</h2>
+            <span class="m-badge">Datos Oficiales NASA LRO / ASU</span>
+          </div>
+          <button class="btn-modal-close" id="close-trek-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-intro">
+            Integración directa con los sistemas cartográficos y topográficos oficiales de la NASA. El modelo 3D de la Luna procesa datos del orbitador <strong>LRO</strong>: fotografía real de la cámara <strong>LROC WAC</strong> (albedo óptico 100m/px) y el altímetro láser <strong>LOLA</strong> (Digital Elevation Models con resolución de hasta 5 metros por píxel en el Polo Sur).
+          </p>
+
+          <!-- Current Site Dossier Section -->
+          <div class="trek-site-card">
+            <div class="trek-site-header">
+              <div>
+                <span class="trek-sub-tag">SITIO SELECCIONADO EN MISIÓN</span>
+                <h3 id="trek-modal-site-name">Malapert Mountain (Massif)</h3>
+                <span id="trek-modal-program" class="trek-prog-pill">Artemis III / CLPS</span>
+              </div>
+              <div class="trek-direct-links">
+                <a id="trek-modal-quickmap-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-quickmap" title="Abrir LROC QuickMap en una nueva pestaña centrado en este sitio">
+                  🔭 Abrir en LROC QuickMap ↗
+                </a>
+                <a id="trek-modal-moontrek-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-moontrek" title="Abrir NASA Solar System Treks (Moon Trek 3D GIS)">
+                  🌐 Explorar en NASA Moon Trek ↗
+                </a>
+              </div>
+            </div>
+
+            <div class="trek-coords-grid">
+              <div class="trek-cell">
+                <span class="tc-label">Latitud / Longitud</span>
+                <strong id="trek-modal-coords">-85.90°S, 357.00°E</strong>
+              </div>
+              <div class="trek-cell">
+                <span class="tc-label">Elevación Datum LOLA</span>
+                <strong id="trek-modal-elev">+5.0 km</strong>
+              </div>
+              <div class="trek-cell">
+                <span class="tc-label">Pendiente Máxima Local</span>
+                <strong id="trek-modal-slope">8.5°</strong>
+              </div>
+              <div class="trek-cell">
+                <span class="tc-label">Proximidad a Trampa Fría</span>
+                <strong id="trek-modal-ice">12.4 km (Haworth/Shoemaker)</strong>
+              </div>
+            </div>
+
+            <p class="trek-geology-text" id="trek-modal-geology">
+              Macizo anortosítico elevado con cumbres de alta insolación y visibilidad directa ininterrumpida hacia las estaciones terrestres de Deep Space Network (DSN).
+            </p>
+          </div>
+
+          <!-- QuickMap & Moon Trek Comparative Section -->
+          <div class="systems-grid">
+            <!-- LROC QuickMap Card -->
+            <div class="system-card">
+              <div class="system-header">
+                <span class="sys-badge qm-badge">ASU / NASA LROC</span>
+                <h4>LROC QuickMap (Arizona State University)</h4>
+              </div>
+              <p class="sys-desc">
+                Desarrollado por el equipo de cámaras <strong>LROC</strong>. Permite inspeccionar mosaicos globales y miles de imágenes de ángulo estrecho (NAC) con resolución de hasta <strong>0.5 metros por píxel</strong>, permitiendo identificar rocas, cráteres secundarios y las huellas de aterrizadores históricos.
+              </p>
+              <ul class="sys-features">
+                <li>✓ Proyección Polar Estereográfica calibrada para el Polo Sur (proj=10).</li>
+                <li>✓ Mosaicos morfológicos WAC + servidor cartográfico Lunaserv WMS.</li>
+                <li>✓ Herramientas de perfil de elevación y cálculo de rugosidad.</li>
+              </ul>
+            </div>
+
+            <!-- NASA Moon Trek Card -->
+            <div class="system-card">
+              <div class="system-header">
+                <span class="sys-badge mt-badge">NASA JPL SOLAR SYSTEM TREKS</span>
+                <h4>NASA Moon Trek (Solar System Treks)</h4>
+              </div>
+              <p class="sys-desc">
+                Portal GIS oficial de la NASA y JPL para planificación de misiones Artemis y CLPS. Proporciona capas 3D y servicios estándar OGC RESTful Web Map Tile Service (WMTS) para elevación, pendientes, mineralogía y temperatura radiométrica Diviner.
+              </p>
+              <ul class="sys-features">
+                <li>✓ Capas WMTS globales con CORS habilitado para visualizadores 3D WebGL.</li>
+                <li>✓ DEM LOLA de 5 metros por píxel para regiones polares de Artemis.</li>
+                <li>✓ Modelos de insolación a lo largo de ciclos sinódicos de 29.5 días.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Active NASA Datasets Table -->
+          <div class="datasets-section">
+            <h4 class="sec-title">📦 Conjuntos de Datos Activos en el Navegador 3D:</h4>
+            <div class="table-responsive">
+              <table class="nasa-datasets-table">
+                <thead>
+                  <tr>
+                    <th>Capa</th>
+                    <th>Instrumento / Misión</th>
+                    <th>Resolución</th>
+                    <th>Uso en la Simulación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>LROC WAC Mosaic v02</strong></td>
+                    <td>Lunar Reconnaissance Orbiter (LROC)</td>
+                    <td>100 m/px (303 ppd)</td>
+                    <td>Fotografía real, textura de albedo visual y mares basálticos</td>
+                  </tr>
+                  <tr>
+                    <td><strong>LOLA Global DEM</strong></td>
+                    <td>Lunar Orbiter Laser Altimeter (LOLA)</td>
+                    <td>128 ppd (~237 m)</td>
+                    <td>Desplazamiento 3D de vértices, cráteres de impacto y macizos</td>
+                  </tr>
+                  <tr>
+                    <td><strong>LOLA Color Hillshade</strong></td>
+                    <td>NASA GSFC / USGS Astrogeology</td>
+                    <td>128 ppd</td>
+                    <td>Topografía en rampa de color (azul=cuencas, rojo=cumbres)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>LOLA Slope Hazard Map</strong></td>
+                    <td>NASA Moon Trek / LOLA Team</td>
+                    <td>16 ppd</td>
+                    <td>Evaluación de estabilidad geotécnica y riesgo de vuelco de la nave</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

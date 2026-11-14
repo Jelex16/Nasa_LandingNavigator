@@ -234,22 +234,99 @@ html, body {
   color: #ffffff;
 }
 
-/* FLOATING 3D CAMERA SHORTCUTS (Top Center) */
-.floating-camera-bar {
+/* FLOATING 3D CONTROLS (Top Center: Cameras & Real Lunar Layers) */
+.floating-controls-wrapper {
   position: fixed;
-  top: 70px;
+  top: 68px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.floating-camera-bar {
   display: flex;
   align-items: center;
   gap: 6px;
   background: rgba(6, 12, 26, 0.78);
   backdrop-filter: blur(16px);
-  padding: 5px 8px;
+  padding: 4px 8px;
   border-radius: 30px;
   border: 1px solid var(--border-glass);
-  z-index: 30;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.floating-layer-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(6, 12, 26, 0.84);
+  backdrop-filter: blur(18px);
+  padding: 4px 10px;
+  border-radius: 30px;
+  border: 1px solid var(--border-glass-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+}
+
+.layer-bar-group, .relief-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.relief-bar-group {
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  padding-left: 8px;
+}
+
+.bar-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-cyan);
+  margin-right: 2px;
+  letter-spacing: 0.5px;
+}
+
+.layer-btn, .relief-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.layer-btn:hover, .relief-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.layer-btn.active {
+  background: rgba(0, 229, 255, 0.18);
+  border-color: var(--color-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+.relief-btn.active {
+  background: rgba(255, 202, 40, 0.2);
+  border-color: var(--color-gold);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 202, 40, 0.25);
 }
 
 .cam-btn {
@@ -1320,6 +1397,318 @@ html, body {
   color: #040810;
 }
 
+/* Nav button highlight for Moon Trek */
+.nav-btn-highlight {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(168, 85, 247, 0.22)) !important;
+  border-color: var(--color-cyan) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+}
+
+.nav-btn-highlight:hover {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.35), rgba(168, 85, 247, 0.35)) !important;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+}
+
+/* NASA Scientific Tools Card in Left Panel */
+.nasa-tools-card {
+  margin: 10px 0 12px 0;
+  padding: 10px 12px;
+  background: rgba(14, 25, 48, 0.65);
+  border: 1px solid var(--border-glass-strong);
+  border-radius: 8px;
+}
+
+.nasa-tools-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nt-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-cyan);
+  letter-spacing: 0.5px;
+}
+
+.nt-sub {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.nasa-tools-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.btn-nasa-tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(6, 12, 26, 0.7);
+  border: 1px solid var(--border-glass);
+  border-radius: 6px;
+  padding: 6px 4px;
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-nasa-tool:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: var(--color-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.btn-nasa-dossier {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.btn-nasa-dossier:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: var(--color-purple);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+}
+
+/* NASA Moon Trek & QuickMap Modal Styles */
+.trek-site-card {
+  background: rgba(10, 18, 38, 0.7);
+  border: 1px solid var(--border-glass-strong);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.trek-site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.trek-sub-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-cyan);
+  letter-spacing: 0.8px;
+}
+
+.trek-site-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 2px 0 6px 0;
+}
+
+.trek-prog-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid var(--border-glass);
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-cyan);
+}
+
+.trek-direct-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-trek-action {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-family: var(--font-main);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-quickmap {
+  background: rgba(0, 229, 255, 0.2);
+  border: 1px solid var(--color-cyan);
+  color: #ffffff;
+}
+
+.btn-quickmap:hover {
+  background: var(--color-cyan);
+  color: #040810;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.5);
+}
+
+.btn-moontrek {
+  background: rgba(255, 202, 40, 0.2);
+  border: 1px solid var(--color-gold);
+  color: #ffffff;
+}
+
+.btn-moontrek:hover {
+  background: var(--color-gold);
+  color: #040810;
+  box-shadow: 0 0 16px rgba(255, 202, 40, 0.5);
+}
+
+.trek-coords-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background: rgba(6, 12, 26, 0.6);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.trek-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.tc-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 2px;
+}
+
+.trek-cell strong {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.trek-geology-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Systems comparative grid */
+.systems-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.system-card {
+  background: rgba(14, 25, 48, 0.5);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.system-header {
+  margin-bottom: 8px;
+}
+
+.sys-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.qm-badge {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--color-cyan);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.mt-badge {
+  background: rgba(255, 202, 40, 0.15);
+  color: var(--color-gold);
+  border: 1px solid rgba(255, 202, 40, 0.3);
+}
+
+.system-card h4 {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.sys-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.sys-features {
+  list-style: none;
+  font-size: 11px;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Datasets Table */
+.datasets-section {
+  background: rgba(10, 18, 38, 0.6);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.sec-title {
+  font-size: 13px;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.nasa-datasets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.nasa-datasets-table th, .nasa-datasets-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nasa-datasets-table th {
+  color: var(--color-cyan);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.nasa-datasets-table td {
+  color: var(--text-secondary);
+}
+
+.nasa-datasets-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1180px) {
   .site-quick-pills {
@@ -1335,5 +1724,19 @@ html, body {
   .glass-panel {
     width: 100%;
     margin-bottom: 12px;
+  }
+  .floating-controls-wrapper {
+    top: 62px;
+    width: 95%;
+  }
+  .floating-layer-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .systems-grid {
+    grid-template-columns: 1fr;
+  }
+  .trek-coords-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }

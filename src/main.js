@@ -4,7 +4,7 @@ import { SkyDomeRadar } from './ui/skyDomeRadar.js';
 import { TimelineChart } from './ui/timelineChart.js';
 import { NetworkVisualizer } from './ui/networkVisualizer.js';
 import { renderComparisonTable } from './ui/comparisonView.js';
-import { LANDING_SITES, getCustomSite } from './topography/lunarData.js';
+import { LANDING_SITES, getCustomSite, getQuickMapUrl, getMoonTrekUrl } from './topography/lunarData.js';
 import {
   calculateLunarEphemeris,
   calculateEphemerisSeries,
@@ -174,6 +174,18 @@ function setLandingSite(site) {
 
   hudSiteName.textContent = site.name;
   hudCoords.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
+
+  // Update LROC QuickMap and NASA Moon Trek URLs for active site
+  const qmUrl = getQuickMapUrl(site);
+  const mtUrl = getMoonTrekUrl(site);
+
+  const btnQuickmap = document.getElementById('btn-open-quickmap');
+  if (btnQuickmap) btnQuickmap.href = qmUrl;
+
+  const btnMoontrek = document.getElementById('btn-open-moontrek');
+  if (btnMoontrek) btnMoontrek.href = mtUrl;
+
+  updateTrekModalContent(site, qmUrl, mtUrl);
 
   // Sync Pill selection state
   document.querySelectorAll('#site-pills-bar .pill-btn').forEach((p) => {
@@ -560,7 +572,64 @@ function initCameraHUDControls() {
 }
 
 /**
- * Initializes Modals (Comparison, JPL Horizons, Neural Network Visualizer)
+ * Lunar Model Layer & 3D Topography Relief Controls
+ */
+function initModelLayerControls() {
+  const layerBtns = document.querySelectorAll('.layer-btn');
+  layerBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const layerId = e.currentTarget.getAttribute('data-layer');
+      layerBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      moonScene.setLayer(layerId);
+    });
+  });
+
+  const reliefBtns = document.querySelectorAll('.relief-btn');
+  reliefBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const reliefVal = parseFloat(e.currentTarget.getAttribute('data-relief'));
+      reliefBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      moonScene.setElevationExaggeration(reliefVal);
+    });
+  });
+}
+
+/**
+ * Updates the NASA Moon Trek & LROC QuickMap scientific dossier modal.
+ */
+function updateTrekModalContent(site, qmUrl, mtUrl) {
+  const siteNameEl = document.getElementById('trek-modal-site-name');
+  if (siteNameEl) siteNameEl.textContent = site.name;
+
+  const progEl = document.getElementById('trek-modal-program');
+  if (progEl) progEl.textContent = site.program;
+
+  const qmBtn = document.getElementById('trek-modal-quickmap-btn');
+  if (qmBtn) qmBtn.href = qmUrl;
+
+  const mtBtn = document.getElementById('trek-modal-moontrek-btn');
+  if (mtBtn) mtBtn.href = mtUrl;
+
+  const coordsEl = document.getElementById('trek-modal-coords');
+  if (coordsEl) coordsEl.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
+
+  const elevEl = document.getElementById('trek-modal-elev');
+  if (elevEl) elevEl.textContent = `${site.elevationKm > 0 ? '+' : ''}${site.elevationKm.toFixed(1)} km`;
+
+  const slopeEl = document.getElementById('trek-modal-slope');
+  if (slopeEl) slopeEl.textContent = `${site.maxSlopeDeg}°`;
+
+  const iceEl = document.getElementById('trek-modal-ice');
+  if (iceEl) iceEl.textContent = `${site.distToIceTrapKm.toFixed(1)} km`;
+
+  const geoEl = document.getElementById('trek-modal-geology');
+  if (geoEl) geoEl.textContent = site.geology || site.description;
+}
+
+/**
+ * Initializes Modals (Comparison, JPL Horizons, Neural Network Visualizer, Moon Trek & QuickMap)
  */
 function initModals() {
   // Multi-Site Comparison Modal
@@ -668,6 +737,32 @@ function initModals() {
     nnModal.classList.add('hidden');
   });
 
+  // NASA Moon Trek & LROC QuickMap Modal
+  const trekModal = document.getElementById('trek-modal');
+  const openTrekBtn = document.getElementById('open-trek-modal-btn');
+  const closeTrekBtn = document.getElementById('close-trek-modal');
+  const btnOpenDossier = document.getElementById('btn-open-dossier');
+
+  if (openTrekBtn && trekModal) {
+    openTrekBtn.addEventListener('click', () => {
+      updateTrekModalContent(state.currentSite, getQuickMapUrl(state.currentSite), getMoonTrekUrl(state.currentSite));
+      trekModal.classList.remove('hidden');
+    });
+  }
+
+  if (btnOpenDossier && trekModal) {
+    btnOpenDossier.addEventListener('click', () => {
+      updateTrekModalContent(state.currentSite, getQuickMapUrl(state.currentSite), getMoonTrekUrl(state.currentSite));
+      trekModal.classList.remove('hidden');
+    });
+  }
+
+  if (closeTrekBtn && trekModal) {
+    closeTrekBtn.addEventListener('click', () => {
+      trekModal.classList.add('hidden');
+    });
+  }
+
   // Region Scan Heatmap Button
   document.getElementById('scan-region-btn').addEventListener('click', () => {
     const site = state.currentSite;
@@ -699,6 +794,7 @@ function bootstrap() {
   initSiteSelector();
   initTimeControls();
   initCameraHUDControls();
+  initModelLayerControls();
   initModals();
 
   // Set default initial site and run first evaluation
