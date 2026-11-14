@@ -4,7 +4,13 @@ import { SkyDomeRadar } from './ui/skyDomeRadar.js';
 import { TimelineChart } from './ui/timelineChart.js';
 import { Panorama25D } from './ui/panorama25d.js';
 import { renderComparisonTable } from './ui/comparisonView.js';
-import { loadLandingSites, setMastHeight, getCustomSite } from './topography/lunarData.js';
+import {
+  loadLandingSites,
+  setMastHeight,
+  getCustomSite,
+  getQuickMapUrl,
+  getMoonTrekUrl
+} from './topography/lunarData.js';
 import { calculateLunarEphemeris } from './ephemeris/astronomy.js';
 import {
   loadEphemeris,
@@ -241,10 +247,64 @@ function updateSitePanel(site) {
         ? 'LOLA real'
         : 'Aproximado';
   $('radar-source-badge').textContent = radarLabel;
+
+  const quickMapUrl = getQuickMapUrl(site);
+  const moonTrekUrl = getMoonTrekUrl(site);
+  const quickMapLink = $('btn-open-quickmap');
+  const moonTrekLink = $('btn-open-moontrek');
+  if (quickMapLink) quickMapLink.href = quickMapUrl;
+  if (moonTrekLink) moonTrekLink.href = moonTrekUrl;
+  updateTrekModalContent(site, quickMapUrl, moonTrekUrl);
+
   siteSelect.value = site.id;
   mastSelect.value = String(state.mastHeightM);
   panelSelect.value = state.panelType;
   profileSelect.value = state.profileId;
+}
+
+function updateTrekModalContent(site, quickMapUrl, moonTrekUrl) {
+  if (!site) return;
+  const setText = (id, value) => {
+    const element = $(id);
+    if (element) element.textContent = value;
+  };
+  setText('trek-modal-site-name', site.name);
+  setText('trek-modal-program', site.program);
+  setText(
+    'trek-modal-coords',
+    `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`
+  );
+  setText('trek-modal-elev', `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`);
+  setText('trek-modal-slope', `${Number(site.maxSlopeDeg).toFixed(1)}°`);
+  setText('trek-modal-ice', `${site.distToIceTrapKm.toFixed(1)} km`);
+  setText('trek-modal-geology', site.geology ?? site.description);
+  const quickMapButton = $('trek-modal-quickmap-btn');
+  const moonTrekButton = $('trek-modal-moontrek-btn');
+  if (quickMapButton) quickMapButton.href = quickMapUrl;
+  if (moonTrekButton) moonTrekButton.href = moonTrekUrl;
+}
+
+function initModelLayerControls() {
+  const layerButtons = document.querySelectorAll('.layer-btn');
+  layerButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      layerButtons.forEach((other) => other.classList.remove('active'));
+      button.classList.add('active');
+      moonScene.setLayer(button.dataset.layer);
+    });
+  });
+
+  const reliefButtons = document.querySelectorAll('.relief-btn');
+  reliefButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      reliefButtons.forEach((other) => other.classList.remove('active'));
+      button.classList.add('active');
+      moonScene.setElevationExaggeration(Number.parseFloat(button.dataset.relief));
+      if (state.currentSite && state.analysis) {
+        moonScene.updateSiteStatus(state.currentSite.id, state.analysis.scorePercent);
+      }
+    });
+  });
 }
 
 function updateDecisionUI(analysis) {
@@ -771,7 +831,22 @@ function initModals() {
   });
   closeNnModal.addEventListener('click', () => nnModal.classList.add('hidden'));
 
-  for (const modal of [comparisonModal, horizonsModal, nnModal, panoramaModal]) {
+  const trekModal = $('trek-modal');
+  const closeTrekModal = $('close-trek-modal');
+  const openTrek = () => {
+    if (!state.currentSite || !trekModal) return;
+    updateTrekModalContent(
+      state.currentSite,
+      getQuickMapUrl(state.currentSite),
+      getMoonTrekUrl(state.currentSite)
+    );
+    trekModal.classList.remove('hidden');
+  };
+  $('btn-open-dossier')?.addEventListener('click', openTrek);
+  $('open-trek-modal-btn')?.addEventListener('click', openTrek);
+  closeTrekModal?.addEventListener('click', () => trekModal?.classList.add('hidden'));
+
+  for (const modal of [comparisonModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
     modal.addEventListener('click', (event) => {
       if (event.target === modal) modal.classList.add('hidden');
     });
@@ -787,6 +862,7 @@ async function bootstrap() {
     initConfigControls();
     initTimeControls();
     initCameraHUDControls();
+    initModelLayerControls();
     initModals();
     initPanorama();
     await ensureEphemeris(state.currentSite);

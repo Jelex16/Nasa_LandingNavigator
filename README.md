@@ -27,6 +27,9 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
   2026-01-01 → 2029-02-01, con interpolación cúbica de Hermite en el cliente.
 - **Panorama 2.5D** de 360°: silueta LOLA, relieve sombreado, trayectoria solar de 24 h, bucle de
   libración terrestre de 28 días, discos finitos y etiquetas “bajo el horizonte”.
+- **Globo 3D con capas LROC/LOLA** (vistas previas 2k/1k), control de relieve 1x/2.5x/5x/plano y
+  enlaces centrados a **LROC QuickMap** y **NASA Moon Trek**. Las texturas del globo son visuales:
+  el score usa los horizontes LOLA de `public/data/horizon`, no las texturas.
 - **Radar polar** de horizonte, Sol y Tierra; curvas de 28 días con ventanas solares y DTE.
 - **Score multicriterio transparente** (energía, eclipse continuo, DTE y corte de comunicaciones)
   con pesos y umbrales visibles, cuatro perfiles de misión y un modal de modelo auditable.
@@ -66,6 +69,8 @@ recorrido principal: las efemérides y los horizontes están precalculados y ver
 | NASA PGDA LOLA 5 m/px landing-site DEMs | Campo cercano de 6 sitios | https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/ |
 | NASA PGDA LOLA 80S 80 m/px regional DEM | Campo lejano y Nobile/Haworth | https://pgda.gsfc.nasa.gov/products/90 |
 | NASA/JPL Horizons (DE441) | Az/el/distancias aparentes Sol/Tierra | https://ssd-api.jpl.nasa.gov/doc/horizons.html |
+| NASA LRO / ASU LROC QuickMap | Enlaces y texturas preview LROC WAC | https://quickmap.lroc.asu.edu/ |
+| NASA Solar System Treks (Moon Trek) | Enlaces y capas LOLA | https://trek.nasa.gov/moon/ |
 | Barker et al. (2021) | DEMs LOLA de sitios de aterrizaje | https://doi.org/10.1016/j.pss.2020.105119 |
 | Mazarico et al. (2011) | Iluminación polar con LOLA | https://doi.org/10.1016/j.icarus.2010.10.030 |
 
@@ -161,6 +166,8 @@ El pipeline completo de LOLA/Horizons que generó los datos base está en el pro
   constelaciones de relé ni incertidumbre Monte Carlo.
 - El horizonte es un perfil 1D por azimut; el panorama 2.5D es una representación sombreada de ese
   perfil, no un mesh 3D.
+- Las texturas del globo 3D son **vistas previas** (2048×1024 y 1024×512); no son el DEM LOLA de
+  5 m/px/80 m/px que alimenta el análisis y no se usan para calcular el score.
 - Nobile/Haworth usan 80 m/px: el relieve sub-kilométrico no está resuelto y se etiqueta como
   regional.
 - La coordenada de Haworth cae dentro de la cuenca del cráter (el DEM muestra las paredes dominando
@@ -171,7 +178,8 @@ El pipeline completo de LOLA/Horizons que generó los datos base está en el pro
 
 ## Créditos y uso de IA
 
-Datos: NASA PGDA/LOLA y NASA/JPL Horizons. Pipeline de datos base: SUNDIAL contributors.
+Datos: NASA PGDA/LOLA, NASA/JPL Horizons, NASA LRO/LROC (ASU QuickMap) y NASA Solar System Treks.
+Pipeline de datos base: SUNDIAL contributors. Texturas LROC/LOLA del globo: previews de NASA/ASU.
 Código y adaptación: equipo de este repositorio. Desarrollo asistido por IA; las cifras y los datos
 provienen del pipeline determinista y de las fuentes citadas, no de texto generado.
 

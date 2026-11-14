@@ -240,6 +240,31 @@ export function setMastHeight(sites, heightM) {
   for (const site of sites) site.mastHeightM = heightM;
 }
 
+/**
+ * Deep link to ASU / NASA LROC QuickMap for the selected site.
+ * South-polar sites use QuickMap's polar stereographic projection (proj=10).
+ */
+export function getQuickMapUrl(site) {
+  if (site.lat < -75) {
+    const radiusM = 1_737_400;
+    const colatRad = ((90 - Math.abs(site.lat)) / 2) * (Math.PI / 180);
+    const rho = 2 * radiusM * Math.tan(colatRad);
+    const lonRad = (site.lon * Math.PI) / 180;
+    const cx = rho * Math.sin(lonRad);
+    const cy = -rho * Math.cos(lonRad);
+    const halfWidth = 35_000;
+    const extent = `${(cx - halfWidth).toFixed(1)},${(cy - halfWidth).toFixed(1)},${(cx + halfWidth).toFixed(1)},${(cy + halfWidth).toFixed(1)}`;
+    return `https://quickmap.lroc.asu.edu/layers?prjExtent=${extent}&proj=10`;
+  }
+  const halfDeg = 1;
+  return `https://quickmap.lroc.asu.edu/layers?extent=${(site.lon - halfDeg).toFixed(3)},${(site.lat - halfDeg).toFixed(3)},${(site.lon + halfDeg).toFixed(3)},${(site.lat + halfDeg).toFixed(3)}`;
+}
+
+/** Deep link to NASA Solar System Treks (Moon Trek) centred on the site. */
+export function getMoonTrekUrl(site) {
+  return `https://trek.nasa.gov/moon/#v=0.1&x=${site.lon.toFixed(4)}&y=${site.lat.toFixed(4)}&z=6&p=urn:ogc:def:crs:EPSG::104903`;
+}
+
 export function getCustomSite(lat, lon, name = 'Sitio personalizado') {
   const normLon = ((lon % 360) + 360) % 360;
   const isSouthPole = lat < -75;

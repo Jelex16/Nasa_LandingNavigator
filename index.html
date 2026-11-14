@@ -116,6 +116,31 @@
 
         <p class="site-desc-text" id="site-description">Cargando topografía LOLA y efemérides…</p>
 
+        <div class="model3d-card" id="model3d-card">
+          <div class="model3d-header">
+            <span class="model3d-eyebrow">MODELO 3D · LRO / LOLA</span>
+            <span class="model3d-note">texturas preview</span>
+          </div>
+          <div class="layer-buttons" role="group" aria-label="Capa del globo lunar">
+            <button class="layer-btn active" type="button" data-layer="lroc" title="Fotografía LROC WAC (vista previa 2k)">LROC</button>
+            <button class="layer-btn" type="button" data-layer="lola_color" title="Topografía LOLA en color (vista previa)">Topo</button>
+            <button class="layer-btn" type="button" data-layer="lola_hillshade" title="Relieve sombreado LOLA (vista previa)">Relieve</button>
+            <button class="layer-btn" type="button" data-layer="lola_slope" title="Pendientes LOLA (vista previa)">Pendiente</button>
+          </div>
+          <div class="model3d-relief-row">
+            <span class="model3d-label">Relieve</span>
+            <button class="relief-btn" type="button" data-relief="1" title="Escala 1:1">1x</button>
+            <button class="relief-btn active" type="button" data-relief="2.5" title="Exageración 2.5x">2.5x</button>
+            <button class="relief-btn" type="button" data-relief="5" title="Exageración 5x">5x</button>
+            <button class="relief-btn" type="button" data-relief="0" title="Desactivar desplazamiento">Plano</button>
+          </div>
+          <div class="nasa-links-row">
+            <a id="btn-open-quickmap" class="btn-nasa-tool" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer">LROC QuickMap ↗</a>
+            <a id="btn-open-moontrek" class="btn-nasa-tool" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer">Moon Trek ↗</a>
+            <button id="btn-open-dossier" class="btn-nasa-tool" type="button">Capas &amp; DEM</button>
+          </div>
+        </div>
+
         <div class="mission-config-row">
           <div class="config-block">
             <label for="mast-select">Mástil</label>
@@ -420,6 +445,132 @@
               Los archivos derivados y sus checksums están en
               <a href="/data/manifest.json" target="_blank" rel="noreferrer">/data/manifest.json</a>.
               Los DEM originales no se distribuyen en este repositorio; los horizontes derivados sí.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="trek-modal">
+      <div class="modal-window modal-wide modal-trek">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2>NASA Moon Trek &amp; LROC QuickMap</h2>
+            <span class="m-badge">Enlaces oficiales · texturas preview</span>
+          </div>
+          <button class="btn-modal-close" id="close-trek-modal" type="button" aria-label="Cerrar explorador NASA">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-intro">
+            Abre la zona del sitio seleccionado en los visores oficiales de NASA/ASU. Las capas del globo 3D
+            incluidas aquí son <strong>vistas previas</strong> de LROC/LOLA; los horizontes y las efemérides que
+            alimentan el score se cargan desde <code>public/data</code>.
+          </p>
+
+          <div class="trek-site-card">
+            <div class="trek-site-header">
+              <div>
+                <span class="trek-sub-tag">SITIO SELECCIONADO</span>
+                <h3 id="trek-modal-site-name">—</h3>
+                <span id="trek-modal-program" class="trek-prog-pill">—</span>
+              </div>
+              <div class="trek-direct-links">
+                <a id="trek-modal-quickmap-btn" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-quickmap">LROC QuickMap ↗</a>
+                <a id="trek-modal-moontrek-btn" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer" class="btn-trek-action btn-moontrek">Moon Trek ↗</a>
+              </div>
+            </div>
+            <div class="trek-coords-grid">
+              <div class="trek-cell">
+                <span class="tc-label">Latitud / Longitud</span>
+                <strong id="trek-modal-coords">—</strong>
+              </div>
+              <div class="trek-cell">
+                <span class="tc-label">Elevación</span>
+                <strong id="trek-modal-elev">—</strong>
+              </div>
+              <div class="trek-cell">
+                <span class="tc-label">Pendiente local</span>
+                <strong id="trek-modal-slope">—</strong>
+              </div>
+              <div class="trek-cell">
+                <span class="tc-label">Trampa fría cercana</span>
+                <strong id="trek-modal-ice">—</strong>
+              </div>
+            </div>
+            <p class="trek-geology-text" id="trek-modal-geology">—</p>
+          </div>
+
+          <div class="systems-grid">
+            <div class="system-card">
+              <div class="system-header">
+                <span class="sys-badge qm-badge">ASU / NASA LROC</span>
+                <h4>LROC QuickMap</h4>
+              </div>
+              <p class="sys-desc">
+                Visor cartográfico de LROC con mosaicos WAC y miles de imágenes NAC. Permite inspeccionar
+                rocas, cráteres secundarios y huellas de misiones históricas a alta resolución.
+              </p>
+              <ul class="sys-features">
+                <li>✓ Proyección polar estereográfica para el Polo Sur.</li>
+                <li>✓ Capas WAC/NAC y perfiles de elevación.</li>
+                <li>✓ Enlace centrado en el sitio seleccionado.</li>
+              </ul>
+            </div>
+            <div class="system-card">
+              <div class="system-header">
+                <span class="sys-badge mt-badge">NASA / JPL</span>
+                <h4>Moon Trek</h4>
+              </div>
+              <p class="sys-desc">
+                Portal GIS de NASA Solar System Treks para explorar elevación, pendientes, mineralogía
+                y temperatura, con servicios WMTS de las capas LOLA.
+              </p>
+              <ul class="sys-features">
+                <li>✓ DEM LOLA y mapas de pendientes.</li>
+                <li>✓ Contexto de planificación Artemis/CLPS.</li>
+                <li>✓ Enlace centrado en el sitio seleccionado.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="datasets-section">
+            <h4 class="sec-title">Datos usados en esta app</h4>
+            <div class="table-responsive">
+              <table class="nasa-datasets-table">
+                <thead>
+                  <tr>
+                    <th>Capa</th>
+                    <th>Uso</th>
+                    <th>Resolución / estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Horizontes LOLA</strong></td>
+                    <td>Energía, eclipse, DTE y panorama 2.5D</td>
+                    <td>5 m/px + 80 m/px en 6 sitios; 80 m/px regional en Nobile/Haworth</td>
+                  </tr>
+                  <tr>
+                    <td><strong>JPL Horizons DE441</strong></td>
+                    <td>Az/el/distancias del Sol y la Tierra</td>
+                    <td>Paso de 1 h, 2026–2029, interpolación Hermite</td>
+                  </tr>
+                  <tr>
+                    <td><strong>LROC WAC</strong></td>
+                    <td>Textura fotográfica del globo 3D</td>
+                    <td>Vista previa 2048×1024; resolución completa en QuickMap</td>
+                  </tr>
+                  <tr>
+                    <td><strong>LOLA color / hillshade / slope</strong></td>
+                    <td>Capas visuales del globo 3D</td>
+                    <td>Vistas previas 1024×512; capas completas en Moon Trek</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="data-note">
+              Las texturas del globo 3D no se usan para calcular el score: el análisis usa los horizontes
+              LOLA de <code>public/data/horizon</code> y las efemérides de <code>public/data/ephem</code>.
             </p>
           </div>
         </div>
