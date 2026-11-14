@@ -1,6 +1,6 @@
 :root {
   --bg-deep: #03060f;
-  --bg-glass: rgba(10, 18, 36, 0.72);
+  --bg-glass: #212121;
   --bg-glass-card: rgba(14, 25, 48, 0.65);
   --bg-glass-hover: rgba(20, 36, 70, 0.8);
   
@@ -13,7 +13,7 @@
   --text-muted: #64748b;
 
   --color-cyan: #00e5ff;
-  --color-cyan-glow: rgba(0, 229, 255, 0.4);
+  --color-cyan-glow: #00e5ff66;
   --color-gold: #ffca28;
   --color-gold-glow: rgba(255, 202, 40, 0.4);
   --color-green: #00e676;
