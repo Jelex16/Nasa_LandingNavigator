@@ -160,10 +160,13 @@ export class TimelineChart {
     const elToY = (el) => this.padding.top + (1 - (el - minEl) / (maxEl - minEl)) * this.plotHeight;
 
     ctx.font = `${10 * this.dpr}px monospace`;
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillStyle = 'rgba(138, 127, 114, 0.95)';
+    ctx.strokeStyle = 'rgba(242, 236, 228, 0.07)';
     ctx.lineWidth = 1 * this.dpr;
-    const stepEl = maxEl - minEl > 20 ? 5 : 2;
+    // Pick a step that keeps roughly five ticks so the labels never collide.
+    const stepCandidates = [1, 2, 5, 10, 20, 50];
+    const idealStep = (maxEl - minEl) / 5;
+    const stepEl = stepCandidates.find((step) => step >= idealStep) ?? 50;
     for (let el = Math.ceil(minEl / stepEl) * stepEl; el <= maxEl; el += stepEl) {
       const y = elToY(el);
       ctx.beginPath();
@@ -176,19 +179,19 @@ export class TimelineChart {
     }
 
     const zeroY = elToY(0);
-    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.strokeStyle = 'rgba(242, 236, 228, 0.24)';
     ctx.lineWidth = 1.5 * this.dpr;
     ctx.beginPath();
     ctx.moveTo(this.padding.left, zeroY);
     ctx.lineTo(this.padding.left + this.plotWidth, zeroY);
     ctx.stroke();
 
-    this.drawHorizonLine(ctx, this.series, timeToX, elToY, 'sun', 'rgba(255,64,129,0.6)');
-    this.drawHorizonLine(ctx, this.series, timeToX, elToY, 'earth', 'rgba(0,229,255,0.35)');
-    this.drawVisibilityBand(ctx, this.series, timeToX, elToY, 'sun', 'rgba(255,213,79,0.14)');
-    this.drawVisibilityBand(ctx, this.series, timeToX, elToY, 'earth', 'rgba(0,229,255,0.08)');
+    this.drawHorizonLine(ctx, this.series, timeToX, elToY, 'sun', 'rgba(176,138,90,0.7)');
+    this.drawHorizonLine(ctx, this.series, timeToX, elToY, 'earth', 'rgba(143,182,209,0.45)');
+    this.drawVisibilityBand(ctx, this.series, timeToX, elToY, 'sun', 'rgba(232,180,92,0.16)');
+    this.drawVisibilityBand(ctx, this.series, timeToX, elToY, 'earth', 'rgba(143,182,209,0.1)');
 
-    ctx.strokeStyle = '#00e5ff';
+    ctx.strokeStyle = '#8fb6d1';
     ctx.lineWidth = 2 * this.dpr;
     ctx.beginPath();
     this.series.forEach((point, index) => {
@@ -199,7 +202,7 @@ export class TimelineChart {
     });
     ctx.stroke();
 
-    ctx.strokeStyle = '#ffd54f';
+    ctx.strokeStyle = '#e8b45c';
     ctx.lineWidth = 2.2 * this.dpr;
     ctx.beginPath();
     this.series.forEach((point, index) => {
@@ -213,13 +216,13 @@ export class TimelineChart {
     if (this.currentTimeMs) {
       const cursorX = timeToX(this.currentTimeMs);
       if (cursorX >= this.padding.left && cursorX <= this.padding.left + this.plotWidth) {
-        ctx.strokeStyle = '#ff1744';
+        ctx.strokeStyle = '#f2ece4';
         ctx.lineWidth = 2 * this.dpr;
         ctx.beginPath();
         ctx.moveTo(cursorX, this.padding.top);
         ctx.lineTo(cursorX, this.padding.top + this.plotHeight);
         ctx.stroke();
-        ctx.fillStyle = '#ff1744';
+        ctx.fillStyle = '#f2ece4';
         ctx.beginPath();
         ctx.moveTo(cursorX - 5 * this.dpr, this.padding.top - 2);
         ctx.lineTo(cursorX + 5 * this.dpr, this.padding.top - 2);
@@ -228,7 +231,7 @@ export class TimelineChart {
       }
     }
 
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillStyle = 'rgba(138, 127, 114, 0.95)';
     ctx.font = `${9 * this.dpr}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -248,7 +251,7 @@ export class TimelineChart {
       const sunHorizon = this.horizonFor(point, 'sun');
       const earthHorizon = this.horizonFor(point, 'earth');
 
-      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.strokeStyle = 'rgba(242,236,228,0.32)';
       ctx.lineWidth = 1 * this.dpr;
       ctx.setLineDash([2 * this.dpr, 2 * this.dpr]);
       ctx.beginPath();
@@ -262,27 +265,27 @@ export class TimelineChart {
       let tipX = x + 10 * this.dpr;
       if (tipX + tipW > this.canvas.width - 10) tipX = x - tipW - 10 * this.dpr;
       const tipY = this.padding.top + 10 * this.dpr;
-      ctx.fillStyle = 'rgba(10,16,28,0.94)';
-      ctx.strokeStyle = '#00e5ff';
+      ctx.fillStyle = 'rgba(26,23,21,0.97)';
+      ctx.strokeStyle = '#453c34';
       ctx.lineWidth = 1.2 * this.dpr;
       ctx.beginPath();
-      ctx.roundRect(tipX, tipY, tipW, tipH, 6 * this.dpr);
+      ctx.roundRect(tipX, tipY, tipW, tipH, 3 * this.dpr);
       ctx.fill();
       ctx.stroke();
 
       const dateStr = `${date.toISOString().replace('T', ' ').slice(0, 16)} UTC`;
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#f2ece4';
       ctx.font = `bold ${10 * this.dpr}px monospace`;
       ctx.textAlign = 'left';
       ctx.fillText(dateStr, tipX + 8 * this.dpr, tipY + 16 * this.dpr);
-      ctx.fillStyle = '#ffd54f';
+      ctx.fillStyle = '#e8b45c';
       ctx.font = `${9.5 * this.dpr}px monospace`;
       ctx.fillText(`Sol: ${point.sunEl.toFixed(2)}° · horizonte ${sunHorizon.toFixed(2)}°`, tipX + 8 * this.dpr, tipY + 32 * this.dpr);
-      ctx.fillStyle = '#00e5ff';
+      ctx.fillStyle = '#8fb6d1';
       ctx.fillText(`Tierra: ${point.earthEl.toFixed(2)}° · horizonte ${earthHorizon.toFixed(2)}°`, tipX + 8 * this.dpr, tipY + 48 * this.dpr);
-      ctx.fillStyle = '#69f0ae';
+      ctx.fillStyle = '#7fa96b';
       ctx.fillText(`f☉ ${(point.sunVisibleFraction * 100).toFixed(0)}% · f⊕ ${(point.earthVisibleFraction * 100).toFixed(0)}%`, tipX + 8 * this.dpr, tipY + 64 * this.dpr);
-      ctx.fillStyle = '#b18cf2';
+      ctx.fillStyle = '#b3a99c';
       ctx.fillText(`Energía: ${point.energyWm2?.toFixed(0) ?? '—'} W/m²`, tipX + 8 * this.dpr, tipY + 80 * this.dpr);
     }
   }

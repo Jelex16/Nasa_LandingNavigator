@@ -148,43 +148,6 @@ export function scoreComponents(metrics, profile) {
   return { energy, dark, dte, comms, total };
 }
 
-function buildAttributions(metrics, components, profile) {
-  const energyPct = Math.round(components.energy * 100);
-  const darkPct = Math.round(components.dark * 100);
-  const dtePct = Math.round(components.dte * 100);
-  const commsPct = Math.round(components.comms * 100);
-  return [
-    {
-      feature: 'Energía específica',
-      value: `${(metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`,
-      impact: `${energyPct}/100`,
-      positive: components.energy >= 0.75,
-      desc: `Requerimiento del perfil: ${profile.energyReqKWhM2} kWh/m² en 28 días.`
-    },
-    {
-      feature: 'Eclipse continuo máximo',
-      value: `${metrics.dMaxHours.toFixed(1)} h`,
-      impact: `${darkPct}/100`,
-      positive: components.dark >= 0.75,
-      desc: `Tolerancia del perfil: ${profile.dMaxTolHours} h de eclipse continuo.`
-    },
-    {
-      feature: 'Visibilidad Tierra DTE',
-      value: `${metrics.dteCenterPct.toFixed(0)}%`,
-      impact: `${dtePct}/100`,
-      positive: components.dte >= 0.75,
-      desc: `Requerimiento del perfil: ${profile.dteReqPct}% de visibilidad del centro de la Tierra.`
-    },
-    {
-      feature: 'Corte de comunicaciones máximo',
-      value: `${metrics.gMaxHours.toFixed(1)} h`,
-      impact: `${commsPct}/100`,
-      positive: components.comms >= 0.75,
-      desc: `Tolerancia del perfil: ${profile.gMaxTolHours} h sin enlace DTE.`
-    }
-  ];
-}
-
 function buildStatus(site, metrics, components, profile) {
   const limits = [];
   const slope = Number(site.slopeDeg ?? site.maxSlopeDeg ?? 0);
@@ -362,7 +325,6 @@ export function analyzeSite({
   };
   const components = scoreComponents(metrics, profile);
   const status = buildStatus(site, metrics, components, profile);
-  const attributions = buildAttributions(metrics, components, profile);
 
   return {
     site,
@@ -375,8 +337,7 @@ export function analyzeSite({
     metrics,
     components,
     scorePercent: Math.round(components.total),
-    ...status,
-    attributions
+    ...status
   };
 }
 

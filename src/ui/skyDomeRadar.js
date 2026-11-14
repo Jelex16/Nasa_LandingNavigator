@@ -67,9 +67,9 @@ export class SkyDomeRadar {
 
     // Background sky gradient
     const skyGrad = ctx.createRadialGradient(this.centerX, this.centerY, 10, this.centerX, this.centerY, this.radius);
-    skyGrad.addColorStop(0, '#0a1020');
-    skyGrad.addColorStop(0.8, '#060a14');
-    skyGrad.addColorStop(1, '#03050a');
+    skyGrad.addColorStop(0, '#17130f');
+    skyGrad.addColorStop(0.8, '#100d0a');
+    skyGrad.addColorStop(1, '#0b0a09');
     ctx.fillStyle = skyGrad;
     ctx.beginPath();
     ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
@@ -81,13 +81,13 @@ export class SkyDomeRadar {
 
     elRings.forEach((el) => {
       const { r } = this.azElToXY(0, el);
-      ctx.strokeStyle = el === 0 ? 'rgba(0, 229, 255, 0.45)' : 'rgba(255, 255, 255, 0.1)';
+      ctx.strokeStyle = el === 0 ? 'rgba(143, 182, 209, 0.35)' : 'rgba(242, 236, 228, 0.09)';
       ctx.beginPath();
       ctx.arc(this.centerX, this.centerY, r, 0, Math.PI * 2);
       ctx.stroke();
 
       // Elevation label
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.fillStyle = 'rgba(138, 127, 114, 0.9)';
       ctx.font = `${9 * this.dpr}px monospace`;
       ctx.fillText(`${el}°`, this.centerX + 4 * this.dpr, this.centerY - r + 10 * this.dpr);
     });
@@ -100,7 +100,7 @@ export class SkyDomeRadar {
       { name: 'W', az: 270 }
     ];
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.strokeStyle = 'rgba(242, 236, 228, 0.1)';
     ctx.beginPath();
     ctx.moveTo(this.centerX, this.centerY - this.radius);
     ctx.lineTo(this.centerX, this.centerY + this.radius);
@@ -108,7 +108,7 @@ export class SkyDomeRadar {
     ctx.lineTo(this.centerX + this.radius, this.centerY);
     ctx.stroke();
 
-    ctx.fillStyle = '#00e5ff';
+    ctx.fillStyle = '#8a7f72';
     ctx.font = `bold ${11 * this.dpr}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -122,8 +122,8 @@ export class SkyDomeRadar {
 
     // Draw Topographic Horizon Obstruction Mask (LOLA)
     if (this.site.horizonProfile) {
-      ctx.fillStyle = 'rgba(40, 25, 45, 0.65)';
-      ctx.strokeStyle = '#ff4081';
+      ctx.fillStyle = 'rgba(46, 38, 30, 0.7)';
+      ctx.strokeStyle = '#b08a5a';
       ctx.lineWidth = 1.5 * this.dpr;
 
       ctx.beginPath();
@@ -137,7 +137,7 @@ export class SkyDomeRadar {
       ctx.stroke();
 
       // Outer ring stroke for radar boundary
-      ctx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+      ctx.strokeStyle = 'rgba(176, 138, 90, 0.5)';
       ctx.lineWidth = 1.8 * this.dpr;
       ctx.beginPath();
       ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
@@ -146,8 +146,8 @@ export class SkyDomeRadar {
 
     // Draw Trajectories from series
     if (this.series && this.series.length > 1) {
-      // Sun Trajectory (Golden Arc)
-      ctx.strokeStyle = 'rgba(255, 213, 79, 0.45)';
+      // Sun Trajectory (Warm Arc)
+      ctx.strokeStyle = 'rgba(232, 180, 92, 0.45)';
       ctx.lineWidth = 1.5 * this.dpr;
       ctx.setLineDash([4 * this.dpr, 3 * this.dpr]);
       ctx.beginPath();
@@ -158,8 +158,8 @@ export class SkyDomeRadar {
       });
       ctx.stroke();
 
-      // Earth Libration Loop (Cyan Curve)
-      ctx.strokeStyle = 'rgba(0, 229, 255, 0.55)';
+      // Earth Libration Loop (Steel Curve)
+      ctx.strokeStyle = 'rgba(143, 182, 209, 0.5)';
       ctx.lineWidth = 1.5 * this.dpr;
       ctx.setLineDash([2 * this.dpr, 2 * this.dpr]);
       ctx.beginPath();
@@ -193,25 +193,25 @@ export class SkyDomeRadar {
       // Glow if above horizon
       if (sunIsUp) {
         const sGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 16 * this.dpr);
-        sGrad.addColorStop(0, 'rgba(255, 235, 59, 1)');
-        sGrad.addColorStop(0.4, 'rgba(255, 193, 7, 0.6)');
-        sGrad.addColorStop(1, 'rgba(255, 193, 7, 0)');
+        sGrad.addColorStop(0, 'rgba(232, 180, 92, 0.9)');
+        sGrad.addColorStop(0.4, 'rgba(232, 180, 92, 0.35)');
+        sGrad.addColorStop(1, 'rgba(232, 180, 92, 0)');
         ctx.fillStyle = sGrad;
         ctx.beginPath();
         ctx.arc(0, 0, 16 * this.dpr, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      ctx.fillStyle = sunIsUp ? '#ffd54f' : '#616161';
+      ctx.fillStyle = sunIsUp ? '#e8b45c' : '#5a5147';
       ctx.beginPath();
       ctx.arc(0, 0, 5 * this.dpr, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = sunIsUp ? '#f2ece4' : '#3a332c';
       ctx.lineWidth = 1 * this.dpr;
       ctx.stroke();
 
       // Sun Label
-      ctx.fillStyle = sunIsUp ? '#ffeb3b' : '#9e9e9e';
+      ctx.fillStyle = sunIsUp ? '#e8b45c' : '#6b6156';
       ctx.font = `bold ${9 * this.dpr}px monospace`;
       ctx.fillText(`SOL (${sun.el.toFixed(1)}°)`, 0, -8 * this.dpr);
       ctx.restore();
@@ -222,23 +222,23 @@ export class SkyDomeRadar {
 
       // Radio waves if Earth DTE is active
       if (earthIsUp) {
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.8)';
+        ctx.strokeStyle = 'rgba(143, 182, 209, 0.7)';
         ctx.lineWidth = 1.2 * this.dpr;
         ctx.beginPath();
         ctx.arc(0, 0, 11 * this.dpr, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      ctx.fillStyle = earthIsUp ? '#00e5ff' : '#d50000';
+      ctx.fillStyle = earthIsUp ? '#8fb6d1' : '#5a5147';
       ctx.beginPath();
       ctx.arc(0, 0, 5.5 * this.dpr, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = earthIsUp ? '#f2ece4' : '#3a332c';
       ctx.lineWidth = 1 * this.dpr;
       ctx.stroke();
 
       // Earth Label
-      ctx.fillStyle = earthIsUp ? '#00e5ff' : '#ff5252';
+      ctx.fillStyle = earthIsUp ? '#8fb6d1' : '#6b6156';
       ctx.font = `bold ${9 * this.dpr}px monospace`;
       ctx.fillText(`TIERRA (${earth.el.toFixed(1)}°)`, 0, 14 * this.dpr);
       ctx.restore();

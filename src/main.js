@@ -60,6 +60,7 @@ const $ = (id) => document.getElementById(id);
 
 const siteSelect = $('site-select');
 const sitePillsBar = $('site-pills-bar');
+const cameraBar = document.querySelector('.floating-camera-bar');
 const siteProgramBadge = $('site-program-badge');
 const siteDescription = $('site-description');
 const siteSlopeVal = $('site-slope-val');
@@ -72,19 +73,11 @@ const mastSelect = $('mast-select');
 const panelSelect = $('panel-select');
 const profileSelect = $('profile-select');
 
-const scoreCircle = $('score-circle');
 const scoreNumber = $('score-number');
 const classificationBadge = $('classification-badge');
 const classificationText = $('classification-text');
-const energyScore = $('energy-score');
-const energyFill = $('energy-fill');
-const eclipseScore = $('eclipse-score');
-const eclipseFill = $('eclipse-fill');
-const dteScore = $('dte-score');
-const dteFill = $('dte-fill');
-const commsScore = $('comms-score');
-const commsFill = $('comms-fill');
-const xaiItems = $('xai-items');
+const verdictBar = $('verdict-bar');
+const verdictRows = $('verdict-rows');
 const scoreWindowLabel = $('score-window-label');
 
 const hudSunElev = $('hud-sun-elev');
@@ -231,6 +224,15 @@ function allSites() {
   return state.customSite ? [...state.sites, state.customSite] : [...state.sites];
 }
 
+const HORIZON_SOURCE_LABELS = {
+  lola_hybrid: 'LOLA híbrido (5 m + 80 m/px)',
+  lola_80m_regional: 'LOLA regional 80 m/px',
+  analytic_flat: 'analítico plano',
+  approx: 'aproximado',
+  unavailable: 'sin datos',
+  unknown: 'sin clasificar'
+};
+
 function updateSitePanel(site) {
   hudSiteName.textContent = site.name;
   siteProgramBadge.textContent = site.program;
@@ -239,7 +241,8 @@ function updateSitePanel(site) {
   siteElevVal.textContent = `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`;
   hudCoords.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
   siteDataQuality.textContent = site.dataQuality;
-  siteDataSource.textContent = `Horizonte: ${site.horizonSource} · Efemérides: ${site.ephemSource === 'jpl_horizons' ? 'JPL Horizons DE441' : 'IAU 2000 local'}`;
+  const horizonLabel = HORIZON_SOURCE_LABELS[site.horizonSource] ?? site.horizonSource;
+  siteDataSource.textContent = `Horizonte: ${horizonLabel} · Efemérides: ${site.ephemSource === 'jpl_horizons' ? 'JPL Horizons DE441' : 'IAU 2000 local'}`;
   const radarLabel =
     site.horizonSource === 'analytic_flat'
       ? 'Analítico'
@@ -309,32 +312,41 @@ function initModelLayerControls() {
 
 function updateDecisionUI(analysis) {
   scoreNumber.textContent = analysis.scorePercent;
-  scoreCircle.className = `gauge-ring ${analysis.badgeClass}`;
-  classificationBadge.className = `badge-go-nogo ${analysis.badgeClass}`;
+  classificationBadge.className = `verdict-status ${analysis.badgeClass}`;
   classificationBadge.textContent = analysis.status;
   classificationText.textContent = analysis.statusText;
 
-  const bars = [
-    [energyScore, energyFill, analysis.components.energy],
-    [eclipseScore, eclipseFill, analysis.components.dark],
-    [dteScore, dteFill, analysis.components.dte],
-    [commsScore, commsFill, analysis.components.comms]
+  const weights = analysis.profile.weights;
+  const weightSum = weights.energy + weights.dark + weights.dte + weights.comms;
+  const terms = [
+    { label: 'Energía', metric: `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`, weight: weights.energy, share: analysis.components.energy },
+    { label: 'Eclipse', metric: `${analysis.metrics.dMaxHours.toFixed(1)} h`, weight: weights.dark, share: analysis.components.dark },
+    { label: 'DTE', metric: `${analysis.metrics.dteCenterPct.toFixed(0)}%`, weight: weights.dte, share: analysis.components.dte },
+    { label: 'Comms', metric: `${analysis.metrics.gMaxHours.toFixed(1)} h`, weight: weights.comms, share: analysis.components.comms }
   ];
-  for (const [label, fill, value] of bars) {
-    const pct = Math.round(value * 100);
-    label.textContent = `${pct}%`;
-    fill.style.width = `${pct}%`;
-  }
 
-  xaiItems.innerHTML = '';
-  for (const attr of analysis.attributions) {
-    const item = document.createElement('div');
-    item.className = 'xai-item';
-    item.innerHTML = `
-      <span class="xai-name" title="${attr.desc}">${attr.feature}: <strong>${attr.value}</strong></span>
-      <span class="xai-impact ${attr.positive ? 'impact-pos' : 'impact-neg'}">${attr.impact}</span>
+  verdictBar.innerHTML = '';
+  verdictRows.innerHTML = '';
+  for (const term of terms) {
+    const maxPoints = (100 * term.weight) / weightSum;
+    const points = maxPoints * term.share;
+    const pct = Math.round(term.share * 100);
+    const level = pct >= 75 ? 'good' : pct >= 50 ? 'watch' : 'bad';
+
+    const segment = document.createElement('span');
+    segment.className = `verdict-bar-seg verdict-level-${level}`;
+    segment.style.width = `${points}%`;
+    segment.title = `${term.label}: ${points.toFixed(1)} de ${maxPoints.toFixed(1)} puntos`;
+    verdictBar.appendChild(segment);
+
+    const row = document.createElement('li');
+    row.className = `verdict-row verdict-level-${level}`;
+    row.innerHTML = `
+      <span class="verdict-row-label">${term.label}</span>
+      <span class="verdict-row-metric">${term.metric}</span>
+      <span class="verdict-row-points"><strong>${points.toFixed(1)}</strong><span>/${maxPoints.toFixed(1)}</span></span>
     `;
-    xaiItems.appendChild(item);
+    verdictRows.appendChild(row);
   }
 
   renderDecisionModel(analysis);
@@ -513,7 +525,7 @@ async function calculateSeriesAndEvaluate() {
   } catch (error) {
     console.error('No se pudo evaluar el sitio.', error);
     classificationBadge.textContent = 'SIN DATOS';
-    classificationBadge.className = 'badge-go-nogo status-danger';
+    classificationBadge.className = 'verdict-status status-danger';
     classificationText.textContent = `No se pudo evaluar: ${error.message}`;
     scoreNumber.textContent = '—';
   } finally {
@@ -537,10 +549,7 @@ function populateSiteSelector(sites) {
   }
 
   sitePillsBar.innerHTML = '';
-  const pillOrder = ['site23', 'site01', 'site04', 'site07', 'site11', 'site20', 'control_eq'];
-  for (const id of pillOrder) {
-    const site = sites.find((candidate) => candidate.id === id);
-    if (!site) continue;
+  for (const site of sites) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'pill-btn';
@@ -549,6 +558,17 @@ function populateSiteSelector(sites) {
     button.addEventListener('click', () => prepareSite(site));
     sitePillsBar.appendChild(button);
   }
+  updateScrollAffordance(sitePillsBar);
+}
+
+function initScrollAffordances() {
+  updateScrollAffordance(cameraBar);
+  window.addEventListener('resize', () => updateScrollAffordance(cameraBar));
+}
+
+function updateScrollAffordance(element) {
+  if (!element) return;
+  element.classList.toggle('is-scrollable', element.scrollWidth > element.clientWidth + 1);
 }
 
 function updateActivePill(siteId) {
@@ -580,10 +600,31 @@ function initSiteSelector(sites) {
     const found = allSites().find((s) => s.id === siteSelect.value);
     if (found) prepareSite(found);
   });
+  const customError = $('custom-coords-error');
+  const latInput = $('custom-lat');
+  const lonInput = $('custom-lon');
   $('apply-custom-btn').addEventListener('click', () => {
-    const lat = Number.parseFloat($('custom-lat').value);
-    const lon = Number.parseFloat($('custom-lon').value);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const lat = Number.parseFloat(latInput.value);
+    const lon = Number.parseFloat(lonInput.value);
+    let message = '';
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      message = 'Introduce una latitud y una longitud numéricas.';
+    } else if (lat < -90 || lat > 90) {
+      message = `La latitud debe estar entre -90° y 90°. Has escrito ${lat}°.`;
+    } else if (lon < 0 || lon > 360) {
+      message = `La longitud debe estar entre 0° y 360°. Has escrito ${lon}°.`;
+    }
+    if (message) {
+      customError.textContent = message;
+      customError.hidden = false;
+      const invalid = !Number.isFinite(lat) || lat < -90 || lat > 90 ? latInput : lonInput;
+      invalid.setAttribute('aria-invalid', 'true');
+      invalid.focus();
+      return;
+    }
+    customError.hidden = true;
+    latInput.removeAttribute('aria-invalid');
+    lonInput.removeAttribute('aria-invalid');
     state.customSite = getCustomSite(lat, lon);
     populateSiteSelector(state.sites);
     siteSelect.value = 'custom-site';
@@ -743,17 +784,18 @@ function initPanorama() {
   });
 
   openPanoramaBtn.addEventListener('click', () => {
-    panoramaModal.classList.remove('hidden');
+    openModal(panoramaModal);
     state.panoramaOpen = true;
     panorama.resize();
     updatePanorama();
   });
   closePanoramaModal.addEventListener('click', () => {
-    panoramaModal.classList.add('hidden');
+    closeModal(panoramaModal);
     state.panoramaOpen = false;
   });
   window.addEventListener('resize', () => {
     if (state.panoramaOpen) panorama.resize();
+    updateScrollAffordance(sitePillsBar);
   });
 }
 
@@ -805,31 +847,81 @@ async function openComparison() {
       (siteId) => {
         const found = allSites().find((site) => site.id === siteId);
         if (found) {
-          comparisonModal.classList.add('hidden');
+          closeModal(comparisonModal);
           prepareSite(found);
         }
       }
     );
-    comparisonModal.classList.remove('hidden');
+    openModal(comparisonModal);
   } catch (error) {
     console.error('No se pudo comparar los sitios.', error);
     comparisonModalBody.innerHTML = `<p class="data-note">No se pudo completar la comparación: ${error.message}</p>`;
-    comparisonModal.classList.remove('hidden');
+    openModal(comparisonModal);
   } finally {
     setLoading(false);
   }
 }
 
+const FOCUSABLE = 'a[href], button:not([disabled]), select:not([disabled]), input:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+let lastFocusedElement = null;
+
+function openModal(modal) {
+  if (!modal) return;
+  lastFocusedElement = document.activeElement;
+  modal.classList.remove('hidden');
+  for (const other of document.querySelectorAll('.modal-backdrop')) {
+    if (other !== modal && !other.classList.contains('hidden')) other.classList.add('hidden');
+  }
+  const first = modal.querySelector(FOCUSABLE);
+  (first ?? modal).focus({ preventScroll: true });
+}
+
+function closeModal(modal) {
+  if (!modal) return;
+  modal.classList.add('hidden');
+  if (lastFocusedElement instanceof HTMLElement && document.contains(lastFocusedElement)) {
+    lastFocusedElement.focus({ preventScroll: true });
+  }
+  lastFocusedElement = null;
+}
+
+function initModalKeys() {
+  document.addEventListener('keydown', (event) => {
+    const modal = document.querySelector('.modal-backdrop:not(.hidden)');
+    if (!modal) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeModal(modal);
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusables = [...modal.querySelectorAll(FOCUSABLE)].filter((el) => el.offsetParent !== null);
+    if (focusables.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+}
+
 function initModals() {
   openComparisonBtn.addEventListener('click', openComparison);
-  closeComparisonModal.addEventListener('click', () => comparisonModal.classList.add('hidden'));
-  openHorizonsBtn.addEventListener('click', () => horizonsModal.classList.remove('hidden'));
-  closeHorizonsModal.addEventListener('click', () => horizonsModal.classList.add('hidden'));
+  closeComparisonModal.addEventListener('click', () => closeModal(comparisonModal));
+  openHorizonsBtn.addEventListener('click', () => openModal(horizonsModal));
+  closeHorizonsModal.addEventListener('click', () => closeModal(horizonsModal));
   toggleNnViewBtn.addEventListener('click', () => {
-    nnModal.classList.remove('hidden');
     if (state.analysis) renderDecisionModel(state.analysis);
+    openModal(nnModal);
   });
-  closeNnModal.addEventListener('click', () => nnModal.classList.add('hidden'));
+  closeNnModal.addEventListener('click', () => closeModal(nnModal));
 
   const trekModal = $('trek-modal');
   const closeTrekModal = $('close-trek-modal');
@@ -840,15 +932,15 @@ function initModals() {
       getQuickMapUrl(state.currentSite),
       getMoonTrekUrl(state.currentSite)
     );
-    trekModal.classList.remove('hidden');
+    openModal(trekModal);
   };
   $('btn-open-dossier')?.addEventListener('click', openTrek);
   $('open-trek-modal-btn')?.addEventListener('click', openTrek);
-  closeTrekModal?.addEventListener('click', () => trekModal?.classList.add('hidden'));
+  closeTrekModal?.addEventListener('click', () => closeModal(trekModal));
 
   for (const modal of [comparisonModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
     modal.addEventListener('click', (event) => {
-      if (event.target === modal) modal.classList.add('hidden');
+      if (event.target === modal) closeModal(modal);
     });
   }
 }
@@ -864,7 +956,9 @@ async function bootstrap() {
     initCameraHUDControls();
     initModelLayerControls();
     initModals();
+    initModalKeys();
     initPanorama();
+    initScrollAffordances();
     await ensureEphemeris(state.currentSite);
     updateSitePanel(state.currentSite);
     updateActivePill(state.currentSite.id);
@@ -878,6 +972,8 @@ async function bootstrap() {
     setLoading(false);
   } catch (error) {
     console.error('No se pudo inicializar la aplicación.', error);
+    // An error is not progress: stop the scan and say what failed.
+    loadingOverlay.classList.add('is-error');
     setLoading(true, `No se pudieron cargar los datos LOLA: ${error.message}`);
     const strong = loadingOverlay.querySelector('strong');
     if (strong) strong.textContent = 'Error cargando LOLA + Horizons';

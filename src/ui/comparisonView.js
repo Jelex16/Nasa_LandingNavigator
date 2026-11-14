@@ -31,12 +31,13 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
       const statusShort = analysis.status.split(' ')[0];
       const scoreLabel = isReference ? 'REFERENCIA' : `${statusShort} · ${analysis.scorePercent}%`;
       return `
-        <tr class="comparison-row" data-site-id="${site.id}" tabindex="0" role="button"
-            aria-label="Seleccionar ${site.name}">
+        <tr class="comparison-row" data-site-id="${site.id}">
           <td>
-            <div class="site-cell-name"><strong>${site.name}</strong></div>
-            <div class="site-cell-program">${site.program} · ${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E</div>
-            <div class="site-cell-quality">${site.dataQuality} · ${site.ephemSource === 'jpl_horizons' ? 'Horizons' : 'IAU 2000'}</div>
+            <button class="site-cell-btn" type="button" data-site-id="${site.id}" aria-label="Seleccionar ${site.name}">
+              <span class="site-cell-name"><strong>${site.name}</strong></span>
+              <span class="site-cell-program">${site.program} · ${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E</span>
+              <span class="site-cell-quality">${site.dataQuality} · ${site.ephemSource === 'jpl_horizons' ? 'Horizons' : 'IAU 2000'}</span>
+            </button>
           </td>
           <td><span class="badge ${badgeClass(analysis)}">${scoreLabel}</span></td>
           <td class="${termClass(comps.energy)}">
@@ -108,11 +109,5 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
       if (siteId && onSelectSite) onSelectSite(siteId);
     };
     row.addEventListener('click', select);
-    row.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        select();
-      }
-    });
   });
 }

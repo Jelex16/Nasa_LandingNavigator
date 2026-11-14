@@ -12,11 +12,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
+    <a class="skip-link" href="#left-panel">Saltar a la evaluación del sitio</a>
     <div id="three-container" class="fullscreen-three-container" aria-hidden="true"></div>
 
     <header class="mission-nav">
@@ -35,15 +36,14 @@
 
       <div class="nav-right">
         <div class="clock-chip">
-          <span class="clock-icon" aria-hidden="true">⏱️</span>
           <span id="clock-display" class="clock-text">—</span>
         </div>
         <div class="action-buttons-group">
           <button class="nav-action-btn" id="open-comparison-btn" type="button" title="Comparar sitios con la misma ventana temporal">
-            📊 Comparar
+            Comparar
           </button>
           <button class="nav-action-btn" id="open-horizons-btn" type="button" title="Fuentes de datos NASA y validación">
-            🛰️ Datos NASA
+            Datos NASA
           </button>
         </div>
       </div>
@@ -51,21 +51,21 @@
 
     <div class="floating-camera-bar">
       <button class="cam-btn" id="hud-view-south-pole" type="button" title="Vista cenital del Polo Sur lunar">
-        <span class="cam-icon" aria-hidden="true">🌐</span> Polo Sur
+        Polo Sur
       </button>
       <button class="cam-btn active" id="hud-view-site" type="button" title="Enfocar el sitio de aterrizaje seleccionado">
-        <span class="cam-icon" aria-hidden="true">🎯</span> Enfocar sitio
+        Enfocar sitio
       </button>
       <button class="cam-btn" id="hud-view-global" type="button" title="Vista de órbita completa de la Luna">
-        <span class="cam-icon" aria-hidden="true">🌕</span> Órbita global
+        Órbita global
       </button>
       <button class="cam-btn cam-btn-accent" id="open-panorama-btn" type="button" title="Panorama 2.5D del horizonte LOLA">
-        <span class="cam-icon" aria-hidden="true">🏔️</span> Panorama 2.5D
+        Panorama 2.5D
       </button>
     </div>
 
     <div class="ui-overlay-container">
-      <aside class="glass-panel left-floating-panel" id="left-panel">
+      <aside class="glass-panel left-floating-panel" id="left-panel" tabindex="-1">
         <div class="panel-header-row">
           <div class="panel-title-group">
             <span class="panel-eyebrow">EVALUACIÓN DE SITIO</span>
@@ -77,6 +77,63 @@
         <div class="site-select-row">
           <label for="site-select">Sitio LOLA</label>
           <select id="site-select" class="site-select"></select>
+        </div>
+
+        <section class="verdict-card" aria-labelledby="verdict-heading">
+          <div class="verdict-head">
+            <span class="field-label" id="verdict-heading">Veredicto</span>
+            <button class="btn-link" id="toggle-nn-view-btn" type="button">Ver modelo →</button>
+          </div>
+
+          <div class="verdict-headline">
+            <span class="verdict-status status-safe" id="classification-badge">CARGANDO</span>
+            <span class="verdict-score">
+              <span class="verdict-score-value" id="score-number">—</span>
+              <span class="verdict-score-unit">/100</span>
+            </span>
+          </div>
+
+          <div class="verdict-bar" id="verdict-bar" aria-hidden="true"></div>
+
+          <ul class="verdict-rows" id="verdict-rows"></ul>
+
+          <p class="verdict-note" id="classification-text">
+            Calculando métricas LOLA + Horizons…
+          </p>
+
+          <p class="verdict-window" id="score-window-label">
+            Ventana: 28 días desde — · instante —
+          </p>
+        </section>
+
+        <div class="mission-config-row">
+          <div class="config-block">
+            <label for="mast-select">Mástil</label>
+            <select id="mast-select">
+              <option value="0.5">0.5 m</option>
+              <option value="2" selected>2 m</option>
+              <option value="5">5 m</option>
+              <option value="10">10 m</option>
+              <option value="20">20 m</option>
+            </select>
+          </div>
+          <div class="config-block">
+            <label for="panel-select">Panel</label>
+            <select id="panel-select">
+              <option value="vertical_tracker" selected>Vertical con seguimiento</option>
+              <option value="vertical_fixed">Vertical fijo</option>
+              <option value="horizontal">Horizontal</option>
+            </select>
+          </div>
+          <div class="config-block">
+            <label for="profile-select">Perfil de misión</label>
+            <select id="profile-select">
+              <option value="technology_demo" selected>Demo DTE</option>
+              <option value="night_survivor">Rover nocturno</option>
+              <option value="crewed_outpost">Tripulado</option>
+              <option value="relay_store_forward">Relé</option>
+            </select>
+          </div>
         </div>
 
         <div class="coords-row">
@@ -100,7 +157,7 @@
         </div>
 
         <details class="custom-coords-toggle" id="custom-coords-details">
-          <summary>📍 Ingresar coordenadas personalizadas</summary>
+          <summary>Ingresar coordenadas personalizadas</summary>
           <div class="custom-inputs-row">
             <div class="input-block">
               <label for="custom-lat">Latitud (°S/°N):</label>
@@ -112,14 +169,18 @@
             </div>
             <button class="btn-apply-coords" id="apply-custom-btn" type="button">Evaluar</button>
           </div>
+          <p class="input-error" id="custom-coords-error" role="alert" hidden></p>
         </details>
 
-        <p class="site-desc-text" id="site-description">Cargando topografía LOLA y efemérides…</p>
+        <div class="site-brief">
+          <span class="field-label">Contexto del sitio</span>
+          <p class="site-desc-text" id="site-description">Cargando topografía LOLA y efemérides…</p>
+        </div>
 
         <div class="model3d-card" id="model3d-card">
           <div class="model3d-header">
             <span class="model3d-eyebrow">MODELO 3D · LRO / LOLA</span>
-            <span class="model3d-note">texturas preview</span>
+            <span class="model3d-note">vista previa</span>
           </div>
           <div class="layer-buttons" role="group" aria-label="Capa del globo lunar">
             <button class="layer-btn active" type="button" data-layer="lroc" title="Fotografía LROC WAC (vista previa 2k)">LROC</button>
@@ -140,97 +201,6 @@
             <button id="btn-open-dossier" class="btn-nasa-tool" type="button">Capas &amp; DEM</button>
           </div>
         </div>
-
-        <div class="mission-config-row">
-          <div class="config-block">
-            <label for="mast-select">Mástil</label>
-            <select id="mast-select">
-              <option value="0.5">0.5 m</option>
-              <option value="2" selected>2 m</option>
-              <option value="5">5 m</option>
-              <option value="10">10 m</option>
-              <option value="20">20 m</option>
-            </select>
-          </div>
-          <div class="config-block">
-            <label for="panel-select">Panel</label>
-            <select id="panel-select">
-              <option value="vertical_tracker" selected>Vertical tracker</option>
-              <option value="vertical_fixed">Vertical fijo</option>
-              <option value="horizontal">Horizontal</option>
-            </select>
-          </div>
-          <div class="config-block">
-            <label for="profile-select">Perfil de misión</label>
-            <select id="profile-select">
-              <option value="technology_demo" selected>Demo DTE</option>
-              <option value="night_survivor">Rover nocturno</option>
-              <option value="crewed_outpost">Tripulado</option>
-              <option value="relay_store_forward">Relé</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="neural-score-card">
-          <div class="gauge-and-badge">
-            <div class="radial-gauge-box">
-              <div class="gauge-ring status-safe" id="score-circle">
-                <span class="gauge-number" id="score-number">—</span>
-                <span class="gauge-unit">%</span>
-              </div>
-            </div>
-            <div class="gauge-text-content">
-              <div class="ai-eval-label">MODELO MULTICRITERIO</div>
-              <div class="badge-go-nogo status-safe" id="classification-badge">CARGANDO</div>
-              <p class="classification-comment" id="classification-text">
-                Calculando métricas LOLA + Horizons…
-              </p>
-            </div>
-          </div>
-
-          <div class="score-window-label" id="score-window-label">
-            Ventana: 28 días desde — · instante —
-          </div>
-
-          <div class="neural-subbars">
-            <div class="subbar-item">
-              <div class="subbar-meta">
-                <span>Energía específica (28 días)</span>
-                <strong id="energy-score">—</strong>
-              </div>
-              <div class="bar-track"><div class="bar-fill fill-gold" id="energy-fill" style="width: 0%"></div></div>
-            </div>
-            <div class="subbar-item">
-              <div class="subbar-meta">
-                <span>Supervivencia al eclipse</span>
-                <strong id="eclipse-score">—</strong>
-              </div>
-              <div class="bar-track"><div class="bar-fill fill-red" id="eclipse-fill" style="width: 0%"></div></div>
-            </div>
-            <div class="subbar-item">
-              <div class="subbar-meta">
-                <span>Visibilidad Tierra DTE</span>
-                <strong id="dte-score">—</strong>
-              </div>
-              <div class="bar-track"><div class="bar-fill fill-cyan" id="dte-fill" style="width: 0%"></div></div>
-            </div>
-            <div class="subbar-item">
-              <div class="subbar-meta">
-                <span>Comunicaciones (corte máximo)</span>
-                <strong id="comms-score">—</strong>
-              </div>
-              <div class="bar-track"><div class="bar-fill fill-purple" id="comms-fill" style="width: 0%"></div></div>
-            </div>
-          </div>
-
-          <div class="xai-factors-panel">
-            <div class="xai-header">
-              <span>Factores clave (modelo transparente):</span>
-              <button class="btn-link" id="toggle-nn-view-btn" type="button">Ver modelo →</button>
-            </div>
-            <div class="xai-factors-list" id="xai-items"></div>
-          </div>
-        </div>
       </aside>
 
       <aside class="glass-panel right-floating-panel" id="right-panel">
@@ -243,7 +213,7 @@
         </div>
 
         <div class="radar-box">
-          <canvas id="sky-dome-canvas"></canvas>
+          <canvas id="sky-dome-canvas" role="img" aria-label="Radar polar del horizonte LOLA con la posición del Sol y de la Tierra"></canvas>
           <div class="radar-legend-chips">
             <span class="legend-chip chip-gold">● Sol</span>
             <span class="legend-chip chip-cyan">● Tierra</span>
@@ -254,7 +224,7 @@
         <div class="angles-telemetry-grid">
           <div class="angle-card">
             <div class="angle-header">
-              <span class="angle-icon" aria-hidden="true">☀️</span>
+              <span class="angle-icon" aria-hidden="true"></span>
               <span class="angle-name">POSICIÓN SOL</span>
             </div>
             <div class="angle-values">
@@ -266,7 +236,7 @@
 
           <div class="angle-card">
             <div class="angle-header">
-              <span class="angle-icon" aria-hidden="true">🌍</span>
+              <span class="angle-icon" aria-hidden="true"></span>
               <span class="angle-name">POSICIÓN TIERRA</span>
             </div>
             <div class="angle-values">
@@ -292,7 +262,7 @@
         </div>
 
         <button class="timeline-drawer-toggle" id="timeline-toggle-btn" type="button" aria-expanded="false">
-          <span>📈 Ver curvas de elevación y ventanas (28 días)</span>
+          <span>Ver curvas de elevación y ventanas (28 días)</span>
           <span class="toggle-arrow" id="timeline-arrow">▲</span>
         </button>
       </aside>
@@ -303,7 +273,7 @@
         <div class="chart-drawer-header">
           <div class="cd-title-box">
             <strong>CURVAS DE ELEVACIÓN Y VENTANAS OPERACIONALES (28 DÍAS)</strong>
-            <span>Área dorada = Sol visible; área cian = Tierra visible; línea rosa = horizonte LOLA del Sol; línea cian = horizonte LOLA de la Tierra. Haz clic en la curva para saltar a ese instante.</span>
+            <span>Zonas rellenas: visibilidad del Sol (ámbar) y de la Tierra (azul). Líneas discontinuas: horizonte LOLA en el azimut de cada cuerpo. Haz clic en la curva para saltar a ese instante.</span>
           </div>
           <div class="chart-legend-row">
             <span class="badge-legend text-gold">━ Sol</span>
@@ -313,7 +283,7 @@
           </div>
         </div>
         <div class="chart-canvas-wrapper">
-          <canvas id="timeline-chart-canvas"></canvas>
+          <canvas id="timeline-chart-canvas" role="img" aria-label="Curvas de elevación del Sol y la Tierra frente al horizonte LOLA durante la ventana de 28 días"></canvas>
         </div>
       </div>
 
@@ -362,7 +332,7 @@
       </div>
     </div>
 
-    <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite">
       <div class="loading-card">
         <span class="loading-spinner" aria-hidden="true"></span>
         <strong>Cargando LOLA + Horizons</strong>
@@ -370,11 +340,18 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="comparison-modal">
+    <noscript>
+      <div class="noscript-notice">
+        <strong>Este navegador no ejecuta JavaScript</strong>
+        <span>La herramienta calcula energía, eclipses y visibilidad DTE en el cliente a partir de los datos LOLA y JPL Horizons. Activa JavaScript para usarla.</span>
+      </div>
+    </noscript>
+
+    <div class="modal-backdrop hidden" id="comparison-modal" role="dialog" aria-modal="true" aria-labelledby="comparison-modal-title">
       <div class="modal-window modal-wide modal-comparison">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2>📊 Matriz de decisión y comparación de sitios</h2>
+            <h2 id="comparison-modal-title">Matriz de decisión y comparación de sitios</h2>
             <span class="m-badge">Misma ventana · mismos supuestos</span>
           </div>
           <button class="btn-modal-close" id="close-comparison-modal" type="button" aria-label="Cerrar comparación">&times;</button>
@@ -383,10 +360,10 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="horizons-modal">
+    <div class="modal-backdrop hidden" id="horizons-modal" role="dialog" aria-modal="true" aria-labelledby="horizons-modal-title">
       <div class="modal-window modal-data">
         <div class="modal-header">
-          <h2>🛰️ Datos NASA: LOLA + JPL Horizons</h2>
+          <h2 id="horizons-modal-title">Datos NASA: LOLA + JPL Horizons</h2>
           <button class="btn-modal-close" id="close-horizons-modal" type="button" aria-label="Cerrar datos">&times;</button>
         </div>
         <div class="modal-body" id="data-modal-body">
@@ -395,28 +372,36 @@
             No hay una “red neuronal” entrenada: el score es un índice multicriterio transparente con pesos y umbrales visibles.
           </p>
 
-          <div class="data-grid">
-            <div class="data-card">
-              <span class="data-card-label">HORIZONTE</span>
-              <strong>LOLA 5 m/px + 80 m/px</strong>
-              <span>Seis sitios con DEM local de 5 m/px y DEM regional de 80 m/px hasta 100 km. Nobile y Haworth usan solo el DEM regional de 80 m/px.</span>
+          <dl class="provenance-list">
+            <div class="provenance-row">
+              <dt>Horizonte</dt>
+              <dd>
+                <strong>LOLA 5 m/px + 80 m/px</strong>
+                <span>Seis sitios con DEM local de 5 m/px y DEM regional de 80 m/px hasta 100 km. Nobile y Haworth usan solo el DEM regional de 80 m/px.</span>
+              </dd>
             </div>
-            <div class="data-card">
-              <span class="data-card-label">EFEMÉRIDES</span>
-              <strong>JPL Horizons DE441</strong>
-              <span>Azimut, elevación y distancia aparentes del Sol y la Tierra, paso de 1 h, 2026–2029. Interpolación cúbica de Hermite en el cliente.</span>
+            <div class="provenance-row">
+              <dt>Efemérides</dt>
+              <dd>
+                <strong>JPL Horizons DE441</strong>
+                <span>Azimut, elevación y distancia aparentes del Sol y la Tierra, paso de 1 h, 2026–2029. Interpolación cúbica de Hermite en el cliente.</span>
+              </dd>
             </div>
-            <div class="data-card">
-              <span class="data-card-label">VALIDACIÓN</span>
-              <strong>RMS 1×10⁻⁵° · máx 1.2×10⁻⁴°</strong>
-              <span>Comparación fuera de malla contra Horizons (4.032 muestras) del pipeline SUNDIAL; el motor local IAU 2000 se usa solo como fallback.</span>
+            <div class="provenance-row">
+              <dt>Validación</dt>
+              <dd>
+                <strong>RMS 1×10⁻⁵° · máx 1.2×10⁻⁴°</strong>
+                <span>Comparación fuera de malla contra Horizons (4.032 muestras) del pipeline SUNDIAL; el motor local IAU 2000 se usa solo como fallback.</span>
+              </dd>
             </div>
-            <div class="data-card">
-              <span class="data-card-label">MODELO</span>
-              <strong>Multicriterio transparente</strong>
-              <span>Energía, eclipse continuo, DTE y corte de comunicaciones. Los pesos y umbrales del perfil son visibles y editables en la UI.</span>
+            <div class="provenance-row">
+              <dt>Modelo</dt>
+              <dd>
+                <strong>Multicriterio transparente</strong>
+                <span>Energía, eclipse continuo, DTE y corte de comunicaciones. Los pesos y umbrales del perfil son visibles y editables en la UI.</span>
+              </dd>
             </div>
-          </div>
+          </dl>
 
           <div class="data-section">
             <label class="sec-label">Fuentes y procedencia:</label>
@@ -451,11 +436,11 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="trek-modal">
+    <div class="modal-backdrop hidden" id="trek-modal" role="dialog" aria-modal="true" aria-labelledby="trek-modal-title">
       <div class="modal-window modal-wide modal-trek">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2>NASA Moon Trek &amp; LROC QuickMap</h2>
+            <h2 id="trek-modal-title">NASA Moon Trek &amp; LROC QuickMap</h2>
             <span class="m-badge">Enlaces oficiales · texturas preview</span>
           </div>
           <button class="btn-modal-close" id="close-trek-modal" type="button" aria-label="Cerrar explorador NASA">&times;</button>
@@ -511,9 +496,9 @@
                 rocas, cráteres secundarios y huellas de misiones históricas a alta resolución.
               </p>
               <ul class="sys-features">
-                <li>✓ Proyección polar estereográfica para el Polo Sur.</li>
-                <li>✓ Capas WAC/NAC y perfiles de elevación.</li>
-                <li>✓ Enlace centrado en el sitio seleccionado.</li>
+                <li>Proyección polar estereográfica para el Polo Sur.</li>
+                <li>Capas WAC/NAC y perfiles de elevación.</li>
+                <li>Enlace centrado en el sitio seleccionado.</li>
               </ul>
             </div>
             <div class="system-card">
@@ -526,9 +511,9 @@
                 y temperatura, con servicios WMTS de las capas LOLA.
               </p>
               <ul class="sys-features">
-                <li>✓ DEM LOLA y mapas de pendientes.</li>
-                <li>✓ Contexto de planificación Artemis/CLPS.</li>
-                <li>✓ Enlace centrado en el sitio seleccionado.</li>
+                <li>DEM LOLA y mapas de pendientes.</li>
+                <li>Contexto de planificación Artemis/CLPS.</li>
+                <li>Enlace centrado en el sitio seleccionado.</li>
               </ul>
             </div>
           </div>
@@ -577,11 +562,11 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="nn-modal">
+    <div class="modal-backdrop hidden" id="nn-modal" role="dialog" aria-modal="true" aria-labelledby="nn-modal-title">
       <div class="modal-window modal-wide">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2>Modelo de decisión multicriterio</h2>
+            <h2 id="nn-modal-title">Modelo de decisión multicriterio</h2>
             <span class="m-badge">Sin red neuronal · supuestos visibles</span>
           </div>
           <button class="btn-modal-close" id="close-nn-modal" type="button" aria-label="Cerrar modelo">&times;</button>
@@ -612,11 +597,11 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="panorama-modal">
+    <div class="modal-backdrop hidden" id="panorama-modal" role="dialog" aria-modal="true" aria-labelledby="panorama-modal-title">
       <div class="modal-window modal-panorama">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2>🏔️ Panorama 2.5D del horizonte LOLA</h2>
+            <h2 id="panorama-modal-title">Panorama 2.5D del horizonte LOLA</h2>
             <span class="m-badge" id="panorama-site-label">—</span>
           </div>
           <button class="btn-modal-close" id="close-panorama-modal" type="button" aria-label="Cerrar panorama">&times;</button>
@@ -624,11 +609,11 @@
         <div class="modal-body panorama-body">
           <div class="chart-toolbar panorama-toolbar">
             <div class="legend">
-              <span class="legend-item"><span class="legend-line" style="border-top-color: #f5b942"></span> Sol</span>
-              <span class="legend-item"><span class="legend-line" style="border-top-color: #5aa9e6"></span> Tierra</span>
-              <span class="legend-item"><span class="legend-swatch" style="background: #b08a5a"></span> Horizonte LOLA</span>
-              <span class="legend-item"><span class="legend-dash" style="border-top-color: #f5b942"></span> Trayectoria solar 24 h</span>
-              <span class="legend-item"><span class="legend-dash" style="border-top-color: #5aa9e6"></span> Bucle terrestre 28 d</span>
+              <span class="legend-item"><span class="legend-line" style="border-top-color: #e8b45c"></span> Sol</span>
+              <span class="legend-item"><span class="legend-line" style="border-top-color: #8fb6d1"></span> Tierra</span>
+              <span class="legend-item"><span class="legend-swatch" style="background: #cfc2ae"></span> Horizonte LOLA</span>
+              <span class="legend-item"><span class="legend-dash" style="border-top-color: #e8b45c"></span> Trayectoria solar 24 h</span>
+              <span class="legend-item"><span class="legend-dash" style="border-top-color: #8fb6d1"></span> Bucle terrestre 28 d</span>
             </div>
             <div class="row panorama-controls">
               <div class="segmented" role="group" aria-label="Rango de elevación">

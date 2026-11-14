@@ -108,19 +108,24 @@ export class MoonScene {
     this.controls.update();
 
     this.animId = requestAnimationFrame(this.animate);
+    this.reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.reduceMotion.addEventListener('change', (event) => {
+      this.motionReduced = event.matches;
+    });
+    this.motionReduced = this.reduceMotion.matches;
   }
 
   initScene() {
-    this.scene.background = new THREE.Color(0x040810);
+    this.scene.background = new THREE.Color(0x0b0a09);
   }
 
   initLighting() {
     // Ambient light simulating subtle starlight & earthshine
-    this.ambientLight = new THREE.AmbientLight(0x1a2638, 0.4);
+    this.ambientLight = new THREE.AmbientLight(0x232a30, 0.42);
     this.scene.add(this.ambientLight);
 
     // Dynamic Directional Sun Light
-    this.sunLight = new THREE.DirectionalLight(0xfff8ea, 2.6);
+    this.sunLight = new THREE.DirectionalLight(0xfff6ea, 2.6);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
@@ -189,11 +194,11 @@ export class MoonScene {
       new THREE.Vector3(0, this.moonRadius * 1.35, 0)
     ]);
     const axisMat = new THREE.LineDashedMaterial({
-      color: 0x4a6f94,
+      color: 0x5c5348,
       dashSize: 0.4,
       gapSize: 0.3,
       transparent: true,
-      opacity: 0.4
+      opacity: 0.5
     });
     this.axisLine = new THREE.Line(axisGeom, axisMat);
     this.axisLine.computeLineDistances();
@@ -286,7 +291,7 @@ export class MoonScene {
   initVectors() {
     // Ray to Sun
     const sunRayMat = new THREE.LineBasicMaterial({
-      color: 0xffd54f,
+      color: 0xe8b45c,
       linewidth: 2,
       transparent: true,
       opacity: 0.85
@@ -300,7 +305,7 @@ export class MoonScene {
 
     // Ray to Earth (DTE Comm link)
     const earthRayMat = new THREE.LineBasicMaterial({
-      color: 0x00e5ff,
+      color: 0x8fb6d1,
       linewidth: 2,
       transparent: true,
       opacity: 0.85
@@ -391,10 +396,10 @@ export class MoonScene {
       // Pin base disc / ring
       const ringGeom = new THREE.RingGeometry(0.2, 0.35, 24);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x00ffcc,
+        color: 0x8a7f72,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.6
       });
       const ringMesh = new THREE.Mesh(ringGeom, ringMat);
       ringMesh.rotation.x = Math.PI / 2;
@@ -402,14 +407,14 @@ export class MoonScene {
 
       // Vertical beacon pin
       const pinGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.8, 12);
-      const pinMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const pinMat = new THREE.MeshBasicMaterial({ color: 0x5a5147 });
       const pinMesh = new THREE.Mesh(pinGeom, pinMat);
       pinMesh.position.y = 0.4;
       group.add(pinMesh);
 
       // Beacon tip sphere
       const tipGeom = new THREE.SphereGeometry(0.14, 16, 16);
-      const tipMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+      const tipMat = new THREE.MeshBasicMaterial({ color: 0x8a7f72 });
       const tipMesh = new THREE.Mesh(tipGeom, tipMat);
       tipMesh.position.y = 0.8;
       group.add(tipMesh);
@@ -431,11 +436,11 @@ export class MoonScene {
     const group = this.siteMarkers.get(siteId);
     if (!group) return;
 
-    let hexColor = 0x00e676; // Safe green
+    let hexColor = 0x7fa96b; // Safe
     if (scorePercent < 50) {
-      hexColor = 0xff1744; // Danger red
+      hexColor = 0xd2695a; // Danger
     } else if (scorePercent < 75) {
-      hexColor = 0xff9100; // Caution orange
+      hexColor = 0xd9a441; // Caution
     }
 
     group.userData.ringMesh.material.color.setHex(hexColor);
@@ -516,12 +521,12 @@ export class MoonScene {
       const earthPoints = [sitePos, sitePos.clone().add(new THREE.Vector3(eX, eY, eZ).normalize().multiplyScalar(9))];
       this.earthRayLine.geometry.setFromPoints(earthPoints);
 
-      // Sightline colors: gold/dim for Sun, cyan/red for Earth
+      // Sightline colors: amber for Sun, steel for Earth, dimmed when blocked
       const sunVisible = ephData.sun.el > (site.horizonProfile ? site.horizonProfile(ephData.sun.az) : 0);
-      this.sunRayLine.material.color.setHex(sunVisible ? 0xffd54f : 0x554422);
+      this.sunRayLine.material.color.setHex(sunVisible ? 0xe8b45c : 0x4a4030);
 
       const earthVisible = ephData.earth.el > (site.horizonProfile ? site.horizonProfile(ephData.earth.az) : 0);
-      this.earthRayLine.material.color.setHex(earthVisible ? 0x00e5ff : 0xd50000);
+      this.earthRayLine.material.color.setHex(earthVisible ? 0x8fb6d1 : 0x3d454c);
     }
   }
 
@@ -537,16 +542,16 @@ export class MoonScene {
     this.animId = requestAnimationFrame(this.animate);
 
     // Subtle Earth rotation
-    if (this.earthMesh) {
+    if (this.earthMesh && !this.motionReduced) {
       this.earthMesh.rotation.y += 0.002;
     }
 
-    // Pulse active site pin
+    // Pulse active site pin — a static ring when motion is reduced
     const time = performance.now() * 0.004;
     this.siteMarkers.forEach((group) => {
       const ring = group.userData.ringMesh;
       if (ring) {
-        ring.material.opacity = 0.5 + 0.4 * Math.sin(time);
+        ring.material.opacity = this.motionReduced ? 0.75 : 0.5 + 0.4 * Math.sin(time);
       }
     });
 

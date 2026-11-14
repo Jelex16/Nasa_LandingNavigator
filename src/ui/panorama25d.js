@@ -13,8 +13,8 @@
 
 const DEG = Math.PI / 180;
 const TAU = Math.PI * 2;
-const FONT_SANS = '"Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif';
-const FONT_MONO = '"JetBrains Mono", "Cascadia Code", ui-monospace, Consolas, monospace';
+const FONT_SANS = '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif';
+const FONT_MONO = '"IBM Plex Mono", ui-monospace, Consolas, monospace';
 const PADDING = { top: 28, right: 18, bottom: 32, left: 52 };
 const TERRAIN_BINS = 720;
 const CARDINALS = [
@@ -53,9 +53,9 @@ export class Panorama25D {
     this.preferredHeight = options.height ?? 380;
     this.height = this.preferredHeight;
     this.colors = {
-      sun: options.sunColor ?? '#f5b942',
-      earth: options.earthColor ?? '#5aa9e6',
-      horizon: options.horizonColor ?? '#b9c2d4',
+      sun: options.sunColor ?? '#e8b45c',
+      earth: options.earthColor ?? '#8fb6d1',
+      horizon: options.horizonColor ?? '#cfc2ae',
       terrainTop: options.terrainTop ?? '#4e443a',
       terrainBottom: options.terrainBottom ?? '#0a0807',
       ...options.colors
@@ -179,9 +179,9 @@ export class Panorama25D {
   drawEmpty() {
     const ctx = this.ctx;
     const plot = this.plotRect();
-    ctx.fillStyle = '#050a13';
+    ctx.fillStyle = '#0b0a09';
     ctx.fillRect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillStyle = 'rgba(138,127,114,0.9)';
     ctx.font = `12px ${FONT_SANS}`;
     ctx.textAlign = 'center';
     ctx.fillText('Panorama LOLA no disponible', (plot.left + plot.right) / 2, (plot.top + plot.bottom) / 2);
@@ -198,10 +198,10 @@ export class Panorama25D {
       plot.bottom,
       Math.max(width, 540) * 0.9
     );
-    gradient.addColorStop(0, '#12294a');
-    gradient.addColorStop(0.45, '#0a1a2d');
-    gradient.addColorStop(0.8, '#060b13');
-    gradient.addColorStop(1, '#03060a');
+    gradient.addColorStop(0, '#2a241d');
+    gradient.addColorStop(0.45, '#17130f');
+    gradient.addColorStop(0.8, '#0e0c0a');
+    gradient.addColorStop(1, '#0b0a09');
     ctx.fillStyle = gradient;
     ctx.fillRect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
   }
