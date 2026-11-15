@@ -6,7 +6,12 @@ function formatDateUtc(ms) {
 }
 
 function badgeClass(analysis) {
-  if (analysis.site.role === 'reference') return 'badge-reference';
+  if (
+    analysis.site.role === 'reference' ||
+    analysis.site.role === 'international'
+  ) {
+    return 'badge-reference';
+  }
   if (analysis.badgeClass === 'status-safe') return 'badge-safe';
   if (analysis.badgeClass === 'status-warning') return 'badge-warning';
   return 'badge-danger';
@@ -52,7 +57,8 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
       const site = analysis.site;
       const metrics = analysis.metrics;
       const comps = analysis.components;
-      const isReference = site.role === 'reference';
+      const isReference =
+        site.role === 'reference' || site.role === 'international';
       const statusShort = analysis.status.split(' ')[0];
       const scoreLabel = isReference
         ? t('comparison.refScore')
@@ -134,8 +140,14 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
         </div>
         <p class="comparison-note">${t('comparison.note')}</p>
         <div class="comparison-actions">
+          <button class="nav-action-btn" id="open-ab-btn" type="button">
+            ${t('comparison.abButton')}
+          </button>
           <button class="nav-action-btn" id="open-matrix-btn" type="button">
             ${t('comparison.matrixButton')}
+          </button>
+          <button class="btn-link" id="export-comparison-csv" type="button">
+            ${t('export.csv')}
           </button>
         </div>
       </div>

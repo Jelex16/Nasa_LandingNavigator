@@ -12,6 +12,7 @@
     "data:fix-azimuth": "node scripts/fix_horizon_azimuth.mjs",
     "data:regional-horizons": "python scripts/build_regional_horizons.py --north-mode true",
     "data:sweep": "node scripts/build_monthly_sweep.mjs",
+    "data:flat-horizons": "node scripts/build_flat_horizons.mjs",
     "data:manifest": "node scripts/update_manifest.mjs"
   },
   "devDependencies": {

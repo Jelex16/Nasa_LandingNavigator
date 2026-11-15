@@ -1,56 +1,38 @@
-/* ============================================================================
-   Lunar Landing Site Navigator — instrument surface
-   ----------------------------------------------------------------------------
-   The palette is derived from the artifact: lunar regolith under grazing
-   polar light. Surfaces are warm near-blacks, never navy. Ink is bone, not
-   white. Chroma is reserved for the sky — Sun amber, Earth steel, terrain clay —
-   because in a polar instrument, colour is data. Interactivity is expressed by
-   light, not hue: the accent is the illuminated state.
-   ========================================================================== */
 
 :root {
-  /* Surfaces — warm regolith neutral, opaque by commitment */
   --void: #0b0a09;
   --floor: #12100e;
   --surface: #1a1715;
   --surface-raised: #221e1a;
   --surface-sunken: #14120f;
 
-  /* Hairlines */
   --line: #2e2823;
   --line-strong: #453c34;
   --line-faint: #221d19;
 
-  /* Ink — warm bone, contrast-checked against --surface */
-  --ink: #f2ece4;        /* 15.1:1 */
-  --ink-2: #b3a99c;      /*  7.7:1 */
-  --ink-3: #918678;      /*  5.0:1 — AA at any size */
+  --ink: #f2ece4;
+  --ink-2: #b3a99c;
+  --ink-3: #918678;
 
-  /* Interactive accent: light itself */
   --accent: #efe6d8;
   --accent-fill: rgba(239, 230, 216, 0.12);
   --accent-fill-strong: rgba(239, 230, 216, 0.2);
   --accent-line: rgba(239, 230, 216, 0.4);
 
-  /* Sky data — the only chroma in the system */
   --data-sun: #e8b45c;
   --data-earth: #8fb6d1;
   --data-terrain: #b08a5a;
 
-  /* Status */
   --ok: #7fa96b;
   --warn: #d9a441;
   --bad: #d2695a;
 
-  /* Type */
   --font-main: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Elevation — one real shadow, no blur */
   --raise: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px -16px rgba(0, 0, 0, 0.9);
   --raise-high: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 30px 70px -20px rgba(0, 0, 0, 0.95);
 
-  /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --fast: 140ms;
   --base: 200ms;
@@ -77,8 +59,6 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-/* ---- Focus system ------------------------------------------------------- */
-/* One ring, applied everywhere. Never removed without this replacement. */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -88,7 +68,6 @@ html, body {
   outline: none;
 }
 
-/* Skip the chrome and land on the evaluation panel. */
 .skip-link {
   position: fixed;
   top: 8px;
@@ -126,7 +105,6 @@ html, body {
 ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
 
-/* ---- Canvas plane ------------------------------------------------------- */
 .fullscreen-three-container {
   position: absolute;
   inset: 0;
@@ -135,7 +113,6 @@ html, body {
   z-index: 1;
 }
 
-/* ---- Top navigation ----------------------------------------------------- */
 .mission-nav {
   position: fixed;
   top: 0;
@@ -207,7 +184,6 @@ html, body {
   color: var(--ink-3);
 }
 
-/* Site selector rail — segmented, not pills */
 .site-quick-pills {
   display: flex;
   align-items: center;
@@ -221,8 +197,6 @@ html, body {
 }
 .site-quick-pills::-webkit-scrollbar { display: none; }
 
-/* When a horizontal rail overflows, fade the trailing edge so the cut reads
-   as "there is more", not as a clipped control. */
 .site-quick-pills.is-scrollable,
 .floating-camera-bar.is-scrollable {
   mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
@@ -321,8 +295,6 @@ html, body {
   color: var(--ink);
 }
 
-/* ---- Camera rail -------------------------------------------------------- */
-/* A segmented instrument rail, not a floating capsule. */
 .floating-camera-bar {
   position: fixed;
   top: 72px;
@@ -399,7 +371,6 @@ html, body {
   color: var(--ink);
 }
 
-/* ---- Overlay + panels --------------------------------------------------- */
 .ui-overlay-container {
   position: fixed;
   top: 72px;
@@ -428,8 +399,6 @@ html, body {
   gap: 12px;
 }
 
-/* In a scrolling flex column, children must not shrink below their content.
-   Without this the panel squeezes rows to a hairline once it overflows. */
 .glass-panel > * {
   flex: 0 0 auto;
 }
@@ -491,7 +460,6 @@ html, body {
   border: 1px solid var(--data-terrain);
 }
 
-/* Coordinate readout — a data grid, not cards */
 .coords-row {
   display: grid;
   grid-template-columns: 1.2fr 0.9fr 0.9fr;
@@ -532,7 +500,6 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Custom coordinates */
 .custom-coords-toggle {
   background: var(--surface-sunken);
   border: 1px solid var(--line);
@@ -571,7 +538,6 @@ html, body {
 
 .custom-coords-toggle summary:hover { color: var(--ink); }
 
-/* Progressive disclosure for the site brief and 3D layer controls. */
 .panel-disclosure {
   background: var(--surface-sunken);
   border: 1px solid var(--line);
@@ -676,7 +642,6 @@ html, body {
   background: rgba(210, 105, 90, 0.1);
 }
 
-/* Site description — labelled block, no rail */
 .site-brief {
   border-top: 1px solid var(--line);
   padding-top: 9px;
@@ -700,11 +665,6 @@ html, body {
   line-height: 1.5;
 }
 
-/* ---- Verdict readout ---------------------------------------------------- */
-/* The product's whole output. A numeric score is meaningless on its own, so
-   the card decomposes it: each criterion shows the points it actually
-   contributed out of the maximum its weight allows, and the stacked bar is
-   the same arithmetic drawn to scale. The four segments sum to the score. */
 .verdict-card {
   background: var(--surface-raised);
   border: 1px solid var(--line);
@@ -724,9 +684,10 @@ html, body {
 
 .verdict-headline {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
 }
 
 .verdict-status {
@@ -736,6 +697,9 @@ html, body {
   letter-spacing: -0.01em;
   line-height: 1.15;
   color: var(--ok);
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .verdict-status.status-warning { color: var(--warn); }
@@ -775,6 +739,7 @@ html, body {
   color: var(--ink-3);
   white-space: nowrap;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .verdict-score-secondary .verdict-score-value {
@@ -814,6 +779,11 @@ html, body {
 }
 
 .verdict-key-metric strong {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 3px;
+  max-width: 100%;
   font-family: var(--font-mono);
   font-size: 22px;
   font-weight: 600;
@@ -821,6 +791,15 @@ html, body {
   color: var(--ink);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+#key-outage { font-size: 20px; }
+
+.verdict-key-metric strong .key-unit {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
 }
 
 .verdict-key-metric .key-sub {
@@ -867,7 +846,6 @@ html, body {
 .verdict-details .verdict-bar { margin-bottom: 8px; }
 .verdict-details .verdict-note { margin-top: 10px; }
 
-/* Stacked contribution bar — the segments sum to the score */
 .verdict-bar {
   display: flex;
   width: 100%;
@@ -887,7 +865,6 @@ html, body {
 .verdict-bar-seg.verdict-level-watch { background: var(--warn); }
 .verdict-bar-seg.verdict-level-bad { background: var(--bad); }
 
-/* A zero-point component still exists; keep a sliver visible instead of a 0px gap. */
 .verdict-bar-seg.is-zero {
   min-width: 2px;
   background: var(--bad);
@@ -920,7 +897,6 @@ html, body {
   padding-left: 11px;
 }
 
-/* A tick in the row's state colour, so the legend never relies on hue alone */
 .verdict-row-label::before {
   content: '';
   position: absolute;
@@ -982,6 +958,25 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
+.verdict-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.verdict-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.verdict-actions .btn-link {
+  font-size: 10px;
+}
+
 .btn-link {
   background: none;
   border: none;
@@ -999,7 +994,6 @@ html, body {
 
 .btn-link:hover { text-decoration-color: var(--accent); }
 
-/* ---- Sky panel ---------------------------------------------------------- */
 .radar-box {
   display: flex;
   flex-direction: column;
@@ -1179,7 +1173,6 @@ html, body {
 
 .toggle-arrow.rotated { transform: rotate(180deg); }
 
-/* ---- Time dock ---------------------------------------------------------- */
 .bottom-mission-dock {
   position: fixed;
   bottom: 0;
@@ -1425,7 +1418,6 @@ html, body {
   padding: 5px 8px;
 }
 
-/* ---- Loading ------------------------------------------------------------ */
 .noscript-notice {
   position: fixed;
   inset: 0;
@@ -1491,8 +1483,6 @@ html, body {
   line-height: 1.5;
 }
 
-/* A scanning rule across the full card width: the instrument is reading
-   terrain, not spinning a generic loader. */
 .loading-spinner {
   width: 100%;
   height: 3px;
@@ -1518,7 +1508,6 @@ html, body {
   to { transform: translateX(350%); }
 }
 
-/* A failed load is not progress: hold the rule red and still. */
 .loading-overlay.is-error .loading-spinner::after {
   background: var(--bad);
   animation: none;
@@ -1528,7 +1517,6 @@ html, body {
 
 .loading-overlay.is-error .loading-card strong { color: var(--bad); }
 
-/* ---- Dialogs ------------------------------------------------------------ */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1655,7 +1643,6 @@ html, body {
   padding-top: 14px;
 }
 
-/* Provenance — a definition list with hairlines, not four equal cards */
 .provenance-list {
   display: flex;
   flex-direction: column;
@@ -1757,7 +1744,6 @@ html, body {
   border-radius: 2px;
 }
 
-/* Decision model */
 .decision-formula {
   font-family: var(--font-mono);
   font-size: 13px;
@@ -1805,7 +1791,6 @@ html, body {
 .decision-row .term.good { color: var(--ok); }
 .decision-row .term.bad { color: var(--bad); }
 
-/* ---- External tools ----------------------------------------------------- */
 .trek-site-card {
   background: var(--surface-sunken);
   border: 1px solid var(--line);
@@ -1935,7 +1920,6 @@ html, body {
   max-width: 72ch;
 }
 
-/* Two tool columns, hairline-separated, no card chrome */
 .systems-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2062,7 +2046,6 @@ html, body {
 .nasa-datasets-table td strong { color: var(--ink); font-weight: 500; }
 .nasa-datasets-table tr:hover td { background: transparent; color: var(--ink-2); }
 
-/* ---- Comparison matrix -------------------------------------------------- */
 .comparison-card { width: 100%; }
 
 .comparison-header { margin-bottom: 16px; }
@@ -2122,7 +2105,6 @@ html, body {
 
 .comparison-footnote b { color: var(--ink-2); font-weight: 500; }
 
-/* ---- Date sweep (launch slip) ------------------------------------------ */
 .sweep-assumptions {
   display: flex;
   flex-wrap: wrap;
@@ -2331,8 +2313,6 @@ html, body {
 .site-cell-meta { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
 .site-cell-quality { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
 
-/* The whole site cell is the control, so the row needs no extra link line
-   and keyboard users get a generous target. */
 .site-cell-btn {
   display: flex;
   flex-direction: column;
@@ -2369,7 +2349,6 @@ html, body {
 .metric-warn { color: var(--warn); }
 .metric-danger { color: var(--bad); }
 
-/* Non-colour state glyphs so the distinction never depends on hue alone */
 .metric-good strong::after { content: ''; }
 .comparison-table td.metric-good::before,
 .comparison-table td.metric-warn::before,
@@ -2382,7 +2361,6 @@ html, body {
 .comparison-table td.metric-warn::before { content: '!!'; color: var(--warn); opacity: 0.9; }
 .comparison-table td.metric-danger::before { content: 'xx'; color: var(--bad); opacity: 0.9; }
 
-/* The comms cell states "fuera de tolerancia" in words; the xx prefix is redundant. */
 .comparison-table td.comms-cell::before { content: none; }
 
 .btn-outline {
@@ -2403,7 +2381,6 @@ html, body {
   color: var(--ink);
 }
 
-/* ---- Science tool links ------------------------------------------------- */
 .btn-nasa-tool {
   display: flex;
   align-items: center;
@@ -2428,7 +2405,6 @@ html, body {
   color: var(--ink);
 }
 
-/* ---- Panorama ----------------------------------------------------------- */
 .panorama-body {
   display: flex;
   flex-direction: column;
@@ -2503,7 +2479,6 @@ html, body {
 
 .panorama-note { margin-top: 2px; }
 
-/* ---- Shared chart primitives -------------------------------------------- */
 .row { display: flex; align-items: center; }
 .chart-toolbar { display: flex; align-items: center; gap: 12px; }
 
@@ -2553,7 +2528,6 @@ html, body {
 
 .segmented button + button { border-left: 1px solid var(--line); }
 
-/* ---- Site selector + data line ----------------------------------------- */
 .site-select-row {
   display: flex;
   flex-direction: column;
@@ -2603,8 +2577,6 @@ html, body {
   white-space: nowrap;
 }
 
-/* Mission configuration — the panel select needs more room than the mast,
-   and the profile spans the row so no selected value is clipped. */
 .mission-config-row {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
@@ -2646,7 +2618,6 @@ html, body {
   font-size: 12px;
 }
 
-/* ---- 3D model card ------------------------------------------------------ */
 .model3d-card {
   display: flex;
   flex-direction: column;
@@ -2770,7 +2741,6 @@ html, body {
   font-size: 11px;
 }
 
-/* ---- Responsive --------------------------------------------------------- */
 @media (max-width: 1380px) {
   .site-quick-pills { display: none; }
   .brand-titles h1 { font-size: 12px; }
@@ -2793,8 +2763,6 @@ html, body {
     pointer-events: auto;
     gap: 12px;
   }
-  /* In the stacked layout the container scrolls, so panels must size to their
-     content instead of being squeezed to the container height. */
   .ui-overlay-container > * {
     flex: 0 0 auto;
   }
@@ -2836,8 +2804,6 @@ html, body {
   .modal-trek { max-width: calc(100vw - 16px); }
 }
 
-/* iOS Safari zooms the viewport on focus below 16px. Never suppress with
-   maximum-scale; raise the control instead. */
 @media (max-width: 640px) {
   .site-select,
   .config-block select,
@@ -2857,7 +2823,6 @@ html, body {
   .mission-config-row { grid-template-columns: 1fr; }
   .panorama-canvas-frame { height: 260px; }
   .comparison-table { font-size: 11px; }
-  /* Keep the verdict on one line in the narrowest layout. */
   .verdict-status { font-size: 15px; }
   .verdict-score-value { font-size: 32px; }
   .verdict-score-secondary .verdict-score-value { font-size: 16px; }
@@ -2867,8 +2832,6 @@ html, body {
   .step-buttons { flex: 1 1 auto; }
   .btn-step { flex: 1 1 auto; }
   .scrubber-top-info { gap: 8px 6px; }
-  /* The scenarios selector needs its own row; auto margin pushes it off-screen.
-     Stack label over control so the 16px select can use the full width. */
   .presets-menu-box {
     margin-left: 0;
     flex: 1 1 100%;
@@ -2880,10 +2843,6 @@ html, body {
   .dock-preset-select { flex: 1 1 auto; min-width: 0; width: 100%; }
 }
 
-/* ---- Touch targets ------------------------------------------------------ */
-/* Desktop keeps its dense instrument metrics. Coarse pointers and narrow
-   viewports get the 44px minimum, expanded from the control box rather than
-   from the visible text. */
 @media (pointer: coarse), (max-width: 900px) {
   .pill-btn,
   .cam-btn,
@@ -2923,7 +2882,6 @@ html, body {
   }
 }
 
-/* ---- Motion ------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2937,10 +2895,8 @@ html, body {
   .toggle-arrow.rotated { transform: none; }
 }
 
-/* Paneles contraíbles */
 .panel-header-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; flex-shrink: 0; max-width: 100%; }
 
-/* Texto solo para lectores de pantalla */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2976,7 +2932,6 @@ html, body {
   outline-offset: 2px;
 }
 
-/* Chevron SVG: hereda color y rota al colapsar */
 .panel-collapse-btn .chevron-icon {
   display: block;
   color: currentColor;
@@ -2984,14 +2939,11 @@ html, body {
   transform-origin: center;
 }
 
-/* Compatibilidad: si aún quedara algún span con el glifo antiguo */
 .panel-collapse-btn span {
   display: block;
   transition: transform 0.2s ease;
 }
 
-/* Colapsado: solo queda el encabezado. Los hijos se ocultan sin usar
-   display:none para que los canvas conserven su tamaño y no se rompan. */
 .glass-panel.is-collapsed { gap: 0; }
 .glass-panel.is-collapsed > :not(.panel-header-row) {
   max-height: 0;
@@ -3009,7 +2961,6 @@ html, body {
   transform: rotate(-90deg);
 }
 
-/* Panel colapsado: se ajusta a la altura de su encabezado */
 .ui-overlay-container .glass-panel.is-collapsed {
   height: auto;
   min-height: 0;
@@ -3017,7 +2968,6 @@ html, body {
   align-self: flex-start;
 }
 
-/* Más separación entre los paneles y el dock inferior (~16 px extra) */
 .ui-overlay-container {
   height: calc(101vh - 154px);
 }
@@ -3028,7 +2978,6 @@ html, body {
   }
 }
 
-/* Fechas del barrido en la tabla */
 .sweep-date-btn {
   background: transparent;
   border: 0;
@@ -3048,7 +2997,6 @@ html, body {
   text-decoration-color: var(--accent);
 }
 
-/* Matriz sitio × fecha */
 .comparison-actions {
   display: flex;
   justify-content: flex-end;
@@ -3152,10 +3100,23 @@ html, body {
   color: var(--ink-2) !important;
   background: var(--surface-sunken);
   padding: 0 8px 0 4px !important;
-  max-width: 165px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.matrix-ref {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 3px;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  vertical-align: middle;
 }
 
 .matrix-cell {
@@ -3203,5 +3164,348 @@ html, body {
   }
   .matrix-table {
     min-width: 820px;
+  }
+}
+
+.sweep-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 8px 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--accent-line);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  box-shadow: var(--raise);
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+.modal-guide {
+  max-width: 860px;
+}
+
+.modal-guide .modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.guide-intro {
+  margin: 0 0 10px;
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.guide-section {
+  border-top: 1px solid var(--line-faint);
+  padding: 9px 0;
+}
+
+.guide-section summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.guide-section summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.guide-body {
+  margin-top: 6px;
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.guide-body ol,
+.guide-body ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.guide-body li {
+  margin-bottom: 4px;
+}
+
+.guide-body dl {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 5px 12px;
+  margin: 4px 0 0;
+}
+
+.guide-body dt {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.guide-body dd {
+  margin: 0;
+}
+
+.guide-body p {
+  margin: 0 0 8px;
+}
+
+.guide-body strong {
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .guide-body dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-ab {
+  max-width: 1120px;
+}
+
+.ab-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ab-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.ab-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 220px;
+  min-width: 170px;
+}
+
+.ab-control select,
+.ab-control input {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 8px;
+}
+
+.ab-control select:focus-visible,
+.ab-control input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.ab-scenario-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.ab-date-label {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-3);
+}
+
+.ab-compare-btn {
+  align-self: flex-end;
+}
+
+.ab-context {
+  margin: 0;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.ab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ab-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  padding: 10px;
+}
+
+.ab-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ab-card-title {
+  min-width: 0;
+}
+
+.ab-card-title h3 {
+  margin: 2px 0 3px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ab-site-meta {
+  display: block;
+  font-size: 10px;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+.ab-card .verdict-status {
+  font-size: 11px;
+  white-space: normal;
+  text-align: right;
+  flex-shrink: 0;
+  max-width: 45%;
+}
+
+.ab-radar-box {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ab-radar-box canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.ab-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+}
+
+.ab-metrics > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--line-faint);
+  padding-bottom: 2px;
+  font-size: 11px;
+}
+
+.ab-metric-label {
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.ab-card-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ab-score {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ab-score strong {
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.ab-delta-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.ab-delta {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ab-delta th,
+.ab-delta td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--line-faint);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ab-delta thead th {
+  color: var(--ink-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 9px;
+}
+
+.ab-delta th:first-child {
+  text-align: left;
+  color: var(--ink-2);
+  font-family: var(--font-main);
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .ab-grid {
+    grid-template-columns: 1fr;
+  }
+  .ab-radar-box {
+    height: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ab-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ab-control {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+  .ab-compare-btn {
+    align-self: stretch;
+  }
+  .ab-control select,
+  .ab-control input {
+    font-size: 16px;
+  }
+  .ab-metrics {
+    grid-template-columns: 1fr;
   }
 }

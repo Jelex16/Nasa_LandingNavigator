@@ -96,7 +96,10 @@
         <section class="verdict-card" aria-labelledby="verdict-heading">
           <div class="verdict-head">
             <span class="field-label" id="verdict-heading">Veredicto</span>
-            <button class="btn-link" id="toggle-nn-view-btn" type="button">Ver modelo →</button>
+            <div class="verdict-head-actions">
+              <button class="btn-link" id="open-guide-btn" type="button">Cómo leer</button>
+              <button class="btn-link" id="toggle-nn-view-btn" type="button">Ver modelo →</button>
+            </div>
           </div>
 
           <div class="verdict-headline">
@@ -140,6 +143,10 @@
           <p class="verdict-window" id="score-window-label">
             Ventana: 28 días desde — · instante —
           </p>
+          <div class="verdict-actions">
+            <button class="btn-link" id="share-btn" type="button">Compartir</button>
+            <button class="btn-link" id="export-json-btn" type="button">Exportar JSON</button>
+          </div>
         </section>
 
         <div class="mission-config-row">
@@ -376,6 +383,7 @@
             <option value="clps-summer">Solsticio verano sur (Dic 2026)</option>
             <option value="clps-winter">Solsticio invierno sur (Jun 2026)</option>
             <option value="now">Tiempo real</option>
+            <option value="custom">Fecha personalizada</option>
           </select>
         </div>
       </div>
@@ -388,6 +396,8 @@
         <span>Leyendo los horizontes reales y las efemérides precalculadas…</span>
       </div>
     </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <noscript>
       <div class="noscript-notice">
@@ -414,11 +424,37 @@
         <div class="modal-header">
           <div class="modal-title-with-badge">
             <h2 id="matrix-modal-title">Matriz sitio × fecha</h2>
-            <span class="m-badge" id="matrix-modal-badge">9 sitios × 36 meses · 2026–2028</span>
+            <span class="m-badge" id="matrix-modal-badge">12 sitios × 36 meses · 2026–2028</span>
           </div>
           <button class="btn-modal-close" id="close-matrix-modal" type="button" aria-label="Cerrar matriz">&times;</button>
         </div>
         <div class="modal-body" id="matrix-modal-body"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+      <div class="modal-window modal-wide modal-guide">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2 id="guide-modal-title">Cómo leer esta herramienta</h2>
+            <span class="m-badge" id="guide-modal-badge">Apoyo a decisiones · no certificado para vuelo</span>
+          </div>
+          <button class="btn-modal-close" id="close-guide-modal" type="button" aria-label="Cerrar guía">&times;</button>
+        </div>
+        <div class="modal-body" id="guide-modal-body"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="ab-modal" role="dialog" aria-modal="true" aria-labelledby="ab-modal-title">
+      <div class="modal-window modal-wide modal-ab">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2 id="ab-modal-title">Comparación A/B</h2>
+            <span class="m-badge" id="ab-modal-badge">Mismo perfil · panel · mástil</span>
+          </div>
+          <button class="btn-modal-close" id="close-ab-modal" type="button" aria-label="Cerrar comparación A/B">&times;</button>
+        </div>
+        <div class="modal-body" id="ab-modal-body"></div>
       </div>
     </div>
 
@@ -492,6 +528,10 @@
               Los archivos derivados y sus checksums están en
               <a href="/data/manifest.json" target="_blank" rel="noreferrer">/data/manifest.json</a>.
               Los DEM originales no se distribuyen en este repositorio; los horizontes derivados sí.
+            </p>
+            <p class="data-note">
+              Los sitios internacionales de referencia (Chandrayaan-3, SLIM, Chang'e 4) usan un horizonte
+              analítico plano y el motor IAU 2000 local; no son análisis de terreno LOLA.
             </p>
           </div>
         </div>

@@ -112,7 +112,8 @@ function buildHtml(sweeps, context, metric) {
     .join('');
 
   const rows = sweeps
-    .map(({ siteId, siteName, sweep }) => {
+    .map(({ siteId, siteName, role, sweep }) => {
+      const isReference = role === 'reference' || role === 'international';
       const cells = sweep.points
         .map((point, index) => {
           const value = metricValue(point, context, metric);
@@ -124,7 +125,9 @@ function buildHtml(sweeps, context, metric) {
             title="${title}" aria-label="${title}">${metricDisplay(value, metric)}</button></td>`;
         })
         .join('');
-      return `<tr><th scope="row" class="matrix-site">${siteName}</th>${cells}</tr>`;
+      return `<tr><th scope="row" class="matrix-site${isReference ? ' is-reference' : ''}">${siteName}${
+        isReference ? ` <span class="matrix-ref">${t('common.reference')}</span>` : ''
+      }</th>${cells}</tr>`;
     })
     .join('');
 
@@ -149,6 +152,7 @@ function buildHtml(sweeps, context, metric) {
         <span><i class="matrix-warn"></i>${t('matrix.legend.warn')}</span>
         <span><i class="matrix-bad"></i>${t('matrix.legend.bad')}</span>
       </div>
+      <button class="nav-action-btn" id="export-matrix-csv" type="button">${t('export.csv')}</button>
     </div>
     ${mastWarning}
     <div class="matrix-scroll">
@@ -161,7 +165,7 @@ function buildHtml(sweeps, context, metric) {
   `;
 }
 
-export function renderSiteDateMatrix(container, { sweeps, context, onSelect }) {
+export function renderSiteDateMatrix(container, { sweeps, context, onSelect, onExport }) {
   if (!container || !sweeps?.length || !sweeps[0].sweep?.points?.length) return;
 
   const draw = (metric) => {
@@ -169,6 +173,9 @@ export function renderSiteDateMatrix(container, { sweeps, context, onSelect }) {
     container.querySelector('#matrix-metric')?.addEventListener('change', (event) => {
       draw(event.target.value);
     });
+    container
+      .querySelector('#export-matrix-csv')
+      ?.addEventListener('click', () => onExport?.());
     container.querySelectorAll('.matrix-cell').forEach((button) => {
       button.addEventListener('click', () => {
         const siteId = button.getAttribute('data-site-id');

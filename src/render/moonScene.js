@@ -2,33 +2,25 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { LunarTextureManager } from './lunarTextureManager.js';
 
-/**
- * Creates a procedural Earth sphere texture with oceans, continents, and atmosphere.
- */
 function createProceduralEarthTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
-  // Deep Blue Oceans
   ctx.fillStyle = '#0d2b45';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Continents (Americas, Eurasia, Africa, Australia, Antarctica)
   ctx.fillStyle = '#2d5a27';
 
-  // Africa / Europe
   ctx.beginPath();
   ctx.ellipse(540, 260, 90, 120, 0.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // Eurasia
   ctx.beginPath();
   ctx.ellipse(680, 160, 160, 80, -0.1, 0, Math.PI * 2);
   ctx.fill();
 
-  // Americas
   ctx.beginPath();
   ctx.ellipse(260, 170, 70, 90, -0.3, 0, Math.PI * 2);
   ctx.fill();
@@ -36,16 +28,13 @@ function createProceduralEarthTexture() {
   ctx.ellipse(320, 340, 60, 100, 0.3, 0, Math.PI * 2);
   ctx.fill();
 
-  // Australia
   ctx.beginPath();
   ctx.ellipse(820, 360, 45, 35, 0.1, 0, Math.PI * 2);
   ctx.fill();
 
-  // Antarctica
   ctx.fillStyle = '#e8f4f8';
   ctx.fillRect(0, 470, canvas.width, 42);
 
-  // Cloud swirls
   ctx.fillStyle = 'rgba(255, 255, 255, 0.38)';
   for (let i = 0; i < 20; i++) {
     ctx.beginPath();
@@ -81,7 +70,6 @@ export class MoonScene {
     this.controls.maxDistance = 70;
 
     this.moonRadius = 10;
-    // Matches the active 2.5x control: 0.22 * 2.5.
     this.displacementScale = 0.55;
     this.displacementEnabled = true;
     this.currentLayerId = 'lroc';
@@ -102,7 +90,6 @@ export class MoonScene {
     this.handleResize = this.handleResize.bind(this);
     window.addEventListener('resize', this.handleResize);
 
-    // Initial camera position (angled towards South Pole)
     this.camera.position.set(0, -22, 18);
     this.controls.target.set(0, -3, 0);
     this.controls.update();
@@ -120,16 +107,12 @@ export class MoonScene {
   }
 
   initLighting() {
-    // Ambient light simulating subtle starlight & earthshine
     this.ambientLight = new THREE.AmbientLight(0x2a3238, 0.5);
     this.scene.add(this.ambientLight);
 
-    // Fill light so the night side stays readable instead of rendering as a
-    // featureless black disc.
     this.hemiLight = new THREE.HemisphereLight(0x8fb6d1, 0x1a1512, 0.4);
     this.scene.add(this.hemiLight);
 
-    // Dynamic Directional Sun Light
     this.sunLight = new THREE.DirectionalLight(0xfff6ea, 2.6);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
@@ -142,13 +125,11 @@ export class MoonScene {
     this.sunLight.shadow.camera.bottom = -15;
     this.scene.add(this.sunLight);
 
-    // Sun visual orb in the distance
     const sunGeom = new THREE.SphereGeometry(1.6, 24, 24);
     const sunMat = new THREE.MeshBasicMaterial({ color: 0xffea88 });
     this.sunMesh = new THREE.Mesh(sunGeom, sunMat);
     this.scene.add(this.sunMesh);
 
-    // Sun corona glow sprite
     const spriteCanvas = document.createElement('canvas');
     spriteCanvas.width = 128;
     spriteCanvas.height = 128;
@@ -172,7 +153,6 @@ export class MoonScene {
   }
 
   async initMoon() {
-    // High tessellation sphere to support true vertex displacement for craters and mountains
     const moonGeom = new THREE.SphereGeometry(this.moonRadius, 192, 192);
 
     this.moonMaterial = new THREE.MeshStandardMaterial({
@@ -188,12 +168,8 @@ export class MoonScene {
     this.moonMesh.receiveShadow = true;
     this.moonMesh.castShadow = true;
 
-    // Three.js SphereGeometry maps texture u=0.5 to +X, the same convention as
-    // latLonToVector3's lon=0. Rotating the mesh here would shift the photo
-    // layer 90° away from the landing-site pins.
     this.scene.add(this.moonMesh);
 
-    // Polar axis ring indicator (Subtle dashed line)
     const axisGeom = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, -this.moonRadius * 1.35, 0),
       new THREE.Vector3(0, this.moonRadius * 1.35, 0)
@@ -209,7 +185,6 @@ export class MoonScene {
     this.axisLine.computeLineDistances();
     this.scene.add(this.axisLine);
 
-    // Load initial NASA elevation and photographic textures
     try {
       const [dispTex, colorTex] = await Promise.all([
         this.textureManager.loadDisplacementTexture(),
@@ -229,9 +204,6 @@ export class MoonScene {
     }
   }
 
-  /**
-   * Switches the active lunar map layer (LROC Photo, LOLA Topography DEM, LOLA Hillshade, LOLA Slope).
-   */
   async setLayer(layerId) {
     this.currentLayerId = layerId;
     try {
@@ -245,9 +217,6 @@ export class MoonScene {
     }
   }
 
-  /**
-   * Sets the 3D surface elevation exaggeration multiplier (1x = real scale, 2.5x, 5x, 0 = flat).
-   */
   setElevationExaggeration(multiplier) {
     if (!this.moonMaterial) return;
 
@@ -263,7 +232,6 @@ export class MoonScene {
     }
     this.moonMaterial.needsUpdate = true;
 
-    // Reposition markers to float cleanly above displaced relief
     if (this.currentSitesList) {
       this.setLandingSites(this.currentSitesList, this.onSelectCallback);
     }
@@ -281,7 +249,6 @@ export class MoonScene {
     this.earthMesh = new THREE.Mesh(earthGeom, earthMat);
     this.scene.add(this.earthMesh);
 
-    // Earth atmosphere halo
     const haloGeom = new THREE.SphereGeometry(1.55, 32, 32);
     const haloMat = new THREE.MeshBasicMaterial({
       color: 0x64b5f6,
@@ -294,7 +261,6 @@ export class MoonScene {
   }
 
   initVectors() {
-    // Ray to Sun
     const sunRayMat = new THREE.LineBasicMaterial({
       color: 0xe8b45c,
       linewidth: 2,
@@ -308,7 +274,6 @@ export class MoonScene {
     this.sunRayLine = new THREE.Line(sunRayGeom, sunRayMat);
     this.scene.add(this.sunRayLine);
 
-    // Ray to Earth (DTE Comm link)
     const earthRayMat = new THREE.LineBasicMaterial({
       color: 0x8fb6d1,
       linewidth: 2,
@@ -357,13 +322,7 @@ export class MoonScene {
     this.scene.add(this.starfield);
   }
 
-  /**
-   * Converts Selenographic coordinates (lat, lon) to 3D Cartesian position on Moon sphere.
-   * Coordinate convention: Y is lunar spin axis (North = +Y, South = -Y)
-   * X and Z lie on equatorial plane. Prime meridian (0 lon) along +X.
-   */
   latLonToVector3(lat, lon, altitudeOffset = 0.12) {
-    // Offset accounts for displacement and ensures pin hovers visibly above terrain
     const totalOffset = altitudeOffset + (this.displacementEnabled ? this.displacementScale * 0.4 : 0);
     const r = this.moonRadius + totalOffset;
     const phi = (lat * Math.PI) / 180;
@@ -376,14 +335,10 @@ export class MoonScene {
     return new THREE.Vector3(x, y, z);
   }
 
-  /**
-   * Adds or updates 3D pins for all landing sites.
-   */
   setLandingSites(sites, onSelectCallback) {
     this.currentSitesList = sites;
     this.onSelectCallback = onSelectCallback;
 
-    // Clear old markers
     this.siteMarkers.forEach((group) => {
       this.scene.remove(group);
     });
@@ -394,11 +349,9 @@ export class MoonScene {
       const pos = this.latLonToVector3(site.lat, site.lon, 0.08);
       group.position.copy(pos);
 
-      // Normal vector pointing outwards from Moon center
       const normal = pos.clone().normalize();
       group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
-      // Pin base disc / ring
       const ringGeom = new THREE.RingGeometry(0.2, 0.35, 24);
       const ringMat = new THREE.MeshBasicMaterial({
         color: 0x8a7f72,
@@ -410,14 +363,12 @@ export class MoonScene {
       ringMesh.rotation.x = Math.PI / 2;
       group.add(ringMesh);
 
-      // Vertical beacon pin
       const pinGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.8, 12);
       const pinMat = new THREE.MeshBasicMaterial({ color: 0x5a5147 });
       const pinMesh = new THREE.Mesh(pinGeom, pinMat);
       pinMesh.position.y = 0.4;
       group.add(pinMesh);
 
-      // Beacon tip sphere
       const tipGeom = new THREE.SphereGeometry(0.14, 16, 16);
       const tipMat = new THREE.MeshBasicMaterial({ color: 0x8a7f72 });
       const tipMesh = new THREE.Mesh(tipGeom, tipMat);
@@ -434,32 +385,25 @@ export class MoonScene {
     }
   }
 
-  /**
-   * Updates marker color based on the transparent decision score.
-   */
   updateSiteStatus(siteId, scorePercent) {
     const group = this.siteMarkers.get(siteId);
     if (!group) return;
 
-    let hexColor = 0x7fa96b; // Safe
+    let hexColor = 0x7fa96b;
     if (scorePercent < 50) {
-      hexColor = 0xd2695a; // Danger
+      hexColor = 0xd2695a;
     } else if (scorePercent < 75) {
-      hexColor = 0xd9a441; // Caution
+      hexColor = 0xd9a441;
     }
 
     group.userData.ringMesh.material.color.setHex(hexColor);
     group.userData.tipMesh.material.color.setHex(hexColor);
   }
 
-  /**
-   * Selects an active landing site and moves the camera / vectors.
-   */
   setActiveSite(site) {
     this.currentSite = site;
     const sitePos = this.latLonToVector3(site.lat, site.lon, 0.15);
 
-    // Highlight active pin
     this.siteMarkers.forEach((group, id) => {
       const isSelected = id === site.id;
       group.userData.ringMesh.scale.set(isSelected ? 1.6 : 1.0, isSelected ? 1.6 : 1.0, 1.0);
@@ -468,9 +412,6 @@ export class MoonScene {
     return sitePos;
   }
 
-  /**
-   * Camera View Presets
-   */
   viewSouthPole() {
     this.controls.target.set(0, -this.moonRadius, 0);
     this.camera.position.set(0, -this.moonRadius * 2.3, 3);
@@ -491,22 +432,18 @@ export class MoonScene {
     this.controls.update();
   }
 
-  /**
-   * Updates Sun and Earth 3D positions and sightline vectors from ephemeris data.
-   */
   updateEphemeris(ephData, site) {
     if (!ephData) return;
 
     const sunDist = 38;
     const sX = ephData.sunDirMCMF[0];
-    const sY = ephData.sunDirMCMF[2]; // pole in MCMF
+    const sY = ephData.sunDirMCMF[2];
     const sZ = -ephData.sunDirMCMF[1];
 
     const sunPos = new THREE.Vector3(sX, sY, sZ).normalize().multiplyScalar(sunDist);
     this.sunLight.position.copy(sunPos);
     this.sunMesh.position.copy(sunPos);
 
-    // Earth position
     const earthDist = 30;
     const eX = ephData.earthDirMCMF[0];
     const eY = ephData.earthDirMCMF[2];
@@ -514,19 +451,15 @@ export class MoonScene {
     const earthPos = new THREE.Vector3(eX, eY, eZ).normalize().multiplyScalar(earthDist);
     this.earthMesh.position.copy(earthPos);
 
-    // Update Sightlines from selected landing site
     if (site) {
       const sitePos = this.latLonToVector3(site.lat, site.lon, 0.12);
 
-      // Sun vector
       const sunPoints = [sitePos, sitePos.clone().add(new THREE.Vector3(sX, sY, sZ).normalize().multiplyScalar(10))];
       this.sunRayLine.geometry.setFromPoints(sunPoints);
 
-      // Earth vector
       const earthPoints = [sitePos, sitePos.clone().add(new THREE.Vector3(eX, eY, eZ).normalize().multiplyScalar(9))];
       this.earthRayLine.geometry.setFromPoints(earthPoints);
 
-      // Sightline colors: amber for Sun, steel for Earth, dimmed when blocked
       const sunVisible = ephData.sun.el > (site.horizonProfile ? site.horizonProfile(ephData.sun.az) : 0);
       this.sunRayLine.material.color.setHex(sunVisible ? 0xe8b45c : 0x4a4030);
 
@@ -546,12 +479,10 @@ export class MoonScene {
   animate() {
     this.animId = requestAnimationFrame(this.animate);
 
-    // Subtle Earth rotation
     if (this.earthMesh && !this.motionReduced) {
       this.earthMesh.rotation.y += 0.002;
     }
 
-    // Pulse active site pin — a static ring when motion is reduced
     const time = performance.now() * 0.004;
     this.siteMarkers.forEach((group) => {
       const ring = group.userData.ringMesh;

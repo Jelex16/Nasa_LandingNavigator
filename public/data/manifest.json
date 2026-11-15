@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "version": "1.0.2",
-  "generatedUtc": "2026-11-15T01:13:00.111Z",
+  "version": "1.0.3",
+  "generatedUtc": "2026-11-15T01:57:32.938Z",
   "dataMode": "real",
   "horizonModel": "Hybrid LOLA profile: 5 m/px landing-site DEM near field + 80 m/px LOLA 80S regional DEM to R=100 km; lunar curvature term r^2/(2R_Moon); five mast heights 0.5, 2, 5, 10, 20 m.",
   "ephemSource": "JPL Horizons API, DE441, apparent topocentric az/el and distance, 1 h step",
@@ -141,6 +141,22 @@
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
+      "path": "horizon/chandrayaan3.json",
+      "bytes": 7539,
+      "sha256": "7a058fc5699512d066eb4ac6ae96335cfee17e821a6cb7ffccebe5897aa40ef6",
+      "source": "Analytic flat horizon (reference); no LOLA terrain at this location",
+      "sourceUrl": "https://ssd.jpl.nasa.gov/horizons/",
+      "generatedUtc": "2026-11-15T01:55:36Z"
+    },
+    {
+      "path": "horizon/change4.json",
+      "bytes": 7534,
+      "sha256": "183daf7f2b920b051d338cc70b94fb3f72bde92d181854f4cbc0e7cb3c222dcc",
+      "source": "Analytic flat horizon (reference); no LOLA terrain at this location",
+      "sourceUrl": "https://ssd.jpl.nasa.gov/horizons/",
+      "generatedUtc": "2026-11-15T01:55:36Z"
+    },
+    {
       "path": "horizon/control_eq.json",
       "bytes": 25611,
       "sha256": "2d60f565aaf329dbb4593617ded533e5b63afe242abf8890840f2c7894841c21",
@@ -213,6 +229,14 @@
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
+      "path": "horizon/slim.json",
+      "bytes": 7531,
+      "sha256": "ac4ff805b2ab02fa0351de85bc445d3018cf1139d7128827a28e2eceedf35fe4",
+      "source": "Analytic flat horizon (reference); no LOLA terrain at this location",
+      "sourceUrl": "https://ssd.jpl.nasa.gov/horizons/",
+      "generatedUtc": "2026-11-15T01:55:36Z"
+    },
+    {
       "path": "sites-extra.json",
       "bytes": 4006,
       "sha256": "836b56f8ce00a7cb8ca1777a98193aa5c8839c98c6218ac3dd55614cc746e8c0",
@@ -221,12 +245,36 @@
       "generatedUtc": "2026-11-14T18:26:48Z"
     },
     {
+      "path": "sites-international.json",
+      "bytes": 3922,
+      "sha256": "ec8da49240b1afc1f0b6a243a1477b1025a154bb87e867360feb0aaa158be6b9",
+      "source": "International reference sites; real mission coordinates, analytic flat horizon, local IAU 2000 ephemerides",
+      "sourceUrl": "https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/",
+      "generatedUtc": "2026-11-15T00:00:00Z"
+    },
+    {
       "path": "sites.json",
       "bytes": 10637,
       "sha256": "5d660ea1955f8a66c66e9be8670b1399d2af970b76be5b64a0f3954492c71598",
       "source": "SUNDIAL pipeline; site coordinates derived from PGDA GeoTIFF CRS",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
+    },
+    {
+      "path": "sweep/chandrayaan3.json",
+      "bytes": 10908,
+      "sha256": "8102addd59873276fb8644afd4aea6a2f5675466b5839d6c3923a8d0fc0140b8",
+      "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-15T01:56:36.710Z"
+    },
+    {
+      "path": "sweep/change4.json",
+      "bytes": 10889,
+      "sha256": "30635bd0f0fcb3014e365623fa54e4ac80ebc43d393ccbac1b87f0d2d0a243df",
+      "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-15T01:56:45.959Z"
     },
     {
       "path": "sweep/control_eq.json",
@@ -301,6 +349,14 @@
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
+      "path": "sweep/slim.json",
+      "bytes": 10857,
+      "sha256": "541f2a71988a7632c96861554bcd023ca6911f16e9bb95c667018760f1bab0dc",
+      "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
+      "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
+      "generatedUtc": "2026-11-15T01:56:44.493Z"
+    },
+    {
       "path": "validation.json",
       "bytes": 4850,
       "sha256": "5398b7996e5475801e843bc5642cf9b37a4fce3b7ab88d220019498b3667699d",
@@ -330,5 +386,6 @@
       "label": "NASA/JPL Horizons system (DE441), observer ephemerides",
       "url": "https://ssd.jpl.nasa.gov/horizons/"
     }
-  ]
+  ],
+  "referenceSitesNote": "International reference sites (Chandrayaan-3, SLIM, Chang'e 4) use analytic flat horizons and the local IAU 2000 engine; they are not LOLA terrain analyses."
 }

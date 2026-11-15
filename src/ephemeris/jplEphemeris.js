@@ -9,7 +9,6 @@ export const EARTH_RADIUS_KM = 6_371;
 
 const ephemCache = new Map();
 
-/** Decodes the compact SUNDIAL/JPL Horizons binary ephemeris. */
 export function decodeEphemeris(buffer) {
   if (buffer.byteLength < HEADER_BYTES_WITHOUT_SITE) {
     throw new Error('Ephemeris buffer is truncated');
@@ -107,11 +106,6 @@ function azimuthFromTrig(trig, k, t) {
   return normalizeAzimuthDeg((Math.atan2(s, c) * 180) / Math.PI);
 }
 
-/**
- * Cubic Hermite interpolation of the hourly Horizons samples at any instant.
- * Azimuths are interpolated through (sin Az, cos Az) to avoid the 360 -> 0
- * discontinuity. Returns null outside the precomputed coverage.
- */
 export function sampleEphemeris(series, timeMs) {
   const raw = ephemerisIndexAt(series, timeMs);
   if (raw === null) return null;

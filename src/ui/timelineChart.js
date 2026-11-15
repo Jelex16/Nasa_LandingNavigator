@@ -1,11 +1,5 @@
 import { getLanguage, t } from '../i18n.js';
 
-/**
- * Interactive elevation timeline for the 28-day mission window.
- * Both the Sun and Earth curves are compared with the real LOLA terrain
- * horizon at the corresponding azimuth. The shaded bands use the terrain
- * horizon as their baseline (not 0°), so the visual matches the model.
- */
 
 export class TimelineChart {
   constructor(canvasElement, onTimeSelectCallback) {
@@ -165,7 +159,6 @@ export class TimelineChart {
     ctx.fillStyle = 'rgba(138, 127, 114, 0.95)';
     ctx.strokeStyle = 'rgba(242, 236, 228, 0.07)';
     ctx.lineWidth = 1 * this.dpr;
-    // Pick a step that keeps roughly five ticks so the labels never collide.
     const stepCandidates = [1, 2, 5, 10, 20, 50];
     const idealStep = (maxEl - minEl) / 5;
     const stepEl = stepCandidates.find((step) => step >= idealStep) ?? 50;

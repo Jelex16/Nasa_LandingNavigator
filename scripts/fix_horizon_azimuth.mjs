@@ -1,16 +1,3 @@
-/**
- * Correct the azimuth origin of the legacy SUNDIAL hybrid horizons.
- *
- * The reference pipeline `build_horizons.py` computed `pole_planar_north_angle`
- * as the direction toward the projected lunar south pole and then treated that
- * direction as north. For a southern site, that is geographic *south*. The
- * resulting 720-bin rows are therefore rotated by 180 degrees relative to the
- * compass azimuths returned by JPL Horizons / the local ephemeris engine.
- *
- * This script rotates each legacy polar horizon by 360 bins (180 degrees) so
- * bin 0 = true north, and updates the manifest hashes. It is idempotent: files
- * already carrying `azimuthCorrection` are skipped.
- */
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';

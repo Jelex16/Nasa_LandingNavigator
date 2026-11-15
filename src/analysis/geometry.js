@@ -15,11 +15,6 @@ export function angularRadiusDeg(radiusKm, distanceKm) {
   return Math.asin(radiusKm / distanceKm) * RAD_TO_DEG;
 }
 
-/**
- * Fraction of a finite disk above a locally horizontal horizon segment.
- * rho is the angular radius of the body; x is the normalized distance from
- * the disk centre to the horizon.
- */
 export function diskVisibleFraction(centerElDeg, horizonElDeg, angularRadius) {
   const rho = Math.max(angularRadius, 1e-9);
   const x = clamp((horizonElDeg - centerElDeg) / rho, -1, 1);
@@ -57,10 +52,6 @@ export function azElFromVector(direction, latDeg, lonEastDeg) {
   };
 }
 
-/**
- * Converts a topocentric az/el direction into the Moon-centered,
- * Moon-fixed (MCMF) frame used by the Three.js scene.
- */
 export function azElToMcmf(latDeg, lonEastDeg, azDeg, elDeg) {
   const { up, east, north } = localUnitVectors(latDeg, lonEastDeg);
   const az = azDeg * DEG_TO_RAD;

@@ -220,6 +220,9 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
       <span>${t('sweep.assumptions.mast', { mast: context.mastHeightM.toFixed(1) })}</span>
     </div>
     ${mastWarning}
+    <div class="sweep-toolbar">
+      <button class="nav-action-btn" id="export-sweep-csv" type="button">${t('export.csv')}</button>
+    </div>
     <div class="sweep-chart-wrap" id="sweep-chart-wrap">
       <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="img"
         aria-label="${t('sweep.chartAria', { site: context.siteName })}">

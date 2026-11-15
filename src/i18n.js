@@ -28,6 +28,7 @@ const MESSAGES = {
     "common.outage": "Outage",
     "common.sunShort": "Sun",
     "common.partialDisk": "partial disk",
+    "common.reference": "REFERENCE",
     "common.outOfTolerance": "out of tolerance",
     "common.sinDte": "no DTE",
     "common.verticalTracker": "Vertical tracker",
@@ -44,6 +45,8 @@ const MESSAGES = {
     "status.noData": "NO DATA",
     "status.referenceText":
       "Equatorial control site with historical significance; not a polar landing candidate.",
+    "status.internationalText":
+      "International reference site with an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis or a certified landing candidate.",
     "status.customText":
       "User-defined site with an approximate horizon. The score is an estimate; it does not use a LOLA DEM at the point and does not certify the terrain.",
     "status.slopeDanger":
@@ -86,6 +89,8 @@ const MESSAGES = {
       "Reference site: {dte}% DTE and {sun}% of hours with Sun. Not a polar candidate.",
     "verdict.customSummary":
       "Approximate-horizon estimate: {sun}% of hours with Sun, {dte}% DTE, and a maximum outage of {outage}.",
+    "verdict.internationalSummary":
+      "International reference: {sun}% of hours with Sun and {dte}% DTE. Analytic flat horizon; not a LOLA terrain analysis.",
     "verdict.summary": "{sun}% of hours with Sun, {dte}% DTE and {comms}.",
     "verdict.commsOut":
       "no continuous DTE link: the longest outage is {outage} and the tolerance is {tol} h",
@@ -163,6 +168,9 @@ const MESSAGES = {
     "program.nonOfficial": "Non-official point",
     "program.haworthReference": "Haworth · reference",
     "program.historicalReference": "Historical reference",
+    "program.isro": "ISRO · reference",
+    "program.jaxa": "JAXA · reference",
+    "program.cnsa": "CNSA · reference",
     "program.custom": "User-defined coordinates",
     "description.site23":
       "Elevated massif with a hybrid LOLA horizon: 5 m/px in the near field and 80 m/px out to 100 km. Its geometry favors Earth visibility, but the Sun stays low and local relief controls the energy windows.",
@@ -182,6 +190,12 @@ const MESSAGES = {
       "Reference coordinate inside Haworth crater, next to one of the coldest regions in the solar system. The 80 m/px regional LOLA DEM shows the crater walls dominating the horizon; it is not a certified rim point.",
     "description.control_eq":
       "Equatorial control site. Its analytic flat horizon isolates the effect of the Moon's axial tilt and provides a contrast with polar geometry. It is shown as a reference, not a landing candidate.",
+    "description.chandrayaan3":
+      "India's Chandrayaan-3 Vikram lander touched down at Shiv Shakti Point (69.37°S, 32.32°E) in August 2023. This reference uses an analytic flat horizon and local IAU 2000 ephemerides; the polar terrain horizon is not modeled with LOLA here.",
+    "description.slim":
+      "Japan's SLIM lander touched down at Shioli (13.32°S, 25.25°E) in January 2024. This equatorial reference uses an analytic flat horizon and local IAU 2000 ephemerides; the local terrain horizon is not modeled with LOLA here.",
+    "description.change4":
+      "China's Chang'e 4 landed in Von Kármán crater on the lunar far side (45.46°S, 177.59°E) in January 2019. From the far side the Earth is not directly visible, so the mission relies on a relay. This reference uses an analytic flat horizon and local IAU 2000 ephemerides.",
     "action.simulate": "Simulate",
     "action.pause": "Pause",
     "action.compare": "Compare",
@@ -232,6 +246,7 @@ const MESSAGES = {
     "comparison.note":
       "All rows use the same start date, window, profile, panel and mast height as the main panel. The score is a decision index, not a landing certification. Click a row to select the site.",
     "comparison.matrixButton": "Site × date matrix",
+    "comparison.abButton": "Side-by-side A/B",
     "comparison.footnote":
       "Comms = 1 − max DTE outage / tolerance. A 0/100 indicates that the outage equals or exceeds the profile tolerance, not that data is missing. The outage is measured within the 28-day window; if it lasts longer, the value is a lower bound. DTE uses the Earth center; the partial disk is shown for reference and is not part of the score. Switch the profile to “Relay / store-and-forward” to see non-zero values.",
     "comparison.req": "req {value}",
@@ -298,10 +313,55 @@ const MESSAGES = {
     "matrix.legend.warn": "marginal",
     "matrix.legend.bad": "does not meet",
     "matrix.note":
-      "Each cell is a 28-day window from the first day of the month. Score with the current profile; energy with the current panel; DTE and outage with a 2 m mast. Click a cell to load that site and date in the main view.",
+      "Each cell is a 28-day window from the first day of the month. Score with the current profile; energy with the current panel; DTE and outage with a 2 m mast. Click a cell to load that site and date in the main view. Rows marked REFERENCE are context, not ranked candidates; international references use an analytic flat horizon.",
     "matrix.mastWarning":
       "DTE and outage are precomputed with a 2.0 m mast; the main panel uses {current} m.",
     "matrix.site": "Site",
+    "ab.title": "Side-by-side A/B comparison",
+    "ab.badge": "Same profile · panel · mast",
+    "ab.scenarioA": "Scenario A",
+    "ab.scenarioB": "Scenario B",
+    "ab.site": "Site",
+    "ab.date": "Date (UTC)",
+    "ab.compare": "Compare",
+    "ab.load": "Load in main view",
+    "ab.context":
+      "Both scenarios use the current profile, panel and mast.",
+    "ab.metrics.sun": "Sun",
+    "ab.metrics.dte": "DTE",
+    "ab.metrics.outage": "Outage",
+    "ab.metrics.eclipse": "Eclipse",
+    "ab.metrics.energy": "Energy",
+    "ab.metrics.slope": "Local slope",
+    "ab.metrics.score": "Mission index",
+    "ab.delta": "Δ (B − A)",
+    "ab.loading": "Evaluating scenarios A and B…",
+    "ab.error": "Could not compare the scenarios: {message}",
+    "ab.radarAria": "LOLA horizon radar for {site} on {date}",
+    "ab.points": "pts",
+    "ab.percentPoints": "pp",
+    "guide.title": "How to read this tool",
+    "guide.badge": "Decision-support · not flight-certified",
+    "guide.intro":
+      "This tool compares lunar landing sites and dates using real LOLA terrain and JPL Horizons ephemerides. It is decision-support and educational software, not a flight-certified landing analysis.",
+    "guide.quickStart.title": "Quick start",
+    "guide.quickStart.body":
+      "<ol><li>Pick a curated site or enter custom coordinates.</li><li>Pick a date; the 28-day evaluation window starts there.</li><li>Read the verdict: Sun %, DTE %, and the longest DTE outage.</li><li>Use the polar radar and the 2.5D panorama to see the Sun and Earth against the LOLA horizon.</li><li>Use <strong>Dates</strong> to sweep 36 months, <strong>Compare</strong> for the site matrix or side-by-side A/B, and <strong>Share</strong> to copy a scenario link.</li></ol>",
+    "guide.metrics.title": "What the metrics mean",
+    "guide.metrics.body":
+      "<dl><dt>Sunlit %</dt><dd>Fraction of hours with at least 5% of the solar disk above the LOLA horizon. It is not necessarily full Sun.</dd><dt>DTE %</dt><dd>Fraction of hours with the Earth's center above the local horizon (direct-to-Earth).</dd><dt>Outage</dt><dd>Longest continuous DTE blackout inside the 28-day window.</dd><dt>Eclipse</dt><dd>Longest continuous solar eclipse inside the window.</dd><dt>Energy</dt><dd>Solar energy accumulated over 28 days for the selected panel and mast.</dd><dt>Mission index</dt><dd>A weighted decision index from energy, eclipse, DTE and outage. It is not a probability of success.</dd></dl>",
+    "guide.pole.title": "Why the south pole is hard",
+    "guide.pole.body":
+      "<p>The Sun and the Earth stay close to the horizon at the south pole. A ridge a few degrees high can hide them, so a small change in site or date can flip the verdict.</p><p>Permanently shadowed regions (PSRs) can hold ice but produce no solar power. On the far side the Earth is not directly visible; those missions need a relay, which is why Chang'e 4 shows 0% DTE here.</p>",
+    "guide.glossary.title": "Glossary",
+    "guide.glossary.body":
+      "<dl><dt>LOLA</dt><dd>Lunar Orbiter Laser Altimeter; the laser altimeter behind the DEMs used here.</dd><dt>DEM</dt><dd>Digital elevation model; a grid of terrain heights.</dd><dt>Horizon</dt><dd>The local skyline; here a 1D profile of the maximum elevation per azimuth.</dd><dt>DTE</dt><dd>Direct-to-Earth; a radio link with the Earth above the local horizon.</dd><dt>PSR</dt><dd>Permanently shadowed region; terrain that never receives direct sunlight.</dd><dt>Libration</dt><dd>The Moon's slight wobble, which moves the Earth's apparent position over a month.</dd><dt>CLPS / HLS</dt><dd>NASA's Commercial Lunar Payload Services and Human Landing System programs.</dd><dt>Artemis III</dt><dd>NASA's crewed landing mission and its candidate regions.</dd></dl>",
+    "guide.try.title": "Try this",
+    "guide.try.body":
+      "<ol><li>Select Malapert Massif, 14 Nov 2026: about 50% Sun, 42% DTE, 12-day outage.</li><li>Open <strong>Dates</strong> and click May 2027: 0% Sun, 47% DTE, 14.8-day outage.</li><li>Open <strong>Compare</strong> → <strong>Side-by-side A/B</strong> and choose Chang'e 4: a far-side reference with 0% DTE, which shows why a relay is needed.</li><li>Use <strong>Share</strong> to copy the scenario link, or <strong>Export JSON/CSV</strong> for the data.</li></ol>",
+    "guide.limits.title": "Limits",
+    "guide.limits.body":
+      "Decision-support and educational software, not flight-certified. It does not model rocks below DEM resolution, thermal state, batteries, rover mobility, relay constellations, or Monte Carlo uncertainty. The horizon is a 1D profile per azimuth; the 2.5D panorama is a shaded representation. Nobile/Haworth use 80 m/px; custom and international reference sites use approximate or analytic flat horizons.",
     "matrix.cellTitle":
       "{site} · {date}: score {score}/100, {sun}% Sun, {dte}% DTE, outage {outage}, {energy} kWh/m²",
     "panorama.sun": "Sun",
@@ -329,7 +389,15 @@ const MESSAGES = {
     "sim.dayShort": "Day {day} / {total}",
     "sim.dayAria": "Day {day} of {total}, {time}",
     "play.simulate": "Simulate",
-    "play.pause": "Pause"
+    "play.pause": "Pause",
+    "share.button": "Share",
+    "share.copied": "Link copied",
+    "share.copyPrompt": "Copy this scenario link:",
+    "export.json": "Export JSON",
+    "export.csv": "Export CSV",
+    "export.downloaded": "Downloaded",
+    "export.error": "Could not export: {message}",
+    "scenario.customDate": "Custom date"
   },
   es: {
     "meta.title": "Lunar Landing Site Navigator | NASA Space Apps 2026",
@@ -354,6 +422,7 @@ const MESSAGES = {
     "common.outage": "Corte",
     "common.sunShort": "Sol",
     "common.partialDisk": "disco parcial",
+    "common.reference": "REFERENCIA",
     "common.outOfTolerance": "fuera de tolerancia",
     "common.sinDte": "sin DTE",
     "common.verticalTracker": "Vertical con seguimiento",
@@ -370,6 +439,8 @@ const MESSAGES = {
     "status.noData": "SIN DATOS",
     "status.referenceText":
       "Sitio ecuatorial de control histórico; no es un candidato polar de aterrizaje.",
+    "status.internationalText":
+      "Sitio internacional de referencia con horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis de terreno LOLA ni un candidato certificado.",
     "status.customText":
       "Sitio definido por el usuario con horizonte aproximado. El score es una estimación; no usa un DEM LOLA en el punto y no certifica el terreno.",
     "status.slopeDanger":
@@ -412,6 +483,8 @@ const MESSAGES = {
       "Sitio de referencia: {dte}% de DTE y {sun}% de horas con Sol. No es un candidato polar.",
     "verdict.customSummary":
       "Estimación con horizonte aproximado: {sun}% de horas con Sol, {dte}% de DTE y un corte máximo de {outage}.",
+    "verdict.internationalSummary":
+      "Referencia internacional: {sun}% de horas con Sol y {dte}% de DTE. Horizonte analítico plano; no es un análisis de terreno LOLA.",
     "verdict.summary":
       "{sun}% de las horas con Sol, {dte}% de DTE y {comms}.",
     "verdict.commsOut":
@@ -493,6 +566,9 @@ const MESSAGES = {
     "program.nonOfficial": "Punto no oficial",
     "program.haworthReference": "Haworth · referencia",
     "program.historicalReference": "Referencia histórica",
+    "program.isro": "ISRO · referencia",
+    "program.jaxa": "JAXA · referencia",
+    "program.cnsa": "CNSA · referencia",
     "program.custom": "Coordenadas definidas por el usuario",
     "description.site23":
       "Macizo elevado con un horizonte LOLA híbrido de 5 m/px en el campo cercano y 80 m/px hasta 100 km. Su geometría favorece la visibilidad de la Tierra, pero el Sol permanece bajo y el relieve local condiciona las ventanas de energía.",
@@ -512,6 +588,12 @@ const MESSAGES = {
       "Coordenada de referencia en el interior del cráter Haworth, junto a una de las regiones más frías del sistema solar. El DEM regional LOLA de 80 m/px muestra las paredes del cráter dominando el horizonte; no es un punto de borde certificado.",
     "description.control_eq":
       "Sitio ecuatorial de control. Su horizonte analítico plano aísla el efecto de la inclinación axial lunar y sirve para contrastar la geometría polar. Se muestra como referencia, no como candidato de aterrizaje.",
+    "description.chandrayaan3":
+      "Sitio de referencia de la misión india Chandrayaan-3 en Shiv Shakti Point (69.37°S, 32.32°E), 2023. Usa un horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno polar.",
+    "description.slim":
+      "Sitio de referencia de la misión japonesa SLIM en Shioli (13.32°S, 25.25°E), 2024. Usa un horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.change4":
+      "Sitio de referencia de la misión china Chang'e 4 en Von Kármán (45.46°S, 177.59°E), 2019, en la cara oculta. La Tierra no es visible directamente; la misión depende de un relé. Usa un horizonte analítico plano y efemérides IAU 2000 locales.",
     "action.simulate": "Simular",
     "action.pause": "Pausa",
     "action.compare": "Comparar",
@@ -562,6 +644,7 @@ const MESSAGES = {
     "comparison.note":
       "Todas las filas usan la misma fecha de inicio, ventana, perfil, panel y altura de mástil que el panel principal. El score es un índice de decisión, no una certificación de aterrizaje. Haz clic en una fila para seleccionar el sitio.",
     "comparison.matrixButton": "Matriz sitio × fecha",
+    "comparison.abButton": "Comparación A/B",
     "comparison.footnote":
       "Comms = 1 − corte DTE máximo / tolerancia. Un 0/100 indica que el corte iguala o supera la tolerancia del perfil, no que falte el dato. El corte se mide dentro de la ventana de 28 días; si dura más, el valor es una cota inferior. DTE usa el centro de la Tierra; el disco parcial se muestra como referencia y no entra en el score. Cambia el perfil a “Relé / store-and-forward” para ver valores distintos de 0.",
     "comparison.req": "req {value}",
@@ -628,10 +711,55 @@ const MESSAGES = {
     "matrix.legend.warn": "marginal",
     "matrix.legend.bad": "no cumple",
     "matrix.note":
-      "Cada celda es una ventana de 28 días desde el día 1 del mes. Score con el perfil actual; energía con el panel actual; DTE y corte con mástil 2 m. Haz clic en una celda para cargar ese sitio y esa fecha en la vista principal.",
+      "Cada celda es una ventana de 28 días desde el día 1 del mes. Score con el perfil actual; energía con el panel actual; DTE y corte con mástil 2 m. Haz clic en una celda para cargar ese sitio y esa fecha en la vista principal. Las filas marcadas REFERENCIA son contexto, no candidatos clasificados; las referencias internacionales usan un horizonte analítico plano.",
     "matrix.mastWarning":
       "DTE y corte están precalculados con mástil 2.0 m; el panel principal usa {current} m.",
     "matrix.site": "Sitio",
+    "ab.title": "Comparación A/B lado a lado",
+    "ab.badge": "Mismo perfil · panel · mástil",
+    "ab.scenarioA": "Escenario A",
+    "ab.scenarioB": "Escenario B",
+    "ab.site": "Sitio",
+    "ab.date": "Fecha (UTC)",
+    "ab.compare": "Comparar",
+    "ab.load": "Cargar en vista principal",
+    "ab.context":
+      "Ambos escenarios usan el perfil, panel y mástil actuales.",
+    "ab.metrics.sun": "Sol",
+    "ab.metrics.dte": "DTE",
+    "ab.metrics.outage": "Corte",
+    "ab.metrics.eclipse": "Eclipse",
+    "ab.metrics.energy": "Energía",
+    "ab.metrics.slope": "Pendiente local",
+    "ab.metrics.score": "Índice de misión",
+    "ab.delta": "Δ (B − A)",
+    "ab.loading": "Evaluando los escenarios A y B…",
+    "ab.error": "No se pudo comparar los escenarios: {message}",
+    "ab.radarAria": "Radar del horizonte LOLA para {site} el {date}",
+    "ab.points": "pts",
+    "ab.percentPoints": "pp",
+    "guide.title": "Cómo leer esta herramienta",
+    "guide.badge": "Apoyo a decisiones · no certificado para vuelo",
+    "guide.intro":
+      "Esta herramienta compara sitios y fechas de alunizaje con topografía LOLA real y efemérides JPL Horizons. Es apoyo a decisiones y software educativo, no un análisis de aterrizaje certificado.",
+    "guide.quickStart.title": "Inicio rápido",
+    "guide.quickStart.body":
+      "<ol><li>Elige un sitio curado o introduce coordenadas personalizadas.</li><li>Elige una fecha; la ventana de evaluación de 28 días empieza ahí.</li><li>Lee el veredicto: % Sol, % DTE y el corte DTE más largo.</li><li>Usa el radar polar y el panorama 2.5D para ver el Sol y la Tierra contra el horizonte LOLA.</li><li>Usa <strong>Fechas</strong> para barrer 36 meses, <strong>Comparar</strong> para la matriz o el A/B, y <strong>Compartir</strong> para copiar un enlace del escenario.</li></ol>",
+    "guide.metrics.title": "Qué significan las métricas",
+    "guide.metrics.body":
+      "<dl><dt>Sol %</dt><dd>Fracción de horas con al menos el 5% del disco solar sobre el horizonte LOLA; no implica Sol pleno.</dd><dt>DTE %</dt><dd>Fracción de horas con el centro de la Tierra sobre el horizonte local (directo a Tierra).</dd><dt>Corte</dt><dd>Corte DTE continuo más largo dentro de la ventana de 28 días.</dd><dt>Eclipse</dt><dd>Eclipse solar continuo más largo de la ventana.</dd><dt>Energía</dt><dd>Energía solar acumulada en 28 días para el panel y mástil seleccionados.</dd><dt>Índice de misión</dt><dd>Índice ponderado de energía, eclipse, DTE y corte; no es una probabilidad de éxito.</dd></dl>",
+    "guide.pole.title": "Por qué el polo sur es difícil",
+    "guide.pole.body":
+      "<p>En el polo sur el Sol y la Tierra permanecen cerca del horizonte. Una cresta de pocos grados puede ocultarlos, así que un cambio pequeño de sitio o fecha puede cambiar el veredicto.</p><p>Las regiones permanentemente sombreadas (PSR) pueden contener hielo pero no generan energía solar. En la cara oculta la Tierra no se ve directamente; esas misiones necesitan un relé, por eso Chang'e 4 muestra 0% de DTE.</p>",
+    "guide.glossary.title": "Glosario",
+    "guide.glossary.body":
+      "<dl><dt>LOLA</dt><dd>Lunar Orbiter Laser Altimeter; el altímetro láser de los DEM usados aquí.</dd><dt>DEM</dt><dd>Modelo digital de elevación; una malla de alturas del terreno.</dd><dt>Horizonte</dt><dd>La silueta local del terreno; aquí un perfil 1D de la elevación máxima por azimut.</dd><dt>DTE</dt><dd>Directo a Tierra; enlace de radio con la Tierra sobre el horizonte local.</dd><dt>PSR</dt><dd>Región permanentemente sombreada; terreno que nunca recibe luz solar directa.</dd><dt>Libración</dt><dd>El ligero balanceo de la Luna, que mueve la posición aparente de la Tierra a lo largo del mes.</dd><dt>CLPS / HLS</dt><dd>Programas de NASA Commercial Lunar Payload Services y Human Landing System.</dd><dt>Artemis III</dt><dd>Misión tripulada de NASA y sus regiones candidatas.</dd></dl>",
+    "guide.try.title": "Prueba esto",
+    "guide.try.body":
+      "<ol><li>Selecciona Malapert Massif, 14 nov 2026: ~50% Sol, 42% DTE, corte de 12 días.</li><li>Abre <strong>Fechas</strong> y haz clic en may 2027: 0% Sol, 47% DTE, corte de 14.8 días.</li><li>Abre <strong>Comparar</strong> → <strong>Comparación A/B</strong> y elige Chang'e 4: referencia de la cara oculta con 0% DTE, que muestra por qué se necesita un relé.</li><li>Usa <strong>Compartir</strong> para copiar el enlace del escenario o <strong>Exportar JSON/CSV</strong> para los datos.</li></ol>",
+    "guide.limits.title": "Límites",
+    "guide.limits.body":
+      "Apoyo a decisiones y software educativo, no certificado para vuelo. No modela rocas bajo la resolución del DEM, estado térmico, baterías, movilidad del rover, constelaciones de relé ni incertidumbre Monte Carlo. El horizonte es un perfil 1D por azimut; el panorama 2.5D es una representación sombreada. Nobile/Haworth usan 80 m/px; los sitios personalizados y las referencias internacionales usan horizontes aproximados o analíticos planos.",
     "matrix.cellTitle":
       "{site} · {date}: score {score}/100, {sun}% Sol, {dte}% DTE, corte {outage}, {energy} kWh/m²",
     "panorama.sun": "Sol",
@@ -659,7 +787,15 @@ const MESSAGES = {
     "sim.dayShort": "Día {day} / {total}",
     "sim.dayAria": "Día {day} de {total}, {time}",
     "play.simulate": "Simular",
-    "play.pause": "Pausa"
+    "play.pause": "Pausa",
+    "share.button": "Compartir",
+    "share.copied": "Enlace copiado",
+    "share.copyPrompt": "Copia este enlace del escenario:",
+    "export.json": "Exportar JSON",
+    "export.csv": "Exportar CSV",
+    "export.downloaded": "Descargado",
+    "export.error": "No se pudo exportar: {message}",
+    "scenario.customDate": "Fecha personalizada"
   }
 };
 
@@ -683,7 +819,6 @@ export function setLanguage(language) {
   try {
     localStorage.setItem(STORAGE_KEY, language);
   } catch {
-    // Storage can be blocked; the language still applies for this session.
   }
   if (typeof document !== "undefined") {
     document.documentElement.lang = language;
@@ -699,7 +834,19 @@ export function initLanguage() {
   } catch {
     stored = null;
   }
-  currentLanguage = SUPPORTED.includes(stored) ? stored : DEFAULT_LANGUAGE;
+  let fromUrl = null;
+  if (typeof location !== "undefined") {
+    try {
+      fromUrl = new URLSearchParams(location.search).get("lang");
+    } catch {
+      fromUrl = null;
+    }
+  }
+  currentLanguage = SUPPORTED.includes(fromUrl)
+    ? fromUrl
+    : SUPPORTED.includes(stored)
+      ? stored
+      : DEFAULT_LANGUAGE;
   if (typeof document !== "undefined") {
     document.documentElement.lang = currentLanguage;
     const select = document.getElementById("language-select");

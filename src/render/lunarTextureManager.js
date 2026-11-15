@@ -1,18 +1,5 @@
 import * as THREE from 'three';
 
-/**
- * LunarTextureManager
- * Manages real NASA Lunar Reconnaissance Orbiter (LRO) datasets:
- * - LROC WAC Global Photographic Mosaic (Color Albedo)
- * - LOLA DEM Elevation Color Hillshade (NASA / USGS Topography)
- * - LOLA Shaded Relief (Crater Morpohology & Shadows)
- * - LOLA Slope Map (Landing Hazard & Traverse Safety)
- * - LOLA 8-bit Normalized Digital Elevation Model (Displacement & Bump)
- *
- * Supported services:
- * - NASA Solar System Treks (Moon Trek WMTS)
- * - Arizona State University / NASA LROC QuickMap
- */
 
 const TEXTURE_BASE = `${import.meta.env.BASE_URL}textures/moon/`;
 
@@ -72,9 +59,6 @@ export class LunarTextureManager {
     this.onLoadCallbacks = [];
   }
 
-  /**
-   * Loads the LOLA Digital Elevation Model used for 3D vertex displacement.
-   */
   async loadDisplacementTexture() {
     if (this.displacementTexture) return this.displacementTexture;
 
@@ -97,9 +81,6 @@ export class LunarTextureManager {
     });
   }
 
-  /**
-   * Loads or stitches a specific layer texture.
-   */
   async getLayerTexture(layerId) {
     if (this.textureCache.has(layerId)) {
       return this.textureCache.get(layerId);
@@ -139,22 +120,17 @@ export class LunarTextureManager {
     });
   }
 
-  /**
-   * Stitches 8 equirectangular tiles (2 rows x 4 columns) into a single 1024x512 CanvasTexture.
-   */
   async _stitchTiles(tileFolder) {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    // Fill with neutral background first
     ctx.fillStyle = '#444444';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const tilePromises = [];
 
-    // Zoom level 1: 2 rows (r: 0..1), 4 columns (c: 0..3)
     for (let r = 0; r < 2; r++) {
       for (let c = 0; c < 4; c++) {
         const url = `${tileFolder}/tile_1_${r}_${c}.png`;

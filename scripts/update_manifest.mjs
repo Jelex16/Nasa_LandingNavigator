@@ -41,6 +41,33 @@ function sourceFor(relative) {
       generatedUtc: extra.generatedUtc ?? iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
     };
   }
+  if (relative === 'sites-international.json') {
+    const international = readJson(path.join(DATA, relative));
+    return {
+      source:
+        international.source ??
+        'International reference sites; analytic flat horizon; local IAU 2000',
+      sourceUrl:
+        international.sourceUrl ??
+        'https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/',
+      generatedUtc:
+        international.generatedUtc ??
+        iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
+    };
+  }
+  if (relative.startsWith('horizon/')) {
+    const horizon = readJson(path.join(DATA, relative));
+    if (horizon.provenance === 'analytic_flat') {
+      return {
+        source:
+          horizon.source ?? 'Analytic flat horizon (reference); no LOLA terrain',
+        sourceUrl: horizon.sourceUrl ?? 'https://ssd.jpl.nasa.gov/horizons/',
+        generatedUtc:
+          horizon.generatedUtc ??
+          iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
+      };
+    }
+  }
   return {
     source: 'SUNDIAL pipeline; NASA PGDA LOLA data and JPL Horizons DE441',
     sourceUrl: 'https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/',
@@ -69,10 +96,19 @@ const files = actual.map((relative) => {
 const removed = [...previous.keys()].filter((relative) => !actual.includes(relative));
 const added = actual.filter((relative) => !previous.has(relative));
 
+const version =
+  manifest.version === '1.0.1'
+    ? '1.0.2'
+    : manifest.version === '1.0.2'
+      ? '1.0.3'
+      : manifest.version;
+
 const next = {
   ...manifest,
-  version: manifest.version === '1.0.1' ? '1.0.2' : manifest.version,
+  version,
   generatedUtc: iso(Date.now()),
+  referenceSitesNote:
+    "International reference sites (Chandrayaan-3, SLIM, Chang'e 4) use analytic flat horizons and the local IAU 2000 engine; they are not LOLA terrain analyses.",
   files
 };
 

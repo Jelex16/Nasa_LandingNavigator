@@ -10,11 +10,6 @@ function jd(date) {
 function sin(x) { return Math.sin(x); }
 function cos(x) { return Math.cos(x); }
 
-/**
- * IAU 2000 / SOFA lunar orientation model.
- * Computes the selenographic orientation of the Moon (pole RA/Dec and prime meridian angle W)
- * including 13 major nutation and physical libration terms.
- */
 export function moonOrientation(date) {
   const d = jd(date) - 2451545.0;
   const T = d / 36525;
@@ -97,16 +92,12 @@ export function bodyMatrix(date) {
   return mul(Rz(W), mul(Rx(Math.PI / 2 - delta), Rz(Math.PI / 2 + alpha)));
 }
 
-/**
- * Calculates topocentric positions of Sun and Earth for a lunar observer at (lat, lon).
- * Returns azimuth (0-360, where 0=North, 90=East) and elevation in degrees.
- */
 export function calculateLunarEphemeris(date, lat, lon) {
   const R = bodyMatrix(date);
   const sunG = GeoVector(Body.Sun, date, false);
   const moonG = GeoVector(Body.Moon, date, false);
-  const AU = 149597870.7; // km
-  const RM = 1737.4; // lunar mean radius in km
+  const AU = 149597870.7;
+  const RM = 1737.4;
 
   const moonKm = [moonG.x * AU, moonG.y * AU, moonG.z * AU];
   const sunKm = [sunG.x * AU, sunG.y * AU, sunG.z * AU];
@@ -116,19 +107,15 @@ export function calculateLunarEphemeris(date, lat, lon) {
   const up = [cos(phi) * cos(lam), cos(phi) * sin(lam), sin(phi)];
   const site = [up[0] * RM, up[1] * RM, up[2] * RM];
 
-  // Moon-centric J2000 to Selenographic (MCMF)
   const sunC = apply(R, [sunKm[0] - moonKm[0], sunKm[1] - moonKm[1], sunKm[2] - moonKm[2]]);
   const earthC = apply(R, [-moonKm[0], -moonKm[1], -moonKm[2]]);
 
-  // Site topocentric vectors
   const sun = [sunC[0] - site[0], sunC[1] - site[1], sunC[2] - site[2]];
   const earth = [earthC[0] - site[0], earthC[1] - site[1], earthC[2] - site[2]];
 
-  // Local horizon coordinate frame
   const pole = [0, 0, 1];
   let east = cross(pole, up);
   if (Math.hypot(east[0], east[1], east[2]) < 1e-6) {
-    // Exactly at pole
     east = [0, 1, 0];
   } else {
     east = norm(east);
@@ -149,7 +136,6 @@ export function calculateLunarEphemeris(date, lat, lon) {
   const sunAzEl = toAzEl(sun);
   const earthAzEl = toAzEl(earth);
 
-  // Sub-Earth and Sub-Solar selenographic coordinates (libration)
   const eu = norm(earthC);
   const su = norm(sunC);
   const subEarth = {
@@ -161,11 +147,9 @@ export function calculateLunarEphemeris(date, lat, lon) {
     lon: Math.atan2(su[1], su[0]) * R2D
   };
 
-  // 3D unit vectors in lunar Moon-Centered coordinate system (for Three.js)
   const sunDirMCMF = norm(sunC);
   const earthDirMCMF = norm(earthC);
 
-  // Solar power potential factor: P = sin(elevation) if elevation > 0 else 0
   const solarPowerEfficiency = sunAzEl.el > 0 ? Math.sin(sunAzEl.el * D2R) : 0;
 
   return {

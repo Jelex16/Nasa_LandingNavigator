@@ -1,0 +1,252 @@
+# Feature reference
+
+**Lunar Landing Site Navigator — NASA Space Apps Challenge 2026.**
+
+A static Vite web app that compares lunar landing sites and dates using real NASA LOLA terrain and
+JPL Horizons ephemerides. It is decision-support and educational software, not a flight-certified
+landing analysis. The UI defaults to English; the EN/ES selector in the top bar switches to Spanish
+and remembers the choice.
+
+- [Feature reference (English)](features.md) · [Referencia de features (Español)](features.es.md)
+- [README](../README.en.md) · [Demo script and slides](demo.md)
+
+## 1. Site catalog
+
+Twelve sites plus custom coordinates. Candidate sites are scored; reference sites are shown as
+context and are not ranked as candidates.
+
+| Site | Role | Horizon | Ephemerides |
+|---|---|---|---|
+| Malapert Massif | Artemis III candidate | LOLA 5 m/px + 80 m/px hybrid | JPL Horizons DE441 |
+| Connecting Ridge | Artemis III candidate | LOLA 5 m/px + 80 m/px hybrid | JPL Horizons DE441 |
+| Shackleton Rim (LOLA) | Non-official analysis point | LOLA 5 m/px + 80 m/px hybrid | JPL Horizons DE441 |
+| Peak near Shackleton | Artemis III candidate | LOLA 5 m/px + 80 m/px hybrid | JPL Horizons DE441 |
+| de Gerlache Rim | Artemis III candidate | LOLA 5 m/px + 80 m/px hybrid | JPL Horizons DE441 |
+| Mons Mouton (Leibnitz Beta) | Artemis III candidate | LOLA 5 m/px + 80 m/px hybrid | JPL Horizons DE441 |
+| Nobile Rim 1 | Artemis III candidate | LOLA 80 m/px regional | local IAU 2000 |
+| Haworth (interior) | Region reference point | LOLA 80 m/px regional | local IAU 2000 |
+| Apollo 11 (Mare Tranquillitatis) | Historical equatorial reference | Analytic flat | JPL Horizons DE441 |
+| Chandrayaan-3 (Shiv Shakti) | International reference | Analytic flat (approx.) | local IAU 2000 |
+| SLIM (Shioli) | International reference | Analytic flat (approx.) | local IAU 2000 |
+| Chang'e 4 (Von Kármán) | International reference, far side | Analytic flat (approx.) | local IAU 2000 |
+
+- **Custom coordinates**: latitude/longitude validation; the app uses the nearest real LOLA horizon
+  within 300 km and labels the distance. If no site is within 300 km it uses a flat analytic horizon.
+  Slope and elevation are shown as “—”; the result is explicitly approximate.
+- **International references** are included for comparison and education only. They use real mission
+  coordinates but **not** LOLA terrain at those points; their horizon is analytic flat and their
+  ephemerides are the local IAU 2000 engine. The UI, the data modal, the manifest and this document
+  state this explicitly. Chandrayaan-3 at 69.4°S is a simplification because polar illumination is
+  terrain-sensitive. Chang'e 4 is on the far side, so its DTE is 0% and a relay is required; this is a
+  deliberate educational case.
+
+## 2. Verdict and metrics
+
+- **Verdict first**: `GO`, `CAUTION`, `NO-GO` or `REFERENCE`, with a plain-language summary.
+- **Sunlit %**: fraction of hours with at least 5% of the solar disk above the LOLA horizon.
+- **DTE %**: fraction of hours with the Earth's center above the local horizon (direct-to-Earth).
+  The partial-disk fraction is computed and shown but does not enter the score.
+- **Longest DTE outage**: longest continuous blackout inside the 28-day window.
+- **Longest continuous eclipse**: longest solar eclipse inside the window.
+- **Energy**: accumulated Wh/m² for the selected panel and mast, with DNI corrected by the
+  Sun–Moon distance and the visible solar-disk fraction.
+- **Mission index**: a secondary weighted decision index; it is not a probability of success.
+- **View model**: formula, component values, weights, thresholds, profile description and limits.
+- **View score breakdown**: per-term points, raw metric and threshold, with hard-limit status.
+
+Statuses and hard limits:
+
+- slope >15° adds a limit; slope >25° is `NO-GO`;
+- severe DTE outage, continuous eclipse or DTE below half the requirement forces `NO-GO`;
+- reference and international sites always show `REFERENCE`, with an explanatory note.
+
+## 3. Visualizations
+
+- **Polar LOLA radar**: horizon mask, Sun and Earth positions, 28-day trajectories, below-horizon
+  state and source badge (`Real LOLA`, `Analytic`, `Approximate`).
+- **2.5D horizon panorama**: 360° LOLA silhouette, shaded relief, Sun/Earth finite disks,
+  24-hour solar path, 28-day Earth libration loop, horizon markers, “below the horizon” labels,
+  horizon/full-sky modes and true-scale/enlarged disks. The vertical range adapts to the site horizon.
+- **28-day timeline**: Sun and Earth elevation curves, LOLA horizon at each azimuth, shaded
+  visibility bands, hover tooltip with az/el/horizon/fractions/energy, and click-to-jump.
+- **3D globe**: LROC/LOLA preview layers, relief 1x/2.5x/5x/plane, site pins, Sun/Earth sightlines,
+  south-pole/site/global camera presets. The globe and the Sun/Earth spheres are illustrative and not
+  to scale; they do not enter the score.
+- **Telemetry cards**: Sun/Earth elevation, panel irradiance, LOLA horizon and clearance, DTE status.
+- **Countdowns**: next solar sunset/sunrise, next DTE loss/Earthrise, continuous DTE.
+
+## 4. Dates, time and launch slip
+
+- Mission date/time in UTC, with a custom date option.
+- Presets: example window (Nov 2026), southern summer solstice (Dec 2026), southern winter solstice
+  (Jun 2026), real time (clamped to the 2026–2029 coverage) and custom date.
+- ±1 hour / ±1 day steps, a 28-day scrubber, and playback at 1x/10x/60x.
+- The 28-day evaluation window starts at the mission date; playback changes only the displayed
+  instant, not the evaluation window.
+- **Launch-slip sweep**: 36 monthly 28-day windows from 2026 to 2028, with energy for the current
+  panel, Sun %, DTE %, longest outage, next Earthset and score. Click a month or a table date to load
+  it in the main view. DTE/outage are precomputed with a 2 m mast; the UI warns if the current mast
+  differs.
+
+## 5. Comparisons
+
+- **Comparison matrix**: all 12 sites with the same start date, window, profile, panel and mast.
+  Columns: score/status, energy, continuous eclipse, DTE center, DTE outage and local slope. Rows are
+  clickable; references carry a `REFERENCE` badge. Export CSV.
+- **Side-by-side A/B**: a visual comparison of two site/date scenarios with the current profile,
+  panel and mast. Each card shows the verdict, a compact LOLA radar, Sun/DTE/outage/eclipse/energy/
+  slope and the mission index (references show `REFERENCE`). A delta table shows B−A, coloured by
+  direction. “Load in main view” opens either scenario. A/B is visual; use Share/Export after loading
+  a scenario.
+- **Site × date matrix**: 12 sites × 36 months with a metric selector (Score, Sun %, DTE %, outage).
+  Reference rows are marked; the note explains they are context, not ranked candidates. Click a cell
+  to load that site and date. Export CSV.
+
+## 6. Mission profiles and score
+
+Profiles and their assumptions are visible and selectable:
+
+| Profile | Energy requirement | Eclipse tolerance | DTE requirement | DTE outage tolerance |
+|---|---|---|---|---|
+| Direct DTE demo | 300 kWh/m² | 160 h | 60% | 24 h |
+| Night-surviving rover | 400 kWh/m² | 380 h | 30% | 48 h |
+| Crewed outpost with direct DTE | 450 kWh/m² | 120 h | 90% | 12 h |
+| Relay / store-and-forward | 300 kWh/m² | 200 h | 20% | 400 h |
+
+- Panels: horizontal, vertical fixed and vertical tracker.
+- Mast heights: 0.5, 2, 5, 10 and 20 m.
+- Score: `100 · (wE·E + wD·D + wC·C + wG·G) / Σw`, with visible weights and thresholds.
+- A relay profile only relaxes DTE/outage tolerances; it does not simulate a concrete relay.
+
+## 7. Bilingual UI
+
+- English is the default; the EN/ES selector in the top bar switches the whole UI, including charts,
+  tables, tooltips, the guide and generated values.
+- The choice is persisted in `localStorage`; a URL `lang=en|es` overrides it for a shared link.
+- The `<html lang>`, document title, meta description and ARIA labels follow the language.
+- The README, this reference and the demo script are available in both English and Spanish; English
+  is the submission language.
+
+## 8. Share and export
+
+### Shareable scenario link
+
+The current scenario is encoded in the URL and kept up to date:
+
+```text
+/?site=site23&date=2026-11-14T00:00:00.000Z&profile=technology_demo&panel=vertical_tracker&mast=2&lang=en
+```
+
+| Parameter | Meaning | Values |
+|---|---|---|
+| `site` | Curated site id | e.g. `site23`, `nobile_rim_1`, `change4`, `control_eq` |
+| `lat`, `lon` | Custom coordinates (takes precedence over `site`) | lat −90…90, lon 0…360 |
+| `date` | Mission start, ISO UTC | 2026-01-01 … 2029-01-01 |
+| `profile` | Mission profile id | `technology_demo`, `night_survivor`, `crewed_outpost`, `relay_store_forward` |
+| `panel` | Solar panel | `horizontal`, `vertical_fixed`, `vertical_tracker` |
+| `mast` | Mast height in metres | `0.5`, `2`, `5`, `10`, `20` |
+| `lang` | UI language | `en`, `es` |
+
+The **Share** button copies the full link. Opening the link restores the site, date, profile, panel,
+mast and language. The URL reflects site/date/profile/panel/mast changes; playback and the scrubber
+do not rewrite it.
+
+### Exports
+
+All exports are client-side downloads; no server or account is required.
+
+- **Export JSON** (verdict card): the current scenario with site metadata, profile, panel, mast,
+  metrics, components, status and the full 672-point series (az/el, horizons, visible fractions,
+  flags and energy).
+- **Export CSV** (comparison): one row per site with role, coordinates, score, energy, eclipse, DTE,
+  outage, slope and data sources.
+- **Export CSV** (sweep): 36 monthly rows with energy for the current panel, Sun %, DTE %, outage,
+  Earthset and score.
+- **Export CSV** (site × date matrix): 12 site rows × 36 monthly scores, with the role column.
+
+## 9. Educational guide
+
+**How to read** in the verdict card opens a bilingual guide with:
+
+- **Quick start**: site/date, verdict, radar/panorama, Dates, Compare, Share.
+- **What the metrics mean**: Sun %, DTE %, outage, eclipse, energy and mission index.
+- **Why the south pole is hard**: Sun/Earth near the horizon, terrain, PSRs/ice, far-side relay.
+- **Glossary**: LOLA, DEM, horizon, DTE, PSR, libration, CLPS/HLS, Artemis III.
+- **Try this**: Malapert Nov 2026 → May 2027 → A/B with Chang'e 4 → Share/Export.
+- **Limits**: the declared limitations and the data caveats.
+
+## 10. Data, validation and provenance
+
+- **LOLA 5 m/px landing-site DEMs**: near field for six sites.
+- **LOLA 80S 80 m/px regional DEM**: far field to 100 km and Nobile/Haworth.
+- **JPL Horizons DE441**: apparent topocentric Sun/Earth az/el/distance, 1 h step, 2026-01-01 to
+  2029-02-01, cubic Hermite interpolation in the browser.
+- **Horizon model**: 720 azimuth bins (0.5°), five mast heights, lunar curvature `r²/(2R_M)`,
+  airless horizon (no atmospheric refraction).
+- **Validation**: 4,032 off-grid samples against Horizons; RMS 5×10⁻⁶°, maximum 1.22×10⁻⁴° (the UI
+  rounds to 1×10⁻⁵° and 1.2×10⁻⁴°). The local IAU 2000 engine is a fallback and was spot-checked
+  against Horizons; it is not covered by the full 4,032-sample validation.
+- **Data manifest**: `public/data/manifest.json` lists 35 derived files with sizes and SHA-256
+  checksums; `npm run data:manifest` regenerates it. The original DEMs (~0.5 GB) are not distributed.
+- **International references**: analytic flat horizons and local IAU 2000; not LOLA terrain analyses.
+  The manifest carries a `referenceSitesNote`, and the data modal states it.
+- **3D textures**: LROC WAC and LOLA previews (2k/1k); they are visual only and are not used for the
+  score.
+
+## 11. Accessibility, responsiveness and tests
+
+- Keyboard-operable controls, skip link, focus trap in modals, labelled form controls, `aria-live`
+  verdict/toast, visible focus styles and `prefers-reduced-motion` support.
+- Axe WCAG A/AA audit: **0 violations** in English and Spanish, including the guide, comparison and
+  A/B views.
+- Responsive layout: mobile header, scrollable camera rail, single-column A/B cards, horizontally
+  scrollable matrices, sticky 28-day timeline toggle.
+- Tests: engine, geometry, real-data decode, 28-day Malapert regression, i18n key parity,
+  interpolation and JSON/CSV export. Run `npm test`.
+- Production build: Vite; current bundle ~801 KB minified / ~216 KB gzip. The >500 KB chunk warning
+  remains; code-splitting is a future optimization.
+
+## 12. Limits
+
+- Decision-support and educational software; **not flight-certified**.
+- No rocks below DEM resolution, thermal state, batteries, rover mobility, relay constellations or
+  Monte Carlo uncertainty.
+- The horizon is a 1D profile per azimuth; the 2.5D panorama is a shaded representation, not a 3D
+  mesh.
+- Nobile/Haworth use 80 m/px regional terrain; custom and international reference sites use
+  approximate or analytic flat horizons.
+- The score is a decision index, not a probability of success. `gMaxHours` is a lower bound inside
+  the 28-day window.
+- The 3D globe, Sun/Earth spheres and preview textures are illustrative and not to scale.
+- Ephemeris coverage is 2026-01-01 to 2029-02-01; there is no live Horizons query in the app.
+
+## 13. Commands
+
+```bash
+npm install
+npm run dev            # http://localhost:5173
+npm run build
+npm run preview
+npm test               # engine, data, i18n and export tests
+
+npm run data:sweep             # 36 monthly windows for all sites
+npm run data:flat-horizons     # flat horizons for the international references
+npm run data:manifest          # sizes and SHA-256 for public/data
+npm run data:fix-azimuth       # idempotent azimuth correction
+npm run data:regional-horizons # Nobile/Haworth from the regional DEM
+```
+
+## 14. Key files
+
+| Path | Purpose |
+|---|---|
+| `src/main.js` | application state, controls, URL state, share/export wiring |
+| `src/analysis/` | geometry, sampling, scoring and status |
+| `src/ephemeris/` | Horizons binary decoder/interpolation and IAU 2000 fallback |
+| `src/topography/lunarData.js` | site catalog, horizon lookup, localised site helpers |
+| `src/ui/` | radar, timeline, panorama, comparison, sweep, matrix, A/B and guide |
+| `src/i18n.js`, `src/i18n-static.js` | EN/ES messages and static HTML translation |
+| `src/export.js` | JSON/CSV serialization and downloads |
+| `public/data/` | sites, horizons, ephemerides, sweeps, validation, manifest |
+| `scripts/` | data generation and manifest maintenance |
+| `tests/` | engine, data, i18n and export regression tests |

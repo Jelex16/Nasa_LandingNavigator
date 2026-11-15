@@ -186,6 +186,13 @@ export function buildStatus(site, metrics, components, profile) {
       statusText: t("status.referenceText")
     };
   }
+  if (site.role === "international") {
+    return {
+      status: t("status.reference"),
+      badgeClass: "status-reference",
+      statusText: t("status.internationalText")
+    };
+  }
   if (site.role === "custom") {
     return {
       status: t("status.estimate"),
@@ -307,7 +314,6 @@ export function analyzeSite({
     });
   }
 
-  // Correct the sunlit run computation: a single 1h shadow sample is one hour.
   let dMaxHours = 0;
   let currentShadow = 0;
   for (const point of series) {
@@ -379,11 +385,6 @@ function refineCrossing(site, fromMs, toMs, mastHeightM, sampleAt, selector) {
   return hi;
 }
 
-/**
- * Finds the next solar (finite-disk 5% threshold) and Earth-centre visibility
- * transitions after fromMs, using the precomputed series plus a small binary
- * refinement. This is cheap enough to call on every animation frame.
- */
 export function findNextEvents(series, fromMs, site, mastHeightM, sampleAt) {
   if (!series.length) return { sunIsUp: false, earthIsUp: false, nextSunrise: null, nextSunset: null, nextEarthrise: null, nextEarthset: null };
   const stepMs = series.length > 1 ? series[1].timeMs - series[0].timeMs : 3_600_000;

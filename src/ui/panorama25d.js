@@ -1,15 +1,3 @@
-/**
- * Panorama 2.5D del horizonte lunar.
- *
- * Vanilla Canvas 2D port of SUNDIAL's SkyPanorama, adapted to the Vite app:
- *   - 360° azimuth x elevation panorama with the real LOLA horizon callback
- *   - 2.5D relief fill (gradient + ridge highlight + offset depth layer)
- *   - Sun path (24 h) and Earth libration loop (28 d)
- *   - current finite Sun/Earth disks, below-horizon labels and horizon ticks
- *
- * The class does not fetch data. The host passes a site with
- * site.horizonAt(azimuthDeg, mastHeightM) and the precomputed 28-day series.
- */
 
 import { getLanguage, t } from '../i18n.js';
 
@@ -349,7 +337,6 @@ export class Panorama25D {
     gradient.addColorStop(0.45, 'rgba(52,44,37,0.97)');
     gradient.addColorStop(1, this.colors.terrainBottom);
 
-    // Main 2.5D relief fill.
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(plot.left, plot.bottom);
@@ -361,7 +348,6 @@ export class Panorama25D {
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    // Depth layer: a slightly offset, darker silhouette reads as a near ridge.
     ctx.save();
     ctx.translate(0, 7);
     ctx.globalAlpha = 0.22;
@@ -377,7 +363,6 @@ export class Panorama25D {
     ctx.stroke();
     ctx.restore();
 
-    // Ridge shading: light catches west-facing slopes.
     ctx.beginPath();
     for (let index = 1; index < TERRAIN_BINS; index += 1) {
       const previous = profile[index - 1];
@@ -394,7 +379,6 @@ export class Panorama25D {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Top edge highlight and crisp silhouette.
     ctx.beginPath();
     for (let index = 0; index <= TERRAIN_BINS; index += 1) {
       const x = silhouetteX(index);

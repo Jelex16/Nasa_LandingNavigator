@@ -1,14 +1,5 @@
 import { t } from '../i18n.js';
 
-/**
- * Polar Sky Dome Radar Visualization.
- * Projects the local lunar sky in stereographic/polar coordinates:
- * - Center = Zenith (90° elevation)
- * - Outer boundary = Horizon / Sub-horizon (-2° to 0°)
- * - Renders local LOLA topographic obstruction polygon (crater rims, massifs)
- * - Renders Sun path and live position
- * - Renders Earth libration path and live position
- */
 
 export class SkyDomeRadar {
   constructor(canvasElement) {
@@ -17,8 +8,13 @@ export class SkyDomeRadar {
     this.site = null;
     this.ephemeris = null;
     this.series = [];
+    this.resize = this.resize.bind(this);
     this.resize();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('resize', this.resize);
+  }
+
+  destroy() {
+    window.removeEventListener('resize', this.resize);
   }
 
   resize() {
@@ -35,17 +31,10 @@ export class SkyDomeRadar {
     this.draw();
   }
 
-  /**
-   * Converts azimuth (0-360 deg, 0=North, 90=East) and elevation (-2 to 90 deg)
-   * to canvas Cartesian (x, y) coordinates on the polar radar.
-   */
   azElToXY(azDeg, elDeg) {
-    // Elevation mapping: 90 deg -> r = 0 (zenith), -2 deg -> r = this.radius
-    // Clamped between -2 and 90
     const clampedEl = Math.max(-2, Math.min(90, elDeg));
     const r = this.radius * (1 - (clampedEl - (-2)) / (90 - (-2)));
 
-    // Azimuth: 0 = North (top, -Y), 90 = East (+X), 180 = South (+Y), 270 = West (-X)
     const rad = (azDeg - 90) * (Math.PI / 180);
     const x = this.centerX + r * Math.cos(rad);
     const y = this.centerY + r * Math.sin(rad);
@@ -67,7 +56,6 @@ export class SkyDomeRadar {
 
     if (!this.site) return;
 
-    // Background sky gradient
     const skyGrad = ctx.createRadialGradient(this.centerX, this.centerY, 10, this.centerX, this.centerY, this.radius);
     skyGrad.addColorStop(0, '#17130f');
     skyGrad.addColorStop(0.8, '#100d0a');
@@ -77,7 +65,6 @@ export class SkyDomeRadar {
     ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Concentric elevation rings
     const elRings = [0, 10, 20, 45];
     ctx.lineWidth = 1 * this.dpr;
 
@@ -88,13 +75,11 @@ export class SkyDomeRadar {
       ctx.arc(this.centerX, this.centerY, r, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Elevation label
       ctx.fillStyle = 'rgba(138, 127, 114, 0.9)';
       ctx.font = `${9 * this.dpr}px monospace`;
       ctx.fillText(`${el}°`, this.centerX + 4 * this.dpr, this.centerY - r + 10 * this.dpr);
     });
 
-    // Crosshairs & Cardinal directions
     const cardinal = [
       { name: 'N', az: 0 },
       { name: 'E', az: 90 },
@@ -122,13 +107,10 @@ export class SkyDomeRadar {
       ctx.fillText(c.name, lx, ly);
     });
 
-    // Draw Topographic Horizon Obstruction Mask (LOLA)
     if (this.site.horizonProfile) {
       ctx.strokeStyle = '#b08a5a';
       ctx.lineWidth = 1.5 * this.dpr;
 
-      // Obstruction mask: fill the region between the terrain profile and the
-      // outer radar boundary (lower elevations), leaving the visible sky clear.
       ctx.fillStyle = 'rgba(46, 38, 30, 0.55)';
       ctx.beginPath();
       for (let az = 0; az <= 360; az += 2) {
@@ -143,7 +125,6 @@ export class SkyDomeRadar {
       ctx.closePath();
       ctx.fill();
 
-      // Terrain rim.
       ctx.beginPath();
       for (let az = 0; az <= 360; az += 2) {
         const { x, y } = this.azElToXY(az, this.site.horizonProfile(az));
@@ -153,7 +134,6 @@ export class SkyDomeRadar {
       ctx.closePath();
       ctx.stroke();
 
-      // Outer ring stroke for radar boundary
       ctx.strokeStyle = 'rgba(176, 138, 90, 0.5)';
       ctx.lineWidth = 1.8 * this.dpr;
       ctx.beginPath();
@@ -161,9 +141,7 @@ export class SkyDomeRadar {
       ctx.stroke();
     }
 
-    // Draw Trajectories from series
     if (this.series && this.series.length > 1) {
-      // Sun Trajectory (Warm Arc)
       ctx.strokeStyle = 'rgba(232, 180, 92, 0.45)';
       ctx.lineWidth = 1.5 * this.dpr;
       ctx.setLineDash([4 * this.dpr, 3 * this.dpr]);
@@ -175,7 +153,6 @@ export class SkyDomeRadar {
       });
       ctx.stroke();
 
-      // Earth Libration Loop (Steel Curve)
       ctx.strokeStyle = 'rgba(143, 182, 209, 0.5)';
       ctx.lineWidth = 1.5 * this.dpr;
       ctx.setLineDash([2 * this.dpr, 2 * this.dpr]);
@@ -189,7 +166,6 @@ export class SkyDomeRadar {
       ctx.setLineDash([]);
     }
 
-    // Live Current Sun & Earth Positions
     if (this.ephemeris) {
       const sun = this.ephemeris.sun;
       const earth = this.ephemeris.earth;
@@ -203,11 +179,9 @@ export class SkyDomeRadar {
       const sunIsUp = sun.el > topoSunEl;
       const earthIsUp = earth.el > topoEarthEl;
 
-      // Draw Sun
       ctx.save();
       ctx.translate(sunPos.x, sunPos.y);
 
-      // Glow if above horizon
       if (sunIsUp) {
         const sGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 16 * this.dpr);
         sGrad.addColorStop(0, 'rgba(232, 180, 92, 0.9)');
@@ -227,17 +201,14 @@ export class SkyDomeRadar {
       ctx.lineWidth = 1 * this.dpr;
       ctx.stroke();
 
-      // Sun Label
       ctx.fillStyle = sunIsUp ? '#e8b45c' : '#6b6156';
       ctx.font = `bold ${9 * this.dpr}px monospace`;
       ctx.fillText(t('radar.sunLabel', { el: sun.el.toFixed(1) }), 0, -8 * this.dpr);
       ctx.restore();
 
-      // Draw Earth
       ctx.save();
       ctx.translate(earthPos.x, earthPos.y);
 
-      // Radio waves if Earth DTE is active
       if (earthIsUp) {
         ctx.strokeStyle = 'rgba(143, 182, 209, 0.7)';
         ctx.lineWidth = 1.2 * this.dpr;
@@ -254,7 +225,6 @@ export class SkyDomeRadar {
       ctx.lineWidth = 1 * this.dpr;
       ctx.stroke();
 
-      // Earth Label
       ctx.fillStyle = earthIsUp ? '#8fb6d1' : '#6b6156';
       ctx.font = `bold ${9 * this.dpr}px monospace`;
       ctx.fillText(

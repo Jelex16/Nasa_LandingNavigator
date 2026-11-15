@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-15T00:00:00Z",
+  "dataMode": "reference",
+  "source": "International reference sites; real mission coordinates, analytic flat horizon, local IAU 2000 ephemerides",
+  "sourceUrl": "https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/",
+  "sites": [
+    {
+      "id": "chandrayaan3",
+      "name": "Chandrayaan-3 — Shiv Shakti Point",
+      "shortName": "Chandrayaan-3",
+      "regionType": "international_reference",
+      "latDeg": -69.373,
+      "lonEastDeg": 32.319,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "India's Chandrayaan-3 Vikram lander touched down at Shiv Shakti Point (69.37 S, 32.32 E) in August 2023. This reference uses an analytic flat horizon and local IAU 2000 ephemerides; the polar terrain horizon is not modeled with LOLA here.",
+      "citations": [
+        {
+          "label": "ISRO — Chandrayaan-3",
+          "url": "https://www.isro.gov.in/"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441)",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0.0,
+      "farFieldRadiusKm": 0.0,
+      "optimalPanelAzimuthDeg": 0.0,
+      "dataQuality": "Analytic horizon (reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "international",
+      "horizonFile": "horizon/chandrayaan3.json"
+    },
+    {
+      "id": "slim",
+      "name": "SLIM — Shioli",
+      "shortName": "SLIM",
+      "regionType": "international_reference",
+      "latDeg": -13.316,
+      "lonEastDeg": 25.251,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Japan's SLIM lander touched down at Shioli (13.32 S, 25.25 E) in January 2024. This equatorial reference uses an analytic flat horizon and local IAU 2000 ephemerides; the local terrain horizon is not modeled with LOLA here.",
+      "citations": [
+        {
+          "label": "JAXA — SLIM",
+          "url": "https://global.jaxa.jp/"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441)",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0.0,
+      "farFieldRadiusKm": 0.0,
+      "optimalPanelAzimuthDeg": 0.0,
+      "dataQuality": "Analytic horizon (reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "international",
+      "horizonFile": "horizon/slim.json"
+    },
+    {
+      "id": "change4",
+      "name": "Chang'e 4 — Von Kármán",
+      "shortName": "Chang'e 4",
+      "regionType": "international_reference",
+      "latDeg": -45.456,
+      "lonEastDeg": 177.588,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "China's Chang'e 4 landed in Von Kármán crater on the lunar far side (45.46 S, 177.59 E) in January 2019. From the far side the Earth is not directly visible, so the mission relies on a relay. This reference uses an analytic flat horizon and local IAU 2000 ephemerides.",
+      "citations": [
+        {
+          "label": "CNSA — Chang'e 4",
+          "url": "https://www.cnsa.gov.cn/"
+        },
+        {
+          "label": "NASA/JPL Horizons system (DE441)",
+          "url": "https://ssd.jpl.nasa.gov/horizons/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0.0,
+      "farFieldRadiusKm": 0.0,
+      "optimalPanelAzimuthDeg": 0.0,
+      "dataQuality": "Analytic horizon (reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "international",
+      "horizonFile": "horizon/change4.json"
+    }
+  ]
+}

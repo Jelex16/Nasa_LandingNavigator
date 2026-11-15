@@ -6,6 +6,15 @@ import { Panorama25D } from './ui/panorama25d.js';
 import { renderComparisonTable } from './ui/comparisonView.js';
 import { renderDateSweep } from './ui/dateSweepView.js';
 import { renderSiteDateMatrix } from './ui/siteDateMatrix.js';
+import { renderSideBySide } from './ui/sideBySideView.js';
+import { renderGuide } from './ui/guideView.js';
+import {
+  comparisonToCsv,
+  downloadText,
+  matrixToCsv,
+  scenarioToJson,
+  sweepToCsv
+} from './export.js';
 import {
   loadLandingSites,
   loadDateSweep,
@@ -136,6 +145,16 @@ const matrixModal = $('matrix-modal');
 const matrixModalBody = $('matrix-modal-body');
 const matrixModalBadge = $('matrix-modal-badge');
 const closeMatrixModal = $('close-matrix-modal');
+const abModal = $('ab-modal');
+const abModalBody = $('ab-modal-body');
+const abModalTitle = $('ab-modal-title');
+const abModalBadge = $('ab-modal-badge');
+const closeAbModal = $('close-ab-modal');
+const guideModal = $('guide-modal');
+const guideModalBody = $('guide-modal-body');
+const guideModalTitle = $('guide-modal-title');
+const guideModalBadge = $('guide-modal-badge');
+const closeGuideModal = $('close-guide-modal');
 const horizonsModal = $('horizons-modal');
 const closeHorizonsModal = $('close-horizons-modal');
 const openHorizonsBtn = $('open-horizons-btn');
@@ -195,6 +214,129 @@ function formatDurationMs(ms) {
 function utcLabel(date) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`;
+}
+
+function scenarioParams() {
+  const params = new URLSearchParams();
+  const site = state.currentSite;
+  if (!site) return params;
+  if (site.role === 'custom') {
+    params.set('lat', site.lat.toFixed(6));
+    params.set('lon', site.lon.toFixed(6));
+  } else {
+    params.set('site', site.id);
+  }
+  params.set('date', new Date(state.baseDate.getTime()).toISOString());
+  params.set('profile', state.profileId);
+  params.set('panel', state.panelType);
+  params.set('mast', String(state.mastHeightM));
+  params.set('lang', getLanguage());
+  return params;
+}
+
+function updateURLState() {
+  if (!state.currentSite || typeof history === 'undefined') return;
+  const next = `${location.pathname}?${scenarioParams().toString()}`;
+  const current = `${location.pathname}${location.search}`;
+  if (next !== current) history.replaceState(null, '', next);
+}
+
+function parseScenarioURL(sites) {
+  if (typeof location === 'undefined') return null;
+  const params = new URLSearchParams(location.search);
+  if (![...params.keys()].length) return null;
+  const result = {};
+  const min = new Date(Date.UTC(2026, 0, 1));
+  const max = new Date(Date.UTC(2029, 0, 1));
+  const rawDate = params.get('date');
+  const date = rawDate ? new Date(rawDate) : null;
+  if (date && Number.isFinite(date.getTime())) {
+    result.baseDate = clampDate(date, min, max);
+  }
+  const profile = params.get('profile');
+  if (profile && PROFILE_BY_ID[profile]) result.profileId = profile;
+  const panel = params.get('panel');
+  if (panel && PANELS[panel]) result.panelType = panel;
+  const mast = Number.parseFloat(params.get('mast'));
+  if ([0.5, 2, 5, 10, 20].includes(mast)) result.mastHeightM = mast;
+  const lat = Number.parseFloat(params.get('lat'));
+  const lon = Number.parseFloat(params.get('lon'));
+  if (
+    Number.isFinite(lat) &&
+    Number.isFinite(lon) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lon >= 0 &&
+    lon <= 360
+  ) {
+    result.customSite = getCustomSite(lat, lon);
+  }
+  const siteId = params.get('site');
+  if (siteId) {
+    const site = sites.find((candidate) => candidate.id === siteId);
+    if (site) result.site = site;
+  }
+  return result;
+}
+
+function syncPresetSelect() {
+  const presets = {
+    'artemis-2026': Date.UTC(2026, 10, 14, 0, 0, 0),
+    'clps-summer': Date.UTC(2026, 11, 21, 12, 0, 0),
+    'clps-winter': Date.UTC(2026, 5, 21, 12, 0, 0)
+  };
+  if (Math.abs(state.baseDate.getTime() - Date.now()) < 5 * 60 * 1000) {
+    presetSelect.value = 'now';
+    return;
+  }
+  const match = Object.entries(presets).find(
+    ([, ms]) => Math.abs(state.baseDate.getTime() - ms) < 60_000
+  );
+  presetSelect.value = match ? match[0] : 'custom';
+}
+
+let toastTimeout = null;
+
+function showToast(message) {
+  const toast = $('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.hidden = true;
+  }, 2400);
+}
+
+async function copyShareLink() {
+  updateURLState();
+  const url = window.location.href;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast(t('share.copied'));
+  } catch {
+    window.prompt(t('share.copyPrompt'), url);
+  }
+}
+
+function exportScenarioJson() {
+  if (!state.analysis || !state.currentSite) return;
+  try {
+    const date = new Date(state.baseDate).toISOString().slice(0, 10);
+    downloadText(
+      `lunar-scenario-${state.currentSite.id}-${date}.json`,
+      'application/json',
+      scenarioToJson(state.analysis)
+    );
+    showToast(t('export.downloaded'));
+  } catch (error) {
+    showToast(t('export.error', { message: error.message }));
+  }
+}
+
+function initShareExportControls() {
+  $('share-btn')?.addEventListener('click', copyShareLink);
+  $('export-json-btn')?.addEventListener('click', exportScenarioJson);
 }
 
 function updateDateTimeInput() {
@@ -327,10 +469,35 @@ function formatOutage(metrics) {
   return `${capped ? '≥' : ''}${capped ? days.toFixed(0) : days.toFixed(1)} ${t('common.days')}`;
 }
 
+function setOutageDisplay(element, metrics) {
+  if (!element) return;
+  const text = formatOutage(metrics);
+  const split = text.lastIndexOf(' ');
+  const value = split === -1 ? text : text.slice(0, split);
+  const unit = split === -1 ? '' : text.slice(split + 1);
+  const valueSpan = document.createElement('span');
+  valueSpan.className = 'key-value';
+  valueSpan.textContent = value;
+  element.textContent = '';
+  element.append(valueSpan);
+  if (unit) {
+    const unitSpan = document.createElement('span');
+    unitSpan.className = 'key-unit';
+    unitSpan.textContent = unit;
+    element.append(document.createTextNode(' '), unitSpan);
+  }
+}
+
 function buildVerdictSummary(analysis) {
   const { metrics: m, profile: p, site } = analysis;
   if (site.role === 'reference') {
     return t('verdict.referenceSummary', {
+      dte: m.dteCenterPct.toFixed(0),
+      sun: m.sunlitPct.toFixed(0)
+    });
+  }
+  if (site.role === 'international') {
+    return t('verdict.internationalSummary', {
       dte: m.dteCenterPct.toFixed(0),
       sun: m.sunlitPct.toFixed(0)
     });
@@ -364,7 +531,7 @@ function updateDecisionUI(analysis) {
   const metrics = analysis.metrics;
   if (keySun) keySun.textContent = `${metrics.sunlitPct.toFixed(0)}%`;
   if (keyDte) keyDte.textContent = `${metrics.dteCenterPct.toFixed(0)}%`;
-  if (keyOutage) keyOutage.textContent = formatOutage(metrics);
+  if (keyOutage) setOutageDisplay(keyOutage, metrics);
   if (keyDteSub) keyDteSub.textContent = `≥ ${profile.dteReqPct}%`;
   if (keyOutageSub) keyOutageSub.textContent = `≤ ${profile.gMaxTolHours} h`;
   keyDteCard?.classList.toggle('is-good', metrics.dteCenterPct >= profile.dteReqPct);
@@ -659,6 +826,8 @@ async function calculateSeriesAndEvaluate() {
     state.series = analysis.series;
     updateDecisionUI(analysis);
     updateSimulation();
+    syncPresetSelect();
+    updateURLState();
   } catch (error) {
     console.error('No se pudo evaluar el sitio.', error);
     classificationBadge.textContent = t('status.noData');
@@ -783,6 +952,7 @@ function initTimeControls() {
 
   presetSelect.addEventListener('change', () => {
     const value = presetSelect.value;
+    if (value === 'custom') return;
     if (value === 'artemis-2026') state.baseDate = new Date(Date.UTC(2026, 10, 14, 0, 0, 0));
     else if (value === 'clps-summer') state.baseDate = new Date(Date.UTC(2026, 11, 21, 12, 0, 0));
     else if (value === 'clps-winter') state.baseDate = new Date(Date.UTC(2026, 5, 21, 12, 0, 0));
@@ -977,6 +1147,23 @@ async function openComparison() {
       closeModal(comparisonModal);
       openSiteDateMatrix();
     });
+    comparisonModalBody.querySelector('#open-ab-btn')?.addEventListener('click', () => {
+      closeModal(comparisonModal);
+      openABComparison();
+    });
+    comparisonModalBody.querySelector('#export-comparison-csv')?.addEventListener('click', () => {
+      try {
+        const date = new Date(state.baseDate).toISOString().slice(0, 10);
+        downloadText(
+          `lunar-comparison-${date}.csv`,
+          'text/csv',
+          comparisonToCsv(analyses, {})
+        );
+        showToast(t('export.downloaded'));
+      } catch (error) {
+        showToast(t('export.error', { message: error.message }));
+      }
+    });
     openModal(comparisonModal);
   } catch (error) {
     console.error('No se pudo comparar los sitios.', error);
@@ -1008,20 +1195,33 @@ async function openSweep() {
           count: sweep.points.length
         });
       }
+      const sweepContext = {
+        profile: PROFILE_BY_ID[state.profileId],
+        panelType: state.panelType,
+        mastHeightM: state.mastHeightM,
+        currentDateMs: state.baseDate.getTime(),
+        siteName: state.currentSite.name
+      };
       renderDateSweep(sweepModalBody, {
         sweep,
-        context: {
-          profile: PROFILE_BY_ID[state.profileId],
-          panelType: state.panelType,
-          mastHeightM: state.mastHeightM,
-          currentDateMs: state.baseDate.getTime(),
-          siteName: state.currentSite.name
-        },
+        context: sweepContext,
         onSelectDate: (startMs) => {
           closeModal(sweepModal);
           state.baseDate = new Date(startMs);
           state.currentDate = new Date(startMs);
           calculateSeriesAndEvaluate();
+        }
+      });
+      sweepModalBody.querySelector('#export-sweep-csv')?.addEventListener('click', () => {
+        try {
+          downloadText(
+            `lunar-sweep-${state.currentSite.id}.csv`,
+            'text/csv',
+            sweepToCsv(sweep, sweepContext)
+          );
+          showToast(t('export.downloaded'));
+        } catch (error) {
+          showToast(t('export.error', { message: error.message }));
         }
       });
     }
@@ -1037,6 +1237,86 @@ async function openSweep() {
   }
 }
 
+function openGuide() {
+  if (!guideModal) return;
+  guideModalTitle.textContent = t('guide.title');
+  guideModalBadge.textContent = t('guide.badge');
+  renderGuide(guideModalBody);
+  openModal(guideModal);
+}
+
+async function evaluateABScenario(site, startMs) {
+  await ensureEphemeris(site);
+  return evaluateSiteScenario({
+    site,
+    startMs,
+    mastHeightM: state.mastHeightM,
+    panelType: state.panelType,
+    profileId: state.profileId
+  });
+}
+
+async function openABComparison() {
+  if (!state.currentSite) return;
+  const sites = allSites();
+  let leftSite = state.currentSite;
+  let rightSite = sites.find((site) => site.id !== leftSite.id) ?? leftSite;
+  let leftStart = state.baseDate.getTime();
+  let rightStart = state.baseDate.getTime();
+
+  abModalTitle.textContent = t('ab.title');
+  abModalBadge.textContent = t('ab.badge');
+
+  const show = async () => {
+    setLoading(true, t('ab.loading'));
+    try {
+      const [left, right] = await Promise.all([
+        evaluateABScenario(leftSite, leftStart),
+        evaluateABScenario(rightSite, rightStart)
+      ]);
+      renderSideBySide(abModalBody, {
+        sites,
+        left,
+        right,
+        context: {
+          profile: PROFILE_BY_ID[state.profileId],
+          panelLabel: t(PANELS[state.panelType].labelKey),
+          mastHeightM: state.mastHeightM
+        },
+        onCompare: async ({ a, b }) => {
+          const siteA = sites.find((site) => site.id === a.siteId);
+          const siteB = sites.find((site) => site.id === b.siteId);
+          if (!siteA || !siteB) return;
+          leftSite = siteA;
+          rightSite = siteB;
+          leftStart = a.startMs;
+          rightStart = b.startMs;
+          await show();
+        },
+        onLoad: (siteId, startMs) => {
+          const site = sites.find((candidate) => candidate.id === siteId);
+          if (!site) return;
+          closeModal(abModal);
+          state.baseDate = new Date(startMs);
+          state.currentDate = new Date(startMs);
+          prepareSite(site);
+        }
+      });
+      if (abModal.classList.contains('hidden')) openModal(abModal);
+    } catch (error) {
+      console.error('No se pudo comparar A/B.', error);
+      abModalBody.innerHTML = `<p class="data-note">${t('ab.error', {
+        message: error.message
+      })}</p>`;
+      if (abModal.classList.contains('hidden')) openModal(abModal);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  await show();
+}
+
 async function openSiteDateMatrix() {
   if (!state.currentSite) return;
   setLoading(true, t('action.loading.matrix'));
@@ -1046,7 +1326,9 @@ async function openSiteDateMatrix() {
       await Promise.all(
         sites.map(async (site) => {
           const sweep = await loadDateSweep(site.id);
-          return sweep ? { siteId: site.id, siteName: site.name, sweep } : null;
+          return sweep
+            ? { siteId: site.id, siteName: site.name, role: site.role, sweep }
+            : null;
         })
       )
     ).filter(Boolean);
@@ -1060,14 +1342,15 @@ async function openSiteDateMatrix() {
           months: sweeps[0].sweep.points.length
         });
       }
+      const matrixContext = {
+        profile: PROFILE_BY_ID[state.profileId],
+        panelType: state.panelType,
+        mastHeightM: state.mastHeightM,
+        currentDateMs: state.baseDate.getTime()
+      };
       renderSiteDateMatrix(matrixModalBody, {
         sweeps,
-        context: {
-          profile: PROFILE_BY_ID[state.profileId],
-          panelType: state.panelType,
-          mastHeightM: state.mastHeightM,
-          currentDateMs: state.baseDate.getTime()
-        },
+        context: matrixContext,
         onSelect: (siteId, startMs) => {
           const site = allSites().find((candidate) => candidate.id === siteId);
           if (!site) return;
@@ -1075,6 +1358,18 @@ async function openSiteDateMatrix() {
           state.baseDate = new Date(startMs);
           state.currentDate = new Date(startMs);
           prepareSite(site);
+        },
+        onExport: () => {
+          try {
+            downloadText(
+              'lunar-site-date-matrix.csv',
+              'text/csv',
+              matrixToCsv(sweeps, matrixContext)
+            );
+            showToast(t('export.downloaded'));
+          } catch (error) {
+            showToast(t('export.error', { message: error.message }));
+          }
         }
       });
     }
@@ -1152,7 +1447,6 @@ function initPanelCollapse() {
       button.setAttribute('aria-label', label);
       button.title = label;
       if (!collapsed) {
-        // Redibuja canvas (radar) al volver a mostrarse
         requestAnimationFrame(() => {
           window.dispatchEvent(new Event('resize'));
           updateSimulation();
@@ -1168,6 +1462,9 @@ function initModals() {
   openSweepBtn?.addEventListener('click', openSweep);
   closeSweepModal?.addEventListener('click', () => closeModal(sweepModal));
   closeMatrixModal?.addEventListener('click', () => closeModal(matrixModal));
+  closeAbModal?.addEventListener('click', () => closeModal(abModal));
+  closeGuideModal?.addEventListener('click', () => closeModal(guideModal));
+  $('open-guide-btn')?.addEventListener('click', openGuide);
   openHorizonsBtn.addEventListener('click', () => openModal(horizonsModal));
   closeHorizonsModal.addEventListener('click', () => closeModal(horizonsModal));
   toggleNnViewBtn.addEventListener('click', () => {
@@ -1191,7 +1488,17 @@ function initModals() {
   $('open-trek-modal-btn')?.addEventListener('click', openTrek);
   closeTrekModal?.addEventListener('click', () => closeModal(trekModal));
 
-  for (const modal of [comparisonModal, sweepModal, matrixModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
+  for (const modal of [
+    comparisonModal,
+    sweepModal,
+    matrixModal,
+    abModal,
+    guideModal,
+    horizonsModal,
+    nnModal,
+    panoramaModal,
+    trekModal
+  ].filter(Boolean)) {
     modal.addEventListener('click', (event) => {
       if (event.target === modal) closeModal(modal);
     });
@@ -1231,13 +1538,29 @@ function refreshLanguageUI() {
       getMoonTrekUrl(state.currentSite)
     );
   }
+  updateURLState();
 }
 
 async function bootstrap() {
   try {
     const sites = await loadLandingSites();
     state.sites = sites;
-    state.currentSite = sites.find((site) => site.id === 'site23') ?? sites[0];
+    const urlState = parseScenarioURL(sites);
+    if (urlState) {
+      if (urlState.baseDate) {
+        state.baseDate = urlState.baseDate;
+        state.currentDate = new Date(urlState.baseDate);
+      }
+      if (urlState.profileId) state.profileId = urlState.profileId;
+      if (urlState.panelType) state.panelType = urlState.panelType;
+      if (urlState.mastHeightM != null) state.mastHeightM = urlState.mastHeightM;
+      if (urlState.customSite) state.customSite = urlState.customSite;
+    }
+    state.currentSite =
+      urlState?.customSite ??
+      urlState?.site ??
+      sites.find((site) => site.id === 'site23') ??
+      sites[0];
     initSiteSelector(sites);
     initConfigControls();
     initTimeControls();
@@ -1248,6 +1571,7 @@ async function bootstrap() {
     initModalKeys();
     initPanorama();
     initScrollAffordances();
+    initShareExportControls();
     await ensureEphemeris(state.currentSite);
     updateSitePanel(state.currentSite);
     moonScene.setLandingSites(allSites(), (siteId) => {
@@ -1260,7 +1584,6 @@ async function bootstrap() {
     setLoading(false);
   } catch (error) {
     console.error('No se pudo inicializar la aplicación.', error);
-    // An error is not progress: stop the scan and say what failed.
     loadingOverlay.classList.add('is-error');
     setLoading(true, t('action.bootstrapFailed', { message: error.message }));
     const strong = loadingOverlay.querySelector('strong');
