@@ -4,6 +4,8 @@
 
 NASA Space Apps Challenge 2026 · [Leer en español](README.es.md)
 
+**Live demo: <https://lua-navigator.vercel.app>**
+
 Lua Navigator turns NASA terrain and ephemeris data into a fast, auditable site/date trade-off:
 sunlight, eclipses, direct-to-Earth (DTE) visibility, communication blackouts, slope and a
 transparent multi-criteria index. It is educational and decision-support software, **not** a
@@ -122,6 +124,8 @@ include `siDisclosure`, and every derived JSON under `public/data` includes a to
   original DEMs (~0.5 GB) are not distributed.
 
 ## Quick start
+
+Try it online at **<https://lua-navigator.vercel.app>**, or run it locally:
 
 ```bash
 npm install

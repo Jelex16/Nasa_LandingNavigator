@@ -4,6 +4,8 @@
 
 NASA Space Apps Challenge 2026 · [Read in English](README.md)
 
+**Demo en vivo: <https://lua-navigator.vercel.app>**
+
 Lua Navigator convierte datos de terreno y efemérides de NASA en una comparación sitio/fecha rápida y
 auditable: luz solar, eclipses, visibilidad directa a Tierra (DTE), cortes de comunicaciones,
 pendiente y un índice multicriterio transparente. Es software educativo y de apoyo a decisiones,
@@ -126,6 +128,8 @@ La declaración completa está en [`docs/SI_USAGE.es.md`](docs/SI_USAGE.es.md) (
   Los DEM originales (~0.5 GB) no se distribuyen.
 
 ## Inicio rápido
+
+Pruébalo en línea en **<https://lua-navigator.vercel.app>**, o ejecútalo localmente:
 
 ```bash
 npm install
