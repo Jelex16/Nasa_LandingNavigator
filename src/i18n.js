@@ -6,9 +6,9 @@ const SUPPORTED = ["en", "es"];
 
 const MESSAGES = {
   en: {
-    "meta.title": "Lunar Landing Site Navigator | NASA Space Apps 2026",
+    "meta.title": "Lua Navigator | NASA Space Apps 2026",
     "meta.description":
-      "Lunar Landing Site Navigator: compare lunar landing sites with LOLA topography and JPL Horizons ephemerides.",
+      "Lua Navigator: compare lunar landing sites with LOLA topography and JPL Horizons ephemerides.",
     "common.sun": "Sun",
     "common.earth": "Earth",
     "common.sunUpper": "SUN",
@@ -480,9 +480,9 @@ const MESSAGES = {
     "scenario.customDate": "Custom date"
   },
   es: {
-    "meta.title": "Lunar Landing Site Navigator | NASA Space Apps 2026",
+    "meta.title": "Lua Navigator | NASA Space Apps 2026",
     "meta.description":
-      "Lunar Landing Site Navigator: compara sitios de alunizaje con topografía LOLA y efemérides JPL Horizons.",
+      "Lua Navigator: compara sitios de alunizaje con topografía LOLA y efemérides JPL Horizons.",
     "common.sun": "Sol",
     "common.earth": "Tierra",
     "common.sunUpper": "SOL",
