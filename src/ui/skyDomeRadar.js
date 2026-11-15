@@ -122,14 +122,29 @@ export class SkyDomeRadar {
 
     // Draw Topographic Horizon Obstruction Mask (LOLA)
     if (this.site.horizonProfile) {
-      ctx.fillStyle = 'rgba(46, 38, 30, 0.7)';
       ctx.strokeStyle = '#b08a5a';
       ctx.lineWidth = 1.5 * this.dpr;
 
+      // Obstruction mask: fill the region between the terrain profile and the
+      // outer radar boundary (lower elevations), leaving the visible sky clear.
+      ctx.fillStyle = 'rgba(46, 38, 30, 0.55)';
       ctx.beginPath();
       for (let az = 0; az <= 360; az += 2) {
-        const topoEl = this.site.horizonProfile(az);
-        const { x, y } = this.azElToXY(az, topoEl);
+        const { x, y } = this.azElToXY(az, this.site.horizonProfile(az));
+        if (az === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      for (let az = 360; az >= 0; az -= 2) {
+        const { x, y } = this.azElToXY(az, -2);
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Terrain rim.
+      ctx.beginPath();
+      for (let az = 0; az <= 360; az += 2) {
+        const { x, y } = this.azElToXY(az, this.site.horizonProfile(az));
         if (az === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }

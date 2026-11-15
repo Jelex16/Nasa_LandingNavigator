@@ -1,4 +1,4 @@
-import { GeoVector, Body, Libration } from 'astronomy-engine';
+import { GeoVector, Body } from 'astronomy-engine';
 
 const D2R = Math.PI / 180;
 const R2D = 180 / Math.PI;
@@ -178,97 +178,5 @@ export function calculateLunarEphemeris(date, lat, lon) {
     earthDirMCMF,
     siteUp: up,
     solarPowerEfficiency
-  };
-}
-
-/**
- * Calculates ephemeris time series across a time span (e.g. 7, 14, or 30 days)
- * at stepHours resolution.
- */
-export function calculateEphemerisSeries(startDate, lat, lon, durationDays = 30, stepHours = 2) {
-  const points = [];
-  const startMs = startDate.getTime();
-  const totalSteps = Math.floor((durationDays * 24) / stepHours);
-
-  for (let i = 0; i <= totalSteps; i++) {
-    const curDate = new Date(startMs + i * stepHours * 3600000);
-    const eph = calculateLunarEphemeris(curDate, lat, lon);
-    points.push({
-      time: curDate,
-      timeMs: curDate.getTime(),
-      hoursFromStart: i * stepHours,
-      sunEl: eph.sun.el,
-      sunAz: eph.sun.az,
-      earthEl: eph.earth.el,
-      earthAz: eph.earth.az,
-      subEarthLat: eph.subEarth.lat,
-      subEarthLon: eph.subEarth.lon,
-      powerEff: eph.solarPowerEfficiency
-    });
-  }
-  return points;
-}
-
-/**
- * Calculates event countdowns: time until next sunset, next sunrise, next earthset, next earthrise,
- * taking into account local topographic horizon.
- */
-export function calculateEventCountdowns(currentDate, lat, lon, getHorizonElevationFn) {
-  const stepMinutes = 30;
-  const maxSearchSteps = (45 * 24 * 60) / stepMinutes; // search up to 45 days
-  const nowMs = currentDate.getTime();
-
-  const curEph = calculateLunarEphemeris(currentDate, lat, lon);
-  const curSunHorizon = getHorizonElevationFn ? getHorizonElevationFn(curEph.sun.az) : 0;
-  const curEarthHorizon = getHorizonElevationFn ? getHorizonElevationFn(curEph.earth.az) : 0;
-
-  const sunIsUp = curEph.sun.el > curSunHorizon;
-  const earthIsUp = curEph.earth.el > curEarthHorizon;
-
-  let nextSunset = null;
-  let nextSunrise = null;
-  let nextEarthset = null;
-  let nextEarthrise = null;
-
-  let prevSunUp = sunIsUp;
-  let prevEarthUp = earthIsUp;
-
-  for (let step = 1; step <= maxSearchSteps; step++) {
-    const d = new Date(nowMs + step * stepMinutes * 60000);
-    const eph = calculateLunarEphemeris(d, lat, lon);
-    const sunHoriz = getHorizonElevationFn ? getHorizonElevationFn(eph.sun.az) : 0;
-    const earthHoriz = getHorizonElevationFn ? getHorizonElevationFn(eph.earth.az) : 0;
-
-    const sunUp = eph.sun.el > sunHoriz;
-    const earthUp = eph.earth.el > earthHoriz;
-
-    if (prevSunUp && !sunUp && !nextSunset) {
-      nextSunset = { date: d, msRemaining: d.getTime() - nowMs };
-    }
-    if (!prevSunUp && sunUp && !nextSunrise) {
-      nextSunrise = { date: d, msRemaining: d.getTime() - nowMs };
-    }
-    if (prevEarthUp && !earthUp && !nextEarthset) {
-      nextEarthset = { date: d, msRemaining: d.getTime() - nowMs };
-    }
-    if (!prevEarthUp && earthUp && !nextEarthrise) {
-      nextEarthrise = { date: d, msRemaining: d.getTime() - nowMs };
-    }
-
-    prevSunUp = sunUp;
-    prevEarthUp = earthUp;
-
-    if (nextSunset && nextSunrise && (nextEarthset || !earthIsUp) && (nextEarthrise || earthIsUp)) {
-      break;
-    }
-  }
-
-  return {
-    sunIsUp,
-    earthIsUp,
-    nextSunset,
-    nextSunrise,
-    nextEarthset,
-    nextEarthrise
   };
 }

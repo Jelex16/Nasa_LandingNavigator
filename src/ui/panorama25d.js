@@ -116,7 +116,19 @@ export class Panorama25D {
   }
 
   elevationRange() {
-    return this.mode === 'full' ? { min: -12, max: 90 } : { min: -10, max: 14 };
+    if (this.mode === 'full') return { min: -12, max: 90 };
+    if (!this.site || typeof this.horizonAt !== 'function') return { min: -10, max: 14 };
+    let minHorizon = 0;
+    let maxHorizon = 0;
+    for (let az = 0; az < 360; az += 5) {
+      const value = this.horizonAt(az);
+      if (value < minHorizon) minHorizon = value;
+      if (value > maxHorizon) maxHorizon = value;
+    }
+    return {
+      min: Math.min(-10, Math.floor(minHorizon) - 1),
+      max: Math.max(14, Math.ceil(maxHorizon) + 1)
+    };
   }
 
   plotRect() {
@@ -257,7 +269,9 @@ export class Panorama25D {
     const sunStart = currentTime;
     const sunEnd = currentTime + 24 * 3_600_000;
     let sunPoints = this.series.filter((point) => point.timeMs >= sunStart && point.timeMs <= sunEnd);
-    if (sunPoints.length < 2) sunPoints = this.series.slice(0, Math.min(24, this.series.length));
+    if (sunPoints.length < 2) {
+      sunPoints = this.series.slice(Math.max(0, this.series.length - 24));
+    }
     const earthPoints = this.series;
 
     for (const segment of this.splitOnWrap(earthPoints, (point) => point.earthAz)) {

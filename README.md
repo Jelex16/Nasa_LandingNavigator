@@ -37,6 +37,8 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
   con pesos y umbrales visibles, cuatro perfiles de misión y un modal de modelo auditable.
 - **Comparación de los 9 sitios** con la misma fecha de inicio, ventana, perfil, panel y mástil.
   Filas seleccionables; sin la antigua tabla de “acción” fuera de pantalla.
+- **Matriz sitio × fecha**: 9 sitios × 36 meses con selector de métrica (score, Sol, DTE o corte);
+  una celda carga ese sitio y esa fecha en la vista principal.
 - **Veredicto de primera pantalla**: porcentaje de horas con Sol, DTE centro y corte DTE máximo;
   el score compuesto queda como índice secundario, con el desglose plegado.
 - **Barrido de fechas (launch slip)**: 36 ventanas mensuales 2026–2028 precalculadas con energía,
@@ -65,6 +67,12 @@ npm run preview
 
 El catálogo real y los horizontes se cargan desde `public/data/`. La app no necesita red para el
 recorrido principal: las efemérides y los horizontes están precalculados y versionados.
+
+Tests de regresión (motor y datos):
+
+```bash
+npm test
+```
 
 ---
 
@@ -168,6 +176,9 @@ npm run data:fix-azimuth
 
 # Regenerar el barrido mensual 2026–2028 de los 9 sitios
 npm run data:sweep
+
+# Regenerar el manifiesto de datos y sus checksums
+npm run data:manifest
 ```
 
 El barrido usa 28 días, paso de 1 h, mástil 2 m, panel vertical con seguimiento y perfil Demo DTE
@@ -175,8 +186,9 @@ como supuestos de referencia. La energía se guarda para los tres paneles; DTE y
 con el mástil de 2 m y la UI avisa si el mástil actual es distinto. Los archivos generados están en
 `public/data/sweep/`.
 
-El pipeline completo de LOLA/Horizons que generó los datos base está en el proyecto hermano
-`../` (SUNDIAL, `pipeline/`). Los DEMs locales necesarios no están en este repositorio.
+El pipeline SUNDIAL que generó los datos base no se distribuye en este repositorio; los productos
+derivados y sus checksums están en `public/data/manifest.json`. Los DEM originales (~0.5 GB) no se
+incluyen.
 
 ---
 

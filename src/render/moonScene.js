@@ -121,8 +121,13 @@ export class MoonScene {
 
   initLighting() {
     // Ambient light simulating subtle starlight & earthshine
-    this.ambientLight = new THREE.AmbientLight(0x232a30, 0.42);
+    this.ambientLight = new THREE.AmbientLight(0x2a3238, 0.5);
     this.scene.add(this.ambientLight);
+
+    // Fill light so the night side stays readable instead of rendering as a
+    // featureless black disc.
+    this.hemiLight = new THREE.HemisphereLight(0x8fb6d1, 0x1a1512, 0.4);
+    this.scene.add(this.hemiLight);
 
     // Dynamic Directional Sun Light
     this.sunLight = new THREE.DirectionalLight(0xfff6ea, 2.6);

@@ -15,6 +15,7 @@ Missions to the Moon's south pole face extreme lighting and communication constr
 - **Read a plain-language verdict first**: percent of hours with sunlight, percent of time the Earth's center is visible (DTE), the longest continuous DTE blackout, and a secondary mission index.
 - **Run a launch-slip sweep**: 36 monthly 28-day windows from 2026 to 2028 with energy, DTE, longest outage, and next Earthset. Click a month to load that date in the main view.
 - **Compare sites with the same assumptions**: a comparison matrix with energy, eclipse, DTE, comms/outage, slope, and a transparent multi-criteria score.
+- **Site × date matrix**: 9 sites × 36 months with a metric selector (score, Sun, DTE, outage); click a cell to load that site and date in the main view.
 - **Explore mission profiles**: direct-to-Earth demo, night-surviving rover, crewed outpost, and relay/store-and-forward. All weights and thresholds are visible.
 
 ## Why it matters
@@ -39,7 +40,7 @@ The tool is designed for three audiences:
 - Ephemerides: JPL Horizons DE441, 2026-01-01 to 2029-02-01, cubic Hermite interpolation in the browser.
 - Validation: 4,032 off-grid samples against Horizons; **RMS 1e-5°**, maximum error **1.2e-4°**.
 - Nobile and Haworth use the regional 80 m/px DEM and the local IAU 2000 engine for ephemerides; this is labeled in the UI.
-- The 3D globe textures are previews only. The analysis uses the LOLA horizon files and the Horizons ephemerides, not the textures.
+- The 3D globe textures are previews only, and the Sun/Earth spheres in the 3D scene are illustrative and not to scale. The analysis uses the LOLA horizon files and the Horizons ephemerides, not the textures.
 
 ## Run it
 
@@ -60,6 +61,13 @@ Regenerate the monthly sweep (optional; the generated files are versioned):
 
 ```bash
 npm run data:sweep
+npm run data:manifest
+```
+
+Regression tests (engine and data):
+
+```bash
+npm test
 ```
 
 ## Demo

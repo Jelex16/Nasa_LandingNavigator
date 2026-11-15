@@ -26,29 +26,26 @@ const SITE_UI = {
   site23: {
     displayName: 'Malapert Massif',
     shortName: 'Malapert',
-    program: 'Artemis III / CLPS',
-    targetMission: 'Artemis III candidate region',
+    program: 'Artemis III',
+    targetMission: 'Malapert Massif candidate region',
     descriptionEs:
-      'Macizo elevado con un horizonte LOLA híbrido de 5 m/px en el campo cercano y 80 m/px hasta 100 km. Su geometría favorece la visibilidad de la Tierra, pero el Sol permanece bajo y el relieve local condiciona las ventanas de energía.',
-    iceKm: 12.4
+      'Macizo elevado con un horizonte LOLA híbrido de 5 m/px en el campo cercano y 80 m/px hasta 100 km. Su geometría favorece la visibilidad de la Tierra, pero el Sol permanece bajo y el relieve local condiciona las ventanas de energía.'
   },
   site01: {
     displayName: 'Connecting Ridge',
     shortName: 'Connecting Ridge',
-    program: 'CLPS / Artemis III',
+    program: 'Artemis III',
     targetMission: 'Connecting Ridge candidate region',
     descriptionEs:
-      'Cresta que conecta Shackleton con de Gerlache. Combina una exposición solar relativamente alta con un acceso corto a terreno permanentemente sombreado; el horizonte LOLA real muestra crestas cercanas que bloquean parte del cielo bajo.',
-    iceKm: 3.2
+      'Cresta que conecta Shackleton con de Gerlache. Combina una exposición solar relativamente alta con un acceso corto a terreno permanentemente sombreado; el horizonte LOLA real muestra crestas cercanas que bloquean parte del cielo bajo.'
   },
   site04: {
-    displayName: 'Shackleton Rim',
+    displayName: 'Shackleton Rim (punto LOLA)',
     shortName: 'Shackleton',
-    program: 'Artemis III / HLS',
-    targetMission: 'Peak near Shackleton candidate region',
+    program: 'Punto no oficial',
+    targetMission: 'Borde de Shackleton (punto de análisis LOLA)',
     descriptionEs:
-      'Borde del cráter Shackleton, a menos de un grado del polo sur. El horizonte LOLA híbrido incluye el muro del cráter y crea un régimen extremo de iluminación rasante; la pendiente local es un factor crítico.',
-    iceKm: 0.8
+      'Punto de análisis en el borde del cráter Shackleton, a menos de un grado del polo sur. No es una región candidata oficial de Artemis III; se incluye por su pendiente extrema y su régimen de iluminación rasante. El horizonte LOLA híbrido incluye el muro del cráter.'
   },
   site07: {
     displayName: 'Peak near Shackleton',
@@ -56,44 +53,39 @@ const SITE_UI = {
     program: 'Artemis III',
     targetMission: 'Peak near Shackleton candidate region',
     descriptionEs:
-      'Promontorio elevado cerca de Shackleton con un horizonte relativamente abierto en un amplio rango de azimuts. El DEM LOLA 5 m/px permite resolver crestas cercanas que un modelo global no vería.',
-    iceKm: 2.0
+      'Promontorio elevado cerca de Shackleton con un horizonte relativamente abierto en un amplio rango de azimuts. El DEM LOLA 5 m/px permite resolver crestas cercanas que un modelo global no vería.'
   },
   site11: {
     displayName: 'de Gerlache Rim',
     shortName: 'de Gerlache',
-    program: 'Artemis III / CLPS',
+    program: 'Artemis III',
     targetMission: 'de Gerlache Rim candidate region',
     descriptionEs:
-      'Borde elevado con un régimen mixto de iluminación y visibilidad DTE. Es un caso útil para estudiar la sensibilidad al retraso de aterrizaje con el horizonte LOLA real.',
-    iceKm: 5.2
+      'Borde elevado con un régimen mixto de iluminación y visibilidad DTE. Es un caso útil para estudiar la sensibilidad al retraso de aterrizaje con el horizonte LOLA real.'
   },
   site20: {
     displayName: 'Mons Mouton (Leibnitz Beta)',
     shortName: 'Mons Mouton',
-    program: 'CLPS / Artemis',
+    program: 'Artemis III',
     targetMission: 'Mons Mouton / Leibnitz Beta candidate region',
     descriptionEs:
-      'Meseta amplia y de pendiente moderada, adecuada para landers pesados. El horizonte LOLA híbrido combina el DEM local de 5 m/px con el DEM regional de 80 m/px.',
-    iceKm: 18.0
+      'Meseta amplia y de pendiente moderada, adecuada para landers pesados. El horizonte LOLA híbrido combina el DEM local de 5 m/px con el DEM regional de 80 m/px.'
   },
   nobile_rim_1: {
     displayName: 'Nobile Rim 1',
     shortName: 'Nobile',
-    program: 'CLPS / Artemis',
+    program: 'Artemis III',
     targetMission: 'Nobile Rim 1 candidate region',
     descriptionEs:
-      'Región Nobile Rim 1, en la meseta alta al oeste de Nobile. El DEM regional LOLA de 80 m/px muestra relieve alto y rugoso; no hay DEM local de 5 m/px, así que el horizonte es real pero de menor resolución.',
-    iceKm: 4.5
+      'Región Nobile Rim 1, en la meseta alta al oeste de Nobile. El DEM regional LOLA de 80 m/px muestra relieve alto y rugoso; no hay DEM local de 5 m/px, así que el horizonte es real pero de menor resolución.'
   },
   haworth_rim: {
     displayName: 'Haworth (interior)',
     shortName: 'Haworth',
-    program: 'CLPS / Artemis',
-    targetMission: 'Haworth candidate region (reference point)',
+    program: 'Haworth · referencia',
+    targetMission: 'Punto de referencia en el interior de Haworth',
     descriptionEs:
-      'Coordenada de referencia en el interior del cráter Haworth, junto a una de las regiones más frías del sistema solar. El DEM regional LOLA de 80 m/px muestra las paredes del cráter dominando el horizonte; no es un punto de borde certificado.',
-    iceKm: 1.5
+      'Coordenada de referencia en el interior del cráter Haworth, junto a una de las regiones más frías del sistema solar. El DEM regional LOLA de 80 m/px muestra las paredes del cráter dominando el horizonte; no es un punto de borde certificado.'
   },
   control_eq: {
     displayName: 'Apollo 11 (Mare Tranquillitatis)',
@@ -101,8 +93,7 @@ const SITE_UI = {
     program: 'Referencia histórica',
     targetMission: 'Apollo 11, 1969',
     descriptionEs:
-      'Sitio ecuatorial de control. Su horizonte analítico plano aísla el efecto de la inclinación axial lunar y sirve para contrastar la geometría polar. Se muestra como referencia, no como candidato de aterrizaje.',
-    iceKm: 2800
+      'Sitio ecuatorial de control. Su horizonte analítico plano aísla el efecto de la inclinación axial lunar y sirve para contrastar la geometría polar. Se muestra como referencia, no como candidato de aterrizaje.'
   }
 };
 
@@ -136,9 +127,14 @@ export function horizonElevationAt(profile, azimuthDeg, mastHeightM) {
   return loValue * (1 - hFrac) + hiValue * hFrac;
 }
 
-function customHorizon(azimuthDeg) {
-  const rad = (azimuthDeg * Math.PI) / 180;
-  return 0.35 + 0.55 * Math.sin(rad + 0.6) + 0.18 * Math.cos(2 * rad);
+function greatCircleKm(lat1, lon1, lat2, lon2) {
+  const toRad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toRad;
+  const dLon = (lon2 - lon1) * toRad;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) ** 2;
+  return 2 * 1737.4 * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
 function adaptSite(record) {
@@ -160,7 +156,6 @@ function adaptSite(record) {
     elevationM: record.elevationM ?? 0,
     maxSlopeDeg: record.slopeDeg ?? 0,
     avgSlopeDeg: record.slopeDeg ?? 0,
-    distToIceTrapKm: ui.iceKm ?? 0,
     optimalPanelAzimuthDeg: record.optimalPanelAzimuthDeg ?? 0,
     dataQuality:
       record.dataQuality ??
@@ -182,7 +177,7 @@ function adaptSite(record) {
   };
   site.horizonAt = (azimuthDeg, height = site.mastHeightM) => {
     if (site.horizon) return horizonElevationAt(site.horizon, azimuthDeg, height);
-    return customHorizon(azimuthDeg);
+    return 0;
   };
   site.horizonProfile = (azimuthDeg) => site.horizonAt(azimuthDeg, site.mastHeightM);
   return site;
@@ -282,13 +277,14 @@ export function getMoonTrekUrl(site) {
 
 export function getCustomSite(lat, lon, name = 'Sitio personalizado') {
   const normLon = ((lon % 360) + 360) % 360;
-  const isSouthPole = lat < -75;
-  const distToPoleKm = (90 - Math.abs(lat)) * 30.3;
-  const avgSlope = isSouthPole
-    ? 4.5 + Math.abs(Math.sin(lat * 5 + lon * 2)) * 5.0
-    : 2.5 + Math.abs(Math.sin(lon)) * 2.0;
-  const maxSlope = avgSlope * 1.8 + 1.2;
-  const elevation = isSouthPole ? 1.0 + 3.0 * Math.sin(normLon * (Math.PI / 180)) : -1.0;
+  const nearest = LANDING_SITES
+    .filter((candidate) => candidate.horizon && candidate.isRealLola)
+    .map((candidate) => ({
+      site: candidate,
+      distanceKm: greatCircleKm(lat, normLon, candidate.lat, candidate.lon)
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)[0];
+  const reference = nearest && nearest.distanceKm <= 300 ? nearest : null;
   const site = {
     id: 'custom-site',
     name: `${name} (${lat.toFixed(2)}°, ${normLon.toFixed(2)}°)`,
@@ -300,24 +296,29 @@ export function getCustomSite(lat, lon, name = 'Sitio personalizado') {
     lon: normLon,
     latDeg: lat,
     lonEastDeg: normLon,
-    elevationKm: elevation,
-    elevationM: elevation * 1000,
-    maxSlopeDeg: parseFloat(maxSlope.toFixed(1)),
-    avgSlopeDeg: parseFloat(avgSlope.toFixed(1)),
-    slopeDeg: parseFloat(avgSlope.toFixed(1)),
-    distToIceTrapKm: isSouthPole ? Math.max(1.0, distToPoleKm * 0.4) : 2500,
+    elevationKm: null,
+    elevationM: null,
+    maxSlopeDeg: null,
+    avgSlopeDeg: null,
+    slopeDeg: null,
     optimalPanelAzimuthDeg: 0,
-    description:
-      'Sitio definido por el usuario. Se evalúa con el motor de efemérides local y un horizonte aproximado; no usa un DEM LOLA y no debe interpretarse como una certificación del terreno.',
-    dataQuality: 'Modelo aproximado (sin DEM LOLA)',
-    horizonSource: 'approx',
+    description: reference
+      ? `Sitio definido por el usuario. Se evalúa con efemérides locales y el horizonte LOLA de ${reference.site.name}, a ${reference.distanceKm.toFixed(0)} km; no es un DEM del punto. Pendiente y elevación no están disponibles.`
+      : 'Sitio definido por el usuario. Se evalúa con efemérides locales y un horizonte plano aproximado porque no hay un perfil LOLA a menos de 300 km. No debe interpretarse como una certificación del terreno.',
+    dataQuality: reference
+      ? `Aproximado · horizonte LOLA de ${reference.site.shortName}`
+      : 'Aproximado · horizonte plano',
+    horizonSource: reference ? 'lola_nearest' : 'approx_flat',
+    horizonReferenceName: reference?.site.shortName ?? null,
+    horizonReferenceKm: reference?.distanceKm ?? null,
     ephemSource: 'iau2000_local',
     isRealLola: false,
     mastHeightM: 2,
     horizon: null,
     ephem: null
   };
-  site.horizonAt = (azimuthDeg) => customHorizon(azimuthDeg);
-  site.horizonProfile = (azimuthDeg) => customHorizon(azimuthDeg);
+  site.horizonAt = (azimuthDeg, height = site.mastHeightM) =>
+    reference ? reference.site.horizonAt(azimuthDeg, height) : 0;
+  site.horizonProfile = (azimuthDeg) => site.horizonAt(azimuthDeg, site.mastHeightM);
   return site;
 }

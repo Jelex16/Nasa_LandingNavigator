@@ -160,7 +160,3 @@ export async function loadEphemeris(siteId) {
     throw error;
   }
 }
-
-export function hasEphemeris(siteId) {
-  return ephemCache.has(siteId);
-}

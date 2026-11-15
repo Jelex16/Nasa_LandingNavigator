@@ -43,6 +43,13 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
       const statusShort = analysis.status.split(' ')[0];
       const scoreLabel = isReference ? 'REFERENCIA' : `${statusShort} · ${analysis.scorePercent}%`;
       const comms = commsState(metrics, profile, comps);
+      const slope = site.maxSlopeDeg == null ? null : Number(site.maxSlopeDeg);
+      const elevation = site.elevationKm == null ? null : Number(site.elevationKm);
+      const slopeClass =
+        slope == null ? '' : slope < 10 ? 'metric-good' : slope < 20 ? 'metric-warn' : 'metric-danger';
+      const slopeLabel = slope == null ? '—' : `${slope.toFixed(1)}°`;
+      const elevationLabel =
+        elevation == null ? 'sin DEM' : `${elevation >= 0 ? '+' : ''}${elevation.toFixed(2)} km`;
       return `
         <tr class="comparison-row" data-site-id="${site.id}">
           <td>
@@ -70,9 +77,9 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
             <strong>${metrics.gMaxHours.toFixed(1)} h</strong>
             <div class="site-cell-meta">tol ${profile.gMaxTolHours} h · ${comms.label}</div>
           </td>
-          <td class="${site.maxSlopeDeg < 10 ? 'metric-good' : site.maxSlopeDeg < 20 ? 'metric-warn' : 'metric-danger'}">
-            <strong>${site.maxSlopeDeg.toFixed(1)}°</strong>
-            <div class="site-cell-meta">${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km</div>
+          <td class="${slopeClass}">
+            <strong>${slopeLabel}</strong>
+            <div class="site-cell-meta">${elevationLabel}</div>
           </td>
         </tr>
       `;
@@ -96,6 +103,11 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
           Todas las filas usan la misma fecha de inicio, ventana, perfil, panel y altura de mástil que el panel principal.
           El score es un índice de decisión, no una certificación de aterrizaje. Haz clic en una fila para seleccionar el sitio.
         </p>
+        <div class="comparison-actions">
+          <button class="nav-action-btn" id="open-matrix-btn" type="button">
+            Matriz sitio × fecha
+          </button>
+        </div>
       </div>
 
       <div class="table-responsive">

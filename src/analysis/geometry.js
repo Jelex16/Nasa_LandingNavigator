@@ -89,13 +89,3 @@ export function longestTrueRunHours(flags, stepHours) {
   }
   return longest * stepHours;
 }
-
-export function sphericalSeparationDeg(az1Deg, el1Deg, az2Deg, el2Deg) {
-  const a1 = az1Deg * DEG_TO_RAD;
-  const e1 = el1Deg * DEG_TO_RAD;
-  const a2 = az2Deg * DEG_TO_RAD;
-  const e2 = el2Deg * DEG_TO_RAD;
-  const cosSep =
-    Math.sin(e1) * Math.sin(e2) + Math.cos(e1) * Math.cos(e2) * Math.cos(a1 - a2);
-  return Math.acos(clamp(cosSep, -1, 1)) * RAD_TO_DEG;
-}

@@ -9,7 +9,7 @@ The demo should show the two things judges remember:
 1. A plain-language verdict for one site/date (Sun, DTE, blackout).
 2. A launch-slip sweep that changes the decision when the date moves.
 
-If the A/B comparator is not ready, use the existing comparison matrix after the sweep. Do not show unfinished features.
+Use the comparison matrix and the site × date matrix to show the trade-off. Do not show unfinished features.
 
 ## 30-second video
 

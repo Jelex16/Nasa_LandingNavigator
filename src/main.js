@@ -5,6 +5,7 @@ import { TimelineChart } from './ui/timelineChart.js';
 import { Panorama25D } from './ui/panorama25d.js';
 import { renderComparisonTable } from './ui/comparisonView.js';
 import { renderDateSweep } from './ui/dateSweepView.js';
+import { renderSiteDateMatrix } from './ui/siteDateMatrix.js';
 import {
   loadLandingSites,
   loadDateSweep,
@@ -115,6 +116,10 @@ const sweepModalTitle = $('sweep-modal-title');
 const sweepModalBadge = $('sweep-modal-badge');
 const closeSweepModal = $('close-sweep-modal');
 const openSweepBtn = $('open-sweep-btn');
+const matrixModal = $('matrix-modal');
+const matrixModalBody = $('matrix-modal-body');
+const matrixModalBadge = $('matrix-modal-badge');
+const closeMatrixModal = $('close-matrix-modal');
 const horizonsModal = $('horizons-modal');
 const closeHorizonsModal = $('close-horizons-modal');
 const openHorizonsBtn = $('open-horizons-btn');
@@ -209,6 +214,8 @@ const HORIZON_SOURCE_LABELS = {
   lola_hybrid: 'LOLA híbrido (5 m + 80 m/px)',
   lola_80m_regional: 'LOLA regional 80 m/px',
   analytic_flat: 'analítico plano',
+  lola_nearest: 'LOLA de sitio cercano (aprox.)',
+  approx_flat: 'plano aproximado',
   approx: 'aproximado',
   unavailable: 'sin datos',
   unknown: 'sin clasificar'
@@ -218,12 +225,20 @@ function updateSitePanel(site) {
   hudSiteName.textContent = site.name;
   siteProgramBadge.textContent = site.program;
   siteDescription.textContent = site.description;
-  siteSlopeVal.textContent = `${Number(site.maxSlopeDeg).toFixed(1)}°`;
-  siteElevVal.textContent = `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`;
+  siteSlopeVal.textContent =
+    site.maxSlopeDeg == null ? '—' : `${Number(site.maxSlopeDeg).toFixed(1)}°`;
+  siteElevVal.textContent =
+    site.elevationKm == null
+      ? '—'
+      : `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`;
   hudCoords.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
   siteDataQuality.textContent = site.dataQuality;
-  const horizonLabel = HORIZON_SOURCE_LABELS[site.horizonSource] ?? site.horizonSource;
-  siteDataSource.textContent = `Horizonte: ${horizonLabel} · Efemérides: ${site.ephemSource === 'jpl_horizons' ? 'JPL Horizons DE441' : 'IAU 2000 local'}`;
+  const horizonLabel = site.horizonReferenceName
+    ? `LOLA de ${site.horizonReferenceName} (aprox.)`
+    : HORIZON_SOURCE_LABELS[site.horizonSource] ?? site.horizonSource;
+  const referenceNote =
+    site.horizonReferenceKm == null ? '' : ` · ${site.horizonReferenceKm.toFixed(0)} km`;
+  siteDataSource.textContent = `Horizonte: ${horizonLabel}${referenceNote} · Efemérides: ${site.ephemSource === 'jpl_horizons' ? 'JPL Horizons DE441' : 'IAU 2000 local'}`;
   const radarLabel =
     site.horizonSource === 'analytic_flat'
       ? 'Analítico'
@@ -258,9 +273,17 @@ function updateTrekModalContent(site, quickMapUrl, moonTrekUrl) {
     'trek-modal-coords',
     `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`
   );
-  setText('trek-modal-elev', `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`);
-  setText('trek-modal-slope', `${Number(site.maxSlopeDeg).toFixed(1)}°`);
-  setText('trek-modal-ice', `${site.distToIceTrapKm.toFixed(1)} km`);
+  setText(
+    'trek-modal-elev',
+    site.elevationKm == null
+      ? '—'
+      : `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`
+  );
+  setText(
+    'trek-modal-slope',
+    site.maxSlopeDeg == null ? '—' : `${Number(site.maxSlopeDeg).toFixed(1)}°`
+  );
+  setText('trek-modal-quality', site.dataQuality);
   setText('trek-modal-geology', site.geology ?? site.description);
   const quickMapButton = $('trek-modal-quickmap-btn');
   const moonTrekButton = $('trek-modal-moontrek-btn');
@@ -447,7 +470,7 @@ function updateSimulation() {
   hudSunElev.textContent = `${sky.sun.elDeg >= 0 ? '+' : ''}${sky.sun.elDeg.toFixed(2)}° Elev`;
   hudEarthElev.textContent = `${sky.earth.elDeg >= 0 ? '+' : ''}${sky.earth.elDeg.toFixed(2)}° Elev`;
 
-  const panelAzimuth = analysisPanelAzimuth(state.analysis);
+  const panelAzimuth = state.analysis.panelAzimuthDeg ?? 0;
   const irradiance = panelIrradianceWm2(
     state.panelType,
     sky.sun.azDeg,
@@ -497,12 +520,10 @@ function updateSimulation() {
   timeScrubber.value = String(clamp(Math.round(hoursFromBase), 0, WINDOW_HOURS));
   const day = Math.min(WINDOW_DAYS, Math.floor(hoursFromBase / 24) + 1);
   scrubberDayLabel.textContent = `Día ${day} / ${WINDOW_DAYS}`;
-}
-
-function analysisPanelAzimuth(analysis) {
-  if (!analysis) return 0;
-  if (state.panelType === 'vertical_fixed') return analysis.site.optimalPanelAzimuthDeg || 0;
-  return 0;
+  timeScrubber.setAttribute(
+    'aria-valuetext',
+    `Día ${day} de ${WINDOW_DAYS}, ${utcLabel(state.currentDate)}`
+  );
 }
 
 function formatCountdowns(events) {
@@ -703,7 +724,11 @@ function initTimeControls() {
     if (value === 'artemis-2026') state.baseDate = new Date(Date.UTC(2026, 10, 14, 0, 0, 0));
     else if (value === 'clps-summer') state.baseDate = new Date(Date.UTC(2026, 11, 21, 12, 0, 0));
     else if (value === 'clps-winter') state.baseDate = new Date(Date.UTC(2026, 5, 21, 12, 0, 0));
-    else state.baseDate = new Date();
+    else {
+      const minDate = new Date(Date.UTC(2026, 0, 1, 0, 0, 0));
+      const maxDate = new Date(Date.UTC(2029, 0, 1, 0, 0, 0));
+      state.baseDate = clampDate(new Date(), minDate, maxDate);
+    }
     state.currentDate = new Date(state.baseDate);
     calculateSeriesAndEvaluate();
   });
@@ -886,6 +911,10 @@ async function openComparison() {
         }
       }
     );
+    comparisonModalBody.querySelector('#open-matrix-btn')?.addEventListener('click', () => {
+      closeModal(comparisonModal);
+      openSiteDateMatrix();
+    });
     openModal(comparisonModal);
   } catch (error) {
     console.error('No se pudo comparar los sitios.', error);
@@ -933,6 +962,55 @@ async function openSweep() {
     console.error('No se pudo cargar el barrido de fechas.', error);
     sweepModalBody.innerHTML = `<p class="data-note">No se pudo cargar el barrido: ${error.message}</p>`;
     openModal(sweepModal);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function openSiteDateMatrix() {
+  if (!state.currentSite) return;
+  setLoading(true, 'Cargando barridos mensuales de los sitios…');
+  try {
+    const sites = allSites();
+    const sweeps = (
+      await Promise.all(
+        sites.map(async (site) => {
+          const sweep = await loadDateSweep(site.id);
+          return sweep ? { siteId: site.id, siteName: site.name, sweep } : null;
+        })
+      )
+    ).filter(Boolean);
+
+    if (!sweeps.length) {
+      matrixModalBody.innerHTML =
+        '<p class="data-note">No hay barridos precalculados. Ejecuta <code>npm run data:sweep</code> para generarlos.</p>';
+    } else {
+      if (matrixModalBadge) {
+        matrixModalBadge.textContent = `${sweeps.length} sitios × ${sweeps[0].sweep.points.length} meses · 2026–2028`;
+      }
+      renderSiteDateMatrix(matrixModalBody, {
+        sweeps,
+        context: {
+          profile: PROFILE_BY_ID[state.profileId],
+          panelType: state.panelType,
+          mastHeightM: state.mastHeightM,
+          currentDateMs: state.baseDate.getTime()
+        },
+        onSelect: (siteId, startMs) => {
+          const site = allSites().find((candidate) => candidate.id === siteId);
+          if (!site) return;
+          closeModal(matrixModal);
+          state.baseDate = new Date(startMs);
+          state.currentDate = new Date(startMs);
+          prepareSite(site);
+        }
+      });
+    }
+    openModal(matrixModal);
+  } catch (error) {
+    console.error('No se pudo cargar la matriz sitio × fecha.', error);
+    matrixModalBody.innerHTML = `<p class="data-note">No se pudo cargar la matriz: ${error.message}</p>`;
+    openModal(matrixModal);
   } finally {
     setLoading(false);
   }
@@ -1015,6 +1093,7 @@ function initModals() {
   closeComparisonModal.addEventListener('click', () => closeModal(comparisonModal));
   openSweepBtn?.addEventListener('click', openSweep);
   closeSweepModal?.addEventListener('click', () => closeModal(sweepModal));
+  closeMatrixModal?.addEventListener('click', () => closeModal(matrixModal));
   openHorizonsBtn.addEventListener('click', () => openModal(horizonsModal));
   closeHorizonsModal.addEventListener('click', () => closeModal(horizonsModal));
   toggleNnViewBtn.addEventListener('click', () => {
@@ -1038,7 +1117,7 @@ function initModals() {
   $('open-trek-modal-btn')?.addEventListener('click', openTrek);
   closeTrekModal?.addEventListener('click', () => closeModal(trekModal));
 
-  for (const modal of [comparisonModal, sweepModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
+  for (const modal of [comparisonModal, sweepModal, matrixModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
     modal.addEventListener('click', (event) => {
       if (event.target === modal) closeModal(modal);
     });

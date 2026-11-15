@@ -63,7 +63,7 @@
       <button class="cam-btn cam-btn-accent" id="open-panorama-btn" type="button" title="Panorama 2.5D del horizonte LOLA">
         Panorama 2.5D
       </button>
-      <span class="cam-note" aria-hidden="true">Globo visual · score LOLA</span>
+      <span class="cam-note" aria-hidden="true">Globo visual · no a escala</span>
     </div>
 
     <div class="ui-overlay-container">
@@ -215,7 +215,7 @@
           <div class="model3d-card" id="model3d-card">
             <div class="model3d-header">
               <span class="model3d-eyebrow">MODELO 3D · LRO / LOLA</span>
-              <span class="model3d-note">vista previa · no entra en el score</span>
+              <span class="model3d-note">vista previa · no a escala · no entra en el score</span>
             </div>
             <div class="layer-buttons" role="group" aria-label="Capa del globo lunar">
               <button class="layer-btn active" type="button" data-layer="lroc" title="Fotografía LROC WAC (vista previa 2k)">LROC</button>
@@ -225,7 +225,7 @@
             </div>
             <div class="model3d-relief-row">
               <span class="model3d-label">Relieve</span>
-              <button class="relief-btn" type="button" data-relief="1" title="Escala 1:1">1x</button>
+              <button class="relief-btn" type="button" data-relief="1" title="Exageración relativa 1x; no es escala 1:1">1x</button>
               <button class="relief-btn active" type="button" data-relief="2.5" title="Exageración 2.5x">2.5x</button>
               <button class="relief-btn" type="button" data-relief="5" title="Exageración 5x">5x</button>
               <button class="relief-btn" type="button" data-relief="0" title="Desactivar desplazamiento">Plano</button>
@@ -360,7 +360,8 @@
             </div>
             <span class="lunar-day-badge" id="scrubber-day-label">Día 1 / 28</span>
           </div>
-          <input type="range" id="time-scrubber" min="0" max="672" value="0" class="dock-slider" />
+          <label class="sr-only" for="time-scrubber">Hora dentro de la ventana de evaluación de 28 días</label>
+          <input type="range" id="time-scrubber" min="0" max="672" value="0" class="dock-slider" aria-valuetext="Día 1 de 28" />
         </div>
 
         <div class="presets-menu-box">
@@ -400,6 +401,19 @@
           <button class="btn-modal-close" id="close-comparison-modal" type="button" aria-label="Cerrar comparación">&times;</button>
         </div>
         <div class="modal-body" id="comparison-modal-body"></div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="matrix-modal" role="dialog" aria-modal="true" aria-labelledby="matrix-modal-title">
+      <div class="modal-window modal-wide modal-matrix">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2 id="matrix-modal-title">Matriz sitio × fecha</h2>
+            <span class="m-badge" id="matrix-modal-badge">9 sitios × 36 meses · 2026–2028</span>
+          </div>
+          <button class="btn-modal-close" id="close-matrix-modal" type="button" aria-label="Cerrar matriz">&times;</button>
+        </div>
+        <div class="modal-body" id="matrix-modal-body"></div>
       </div>
     </div>
 
@@ -521,8 +535,8 @@
                 <strong id="trek-modal-slope">—</strong>
               </div>
               <div class="trek-cell">
-                <span class="tc-label">Trampa fría cercana</span>
-                <strong id="trek-modal-ice">—</strong>
+                <span class="tc-label">Calidad del terreno</span>
+                <strong id="trek-modal-quality">—</strong>
               </div>
             </div>
             <p class="trek-geology-text" id="trek-modal-geology">—</p>

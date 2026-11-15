@@ -168,10 +168,10 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
     .join('');
 
   const tableRows = points
-    .map((point) => {
+    .map((point, index) => {
       const values = pointValues(point, context);
       return `<tr>
-        <td>${fullDateLabel(Date.parse(point.startUtc))}</td>
+        <td><button type="button" class="sweep-date-btn" data-index="${index}">${fullDateLabel(Date.parse(point.startUtc))}</button></td>
         <td>${values.energyKWh.toFixed(1)}</td>
         <td>${values.sunlitPct.toFixed(0)}%</td>
         <td>${values.dteCenterPct.toFixed(0)}%</td>
@@ -221,7 +221,7 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
     <p class="sweep-note">
       Muestreo mensual de ventanas de 28 días. El corte es una cota inferior si dura más que la ventana.
       Earthset = primera pérdida del centro de Tierra después del inicio; “—” si no ocurre en la ventana.
-      Haz clic en un mes para cargar esa fecha en la vista principal.
+      Haz clic en un mes del gráfico o en una fecha de la tabla para cargar esa fecha en la vista principal.
     </p>
     <details class="sweep-table-details">
       <summary>Ver tabla de 36 meses</summary>
@@ -283,6 +283,13 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
     tooltip.hidden = true;
     hoverLine.setAttribute('visibility', 'hidden');
   };
+
+  container.querySelectorAll('.sweep-date-btn').forEach((button) => {
+    const index = Number(button.getAttribute('data-index'));
+    button.addEventListener('click', () => {
+      if (onSelectDate) onSelectDate(Date.parse(points[index].startUtc));
+    });
+  });
 
   hits.forEach((hit) => {
     const index = Number(hit.getAttribute('data-index'));
