@@ -73,9 +73,121 @@ const SITE_UI = {
   control_eq: {
     displayName: 'Apollo 11 (Mare Tranquillitatis)',
     shortName: 'Apollo 11',
-    programKey: 'program.historicalReference',
+    programKey: 'program.nasaApollo',
     targetMission: 'Apollo 11, 1969',
     descriptionKey: 'description.control_eq'
+  },
+  apollo12: {
+    displayName: 'Apollo 12 (Oceanus Procellarum)',
+    shortName: 'Apollo 12',
+    programKey: 'program.nasaApollo',
+    targetMission: 'Apollo 12, 1969',
+    descriptionKey: 'description.apollo12'
+  },
+  apollo14: {
+    displayName: 'Apollo 14 (Fra Mauro)',
+    shortName: 'Apollo 14',
+    programKey: 'program.nasaApollo',
+    targetMission: 'Apollo 14, 1971',
+    descriptionKey: 'description.apollo14'
+  },
+  apollo15: {
+    displayName: 'Apollo 15 (Hadley–Apennine)',
+    shortName: 'Apollo 15',
+    programKey: 'program.nasaApollo',
+    targetMission: 'Apollo 15, 1971',
+    descriptionKey: 'description.apollo15'
+  },
+  apollo16: {
+    displayName: 'Apollo 16 (Descartes)',
+    shortName: 'Apollo 16',
+    programKey: 'program.nasaApollo',
+    targetMission: 'Apollo 16, 1972',
+    descriptionKey: 'description.apollo16'
+  },
+  apollo17: {
+    displayName: 'Apollo 17 (Taurus–Littrow)',
+    shortName: 'Apollo 17',
+    programKey: 'program.nasaApollo',
+    targetMission: 'Apollo 17, 1972',
+    descriptionKey: 'description.apollo17'
+  },
+  luna9: {
+    displayName: 'Luna 9 (Oceanus Procellarum)',
+    shortName: 'Luna 9',
+    programKey: 'program.ussrLuna',
+    targetMission: 'Luna 9, 1966',
+    descriptionKey: 'description.luna9'
+  },
+  luna16: {
+    displayName: 'Luna 16 (Mare Fecunditatis)',
+    shortName: 'Luna 16',
+    programKey: 'program.ussrLuna',
+    targetMission: 'Luna 16, 1970',
+    descriptionKey: 'description.luna16'
+  },
+  luna17: {
+    displayName: 'Luna 17 (Mare Imbrium)',
+    shortName: 'Luna 17',
+    programKey: 'program.ussrLuna',
+    targetMission: 'Luna 17 / Lunokhod 1, 1970',
+    descriptionKey: 'description.luna17'
+  },
+  luna21: {
+    displayName: 'Luna 21 (Le Monnier)',
+    shortName: 'Luna 21',
+    programKey: 'program.ussrLuna',
+    targetMission: 'Luna 21 / Lunokhod 2, 1973',
+    descriptionKey: 'description.luna21'
+  },
+  change3: {
+    displayName: "Chang'e 3 (Mare Imbrium)",
+    shortName: "Chang'e 3",
+    programKey: 'program.cnsa',
+    targetMission: "Chang'e 3 / Yutu, 2013",
+    descriptionKey: 'description.change3'
+  },
+  change5: {
+    displayName: "Chang'e 5 (Oceanus Procellarum)",
+    shortName: "Chang'e 5",
+    programKey: 'program.cnsa',
+    targetMission: "Chang'e 5, 2020",
+    descriptionKey: 'description.change5'
+  },
+  change6: {
+    displayName: "Chang'e 6 (Apollo Basin)",
+    shortName: "Chang'e 6",
+    programKey: 'program.cnsa',
+    targetMission: "Chang'e 6, 2024",
+    descriptionKey: 'description.change6'
+  },
+  im1_odysseus: {
+    displayName: 'IM-1 Odysseus (Malapert A)',
+    shortName: 'IM-1 Odysseus',
+    programKey: 'program.intuitiveMachines',
+    targetMission: 'IM-1 Odysseus, 2024 · CLPS',
+    descriptionKey: 'description.im1_odysseus'
+  },
+  im2_athena: {
+    displayName: 'IM-2 Athena (Mons Mouton)',
+    shortName: 'IM-2 Athena',
+    programKey: 'program.intuitiveMachines',
+    targetMission: 'IM-2 Athena, 2025 · CLPS',
+    descriptionKey: 'description.im2_athena'
+  },
+  blue_ghost_1: {
+    displayName: 'Blue Ghost 1 (Mare Crisium)',
+    shortName: 'Blue Ghost 1',
+    programKey: 'program.firefly',
+    targetMission: 'Blue Ghost Mission 1, 2025 · CLPS',
+    descriptionKey: 'description.blue_ghost_1'
+  },
+  im3_reiner_gamma: {
+    displayName: 'IM-3 Reiner Gamma (target)',
+    shortName: 'IM-3 target',
+    programKey: 'program.intuitiveMachines',
+    targetMission: 'IM-3 / PRISM · future CLPS target',
+    descriptionKey: 'description.im3_reiner_gamma'
   },
   chandrayaan3: {
     displayName: 'Chandrayaan-3 (Shiv Shakti)',
@@ -156,6 +268,15 @@ function adaptSite(record) {
     descriptionKey: ui.descriptionKey ?? null,
     description: record.description,
     role,
+    category:
+      record.category ??
+      (record.id === 'control_eq'
+        ? 'historical'
+        : role === 'international'
+          ? 'international'
+          : role === 'reference'
+            ? 'historical'
+            : 'candidates'),
     lat: record.latDeg,
     lon: record.lonEastDeg,
     elevationKm: record.elevationM == null ? null : record.elevationM / 1000,
@@ -225,10 +346,24 @@ export async function loadLandingSites() {
   } catch {
     international = { sites: [] };
   }
+  let historical = { sites: [] };
+  try {
+    historical = await fetchJson(`${base}sites-historical.json`);
+  } catch {
+    historical = { sites: [] };
+  }
+  let clps = { sites: [] };
+  try {
+    clps = await fetchJson(`${base}sites-clps.json`);
+  } catch {
+    clps = { sites: [] };
+  }
   const records = [
     ...catalog.sites,
     ...(extra.sites ?? []),
-    ...(international.sites ?? [])
+    ...(international.sites ?? []),
+    ...(historical.sites ?? []),
+    ...(clps.sites ?? [])
   ];
   const sites = records.map(adaptSite);
 
@@ -257,6 +392,22 @@ export async function loadLandingSites() {
     'nobile_rim_1',
     'haworth_rim',
     'control_eq',
+    'apollo12',
+    'apollo14',
+    'apollo15',
+    'apollo16',
+    'apollo17',
+    'luna9',
+    'luna16',
+    'luna17',
+    'luna21',
+    'change3',
+    'change5',
+    'change6',
+    'im1_odysseus',
+    'im2_athena',
+    'blue_ghost_1',
+    'im3_reiner_gamma',
     'chandrayaan3',
     'slim',
     'change4'
@@ -294,16 +445,28 @@ export function getMoonTrekUrl(site) {
   return `https://trek.nasa.gov/moon/#v=0.1&x=${site.lon.toFixed(4)}&y=${site.lat.toFixed(4)}&z=6&p=urn:ogc:def:crs:EPSG::104903`;
 }
 
-export function getCustomSite(lat, lon, name = t('site.customName')) {
+export const CUSTOM_HORIZON_MAX_KM = 10;
+
+export function findHorizonReference(
+  lat,
+  lon,
+  candidates = LANDING_SITES,
+  maxKm = CUSTOM_HORIZON_MAX_KM
+) {
   const normLon = ((lon % 360) + 360) % 360;
-  const nearest = LANDING_SITES
+  const nearest = candidates
     .filter((candidate) => candidate.horizon && candidate.isRealLola)
     .map((candidate) => ({
       site: candidate,
       distanceKm: greatCircleKm(lat, normLon, candidate.lat, candidate.lon)
     }))
     .sort((a, b) => a.distanceKm - b.distanceKm)[0];
-  const reference = nearest && nearest.distanceKm <= 300 ? nearest : null;
+  return nearest && nearest.distanceKm <= maxKm ? nearest : null;
+}
+
+export function getCustomSite(lat, lon, name = t('site.customName')) {
+  const normLon = ((lon % 360) + 360) % 360;
+  const reference = findHorizonReference(lat, normLon);
   const site = {
     id: 'custom-site',
     name: `${name} (${lat.toFixed(2)}°, ${normLon.toFixed(2)}°)`,
@@ -327,7 +490,7 @@ export function getCustomSite(lat, lon, name = t('site.customName')) {
     description: '',
     dataQuality: reference
       ? `Aproximado · horizonte LOLA de ${reference.site.shortName}`
-      : 'Aproximado · horizonte plano',
+      : `Aproximado · sin LOLA a ≤${CUSTOM_HORIZON_MAX_KM} km · horizonte plano`,
     horizonSource: reference ? 'lola_nearest' : 'approx_flat',
     horizonReferenceName: reference?.site.shortName ?? null,
     horizonReferenceKm: reference?.distanceKm ?? null,

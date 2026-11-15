@@ -5,9 +5,16 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.join(ROOT, 'public', 'data');
 const HORIZON = path.join(DATA, 'horizon');
-const catalog = JSON.parse(
-  fs.readFileSync(path.join(DATA, 'sites-international.json'), 'utf8')
-);
+const CATALOGS = [
+  'sites-international.json',
+  'sites-historical.json',
+  'sites-clps.json'
+];
+const sites = CATALOGS.flatMap((file) => {
+  const filePath = path.join(DATA, file);
+  if (!fs.existsSync(filePath)) return [];
+  return JSON.parse(fs.readFileSync(filePath, 'utf8')).sites ?? [];
+}).filter((site) => (site.horizonMode ?? 'analytic_flat') === 'analytic_flat');
 
 const BINS = 720;
 const BIN_WIDTH = 0.5;
@@ -15,7 +22,7 @@ const HEIGHTS = [0.5, 2.0, 5.0, 10.0, 20.0];
 const generatedUtc = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 
 const written = [];
-for (const site of catalog.sites) {
+for (const site of sites) {
   const record = {
     schemaVersion: 1,
     siteId: site.id,

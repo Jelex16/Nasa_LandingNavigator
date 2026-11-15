@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-15T00:00:00Z",
+  "dataMode": "reference",
+  "source": "CLPS and commercial landing sites; real coordinates, regional LOLA 80 m/px for IM-1/IM-2 and analytic flat horizons elsewhere, local IAU 2000 ephemerides",
+  "sourceUrl": "https://science.nasa.gov/lunar-discovery/deliveries",
+  "sites": [
+    {
+      "id": "im1_odysseus",
+      "name": "IM-1 Odysseus — Malapert A",
+      "shortName": "IM-1 Odysseus",
+      "regionType": "clps",
+      "category": "clps",
+      "latDeg": -80.13,
+      "lonEastDeg": 1.44,
+      "elevationM": 2593.95,
+      "slopeDeg": 4.766,
+      "demSourceNear": null,
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Intuitive Machines' IM-1 Odysseus landed near Malapert A at 80.13 S, 1.44 E on 22 February 2024, the first commercial soft landing. This reference uses a regional 80 m/px LOLA horizon (no 5 m/px near-field DEM) and local IAU 2000 ephemerides. IM-1 lies near the northern edge of the 80S DEM: equatorward samples beyond the DEM boundary are unavailable, so distant relief may be underrepresented to the north.",
+      "citations": [
+        {
+          "label": "NASA LRO — Images of Intuitive Machines' Odysseus lander",
+          "url": "https://www.nasa.gov/missions/lro/nasas-lro-images-intuitive-machines-odysseus-lander/"
+        },
+        {
+          "label": "NASA PGDA — LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        }
+      ],
+      "horizonMode": "lola_regional_80m",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "LOLA 80 m/px regional",
+      "horizonSource": "lola_80m_regional",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/im1_odysseus.json"
+    },
+    {
+      "id": "im2_athena",
+      "name": "IM-2 Athena — Mons Mouton",
+      "shortName": "IM-2 Athena",
+      "regionType": "clps",
+      "category": "clps",
+      "latDeg": -84.7906,
+      "lonEastDeg": 29.1957,
+      "elevationM": 5321.13,
+      "slopeDeg": 1.473,
+      "demSourceNear": null,
+      "demSourceFar": "LDEM_80S_80MPP_ADJ.TIF",
+      "description": "Intuitive Machines' IM-2 Athena landed in the Mons Mouton region at 84.7906 S, 29.1957 E on 6 March 2025 and came to rest on its side. This reference uses a regional 80 m/px LOLA horizon and local IAU 2000 ephemerides.",
+      "citations": [
+        {
+          "label": "LROC — IM-2 Athena landing site",
+          "url": "https://lroc.im-ldi.com/images/1408"
+        },
+        {
+          "label": "NASA PGDA — LOLA 80S 80 m/px regional DEM",
+          "url": "https://pgda.gsfc.nasa.gov/products/90"
+        }
+      ],
+      "horizonMode": "lola_regional_80m",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "LOLA 80 m/px regional",
+      "horizonSource": "lola_80m_regional",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/im2_athena.json"
+    },
+    {
+      "id": "blue_ghost_1",
+      "name": "Blue Ghost 1 — Mare Crisium",
+      "shortName": "Blue Ghost 1",
+      "regionType": "clps",
+      "category": "clps",
+      "latDeg": 18.56,
+      "lonEastDeg": 61.81,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Firefly's Blue Ghost Mission 1 landed near Mons Latreille in Mare Crisium (18.56 N, 61.81 E) on 2 March 2025. This reference uses an analytic flat horizon and local IAU 2000 ephemerides; it is not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "NASA — Firefly Blue Ghost lands on the Moon",
+          "url": "https://www.nasa.gov/news-release/touchdown-carrying-nasa-science-fireflys-blue-ghost-lands-on-moon/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/blue_ghost_1.json"
+    },
+    {
+      "id": "im3_reiner_gamma",
+      "name": "IM-3 Reiner Gamma — target",
+      "shortName": "IM-3 target",
+      "regionType": "clps",
+      "category": "clps",
+      "latDeg": 7.5,
+      "lonEastDeg": 301,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Intuitive Machines' IM-3 (PRISM) is a future CLPS target in the Reiner Gamma region (representative point 7.5 N, 59.0 W). This reference uses an analytic flat horizon and local IAU 2000 ephemerides; the site is not yet occupied.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Intuitive Machines 3 (PRISM)",
+          "url": "https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=IM-3-NOVA"
+        },
+        {
+          "label": "NASA — CLPS deliveries",
+          "url": "https://science.nasa.gov/lunar-discovery/deliveries"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (future target)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/im3_reiner_gamma.json"
+    }
+  ],
+  "si": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "AI-assisted data-generation script; NASA source data",
+    "details": "docs/SI_USAGE.md"
+  }
+}

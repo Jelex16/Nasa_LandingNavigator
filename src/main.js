@@ -179,6 +179,11 @@ const closeGuideModal = $('close-guide-modal');
 const horizonsModal = $('horizons-modal');
 const closeHorizonsModal = $('close-horizons-modal');
 const openHorizonsBtn = $('open-horizons-btn');
+const terrainValidationSection = $('terrain-validation-section');
+const terrainValidationTitle = $('terrain-validation-title');
+const terrainValidationMethod = $('terrain-validation-method');
+const terrainValidationSummary = $('terrain-validation-summary');
+const terrainValidationTable = $('terrain-validation-table');
 const nnModal = $('nn-modal');
 const closeNnModal = $('close-nn-modal');
 const toggleNnViewBtn = $('toggle-nn-view-btn');
@@ -908,19 +913,39 @@ async function calculateSeriesAndEvaluate() {
   }
 }
 
+const SITE_GROUPS = [
+  { id: 'candidates', labelKey: 'group.candidates' },
+  { id: 'historical', labelKey: 'group.historical' },
+  { id: 'clps', labelKey: 'group.clps' },
+  { id: 'international', labelKey: 'group.international' },
+  { id: 'custom', labelKey: 'group.custom' }
+];
+
+function siteGroupId(site) {
+  if (site.role === 'custom') return 'custom';
+  if (site.role === 'candidate') return 'candidates';
+  if (site.category === 'clps') return 'clps';
+  if (site.role === 'international') return 'international';
+  return 'historical';
+}
+
 function populateSiteSelector(sites) {
   siteSelect.innerHTML = '';
-  for (const site of sites) {
-    const option = document.createElement('option');
-    option.value = site.id;
-    option.textContent = `${site.name} · ${dataQualityLabel(site)}`;
-    siteSelect.appendChild(option);
-  }
-  if (state.customSite) {
-    const option = document.createElement('option');
-    option.value = 'custom-site';
-    option.textContent = `${state.customSite.name} · ${dataQualityLabel(state.customSite)}`;
-    siteSelect.appendChild(option);
+  const groups = new Map(SITE_GROUPS.map((group) => [group.id, []]));
+  for (const site of sites) groups.get(siteGroupId(site))?.push(site);
+  if (state.customSite) groups.get('custom')?.push(state.customSite);
+  for (const group of SITE_GROUPS) {
+    const entries = groups.get(group.id);
+    if (!entries?.length) continue;
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = t(group.labelKey);
+    for (const site of entries) {
+      const option = document.createElement('option');
+      option.value = site.id;
+      option.textContent = `${site.name} · ${dataQualityLabel(site)}`;
+      optgroup.appendChild(option);
+    }
+    siteSelect.appendChild(optgroup);
   }
 }
 
@@ -1671,6 +1696,75 @@ function initPanelCollapse() {
   }
 }
 
+let terrainValidation = null;
+let terrainValidationPromise = null;
+
+async function loadTerrainValidation() {
+  if (terrainValidationPromise) return terrainValidationPromise;
+  terrainValidationPromise = (async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.BASE_URL}data/terrain-validation.json`
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      terrainValidation = await response.json();
+    } catch (error) {
+      terrainValidation = null;
+      console.warn('Terrain validation data unavailable.', error);
+    }
+    return terrainValidation;
+  })();
+  return terrainValidationPromise;
+}
+
+function renderTerrainValidation() {
+  if (!terrainValidationSection) return;
+  const sites = Array.isArray(terrainValidation?.sites) ? terrainValidation.sites : [];
+  if (!sites.length) {
+    terrainValidationSection.hidden = true;
+    return;
+  }
+  terrainValidationSection.hidden = false;
+  if (terrainValidationTitle) terrainValidationTitle.textContent = t('terrain.title');
+  if (terrainValidationMethod) {
+    const formatKm = (value) => (Math.round(Number(value) * 10) / 10).toFixed(1);
+    terrainValidationMethod.textContent = t('terrain.method', {
+      minKm: formatKm(terrainValidation.nearFieldMinKm ?? 0),
+      maxKm: formatKm(terrainValidation.nearFieldMaxKm ?? 0),
+      azimuths: terrainValidation.azimuthSamples ?? ''
+    });
+  }
+  const aggregate = terrainValidation.aggregate ?? {};
+  if (terrainValidationSummary) {
+    terrainValidationSummary.textContent = t('terrain.aggregate', {
+      samples: aggregate.samples ?? 0,
+      rms: Number(aggregate.rmsDeg ?? 0).toFixed(3),
+      max: Number(aggregate.maxDeg ?? 0).toFixed(3)
+    });
+  }
+  if (!terrainValidationTable) return;
+  const rows = sites
+    .map(
+      (site) => `<tr>
+        <td>${site.siteShortName ?? site.siteId ?? ''}</td>
+        <td>${Number(site.rmsDeg ?? 0).toFixed(3)}</td>
+        <td>${Number(site.maxDeg ?? 0).toFixed(3)}</td>
+        <td>${site.azimuthSamples ?? ''}</td>
+      </tr>`
+    )
+    .join('');
+  terrainValidationTable.innerHTML = `<table class="terrain-validation-table">
+    <caption>${t('terrain.caption')}</caption>
+    <thead><tr>
+      <th scope="col">${t('terrain.colSite')}</th>
+      <th scope="col">${t('terrain.colRms')}</th>
+      <th scope="col">${t('terrain.colMax')}</th>
+      <th scope="col">${t('terrain.colSamples')}</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
 function initModals() {
   openComparisonBtn.addEventListener('click', openComparison);
   closeComparisonModal.addEventListener('click', () => closeModal(comparisonModal));
@@ -1680,7 +1774,11 @@ function initModals() {
   closeAbModal?.addEventListener('click', () => closeModal(abModal));
   closeGuideModal?.addEventListener('click', () => closeModal(guideModal));
   $('open-guide-btn')?.addEventListener('click', openGuide);
-  openHorizonsBtn.addEventListener('click', () => openModal(horizonsModal));
+  openHorizonsBtn.addEventListener('click', async () => {
+    openModal(horizonsModal);
+    await loadTerrainValidation();
+    renderTerrainValidation();
+  });
   closeHorizonsModal.addEventListener('click', () => closeModal(horizonsModal));
   toggleNnViewBtn.addEventListener('click', () => {
     if (state.analysis) renderDecisionModel(state.analysis);
@@ -1745,6 +1843,7 @@ function refreshLanguageUI() {
     if (state.panoramaOpen) updatePanorama();
   }
   playText.textContent = state.isPlaying ? t('action.pause') : t('action.simulate');
+  renderTerrainValidation();
   const trekModal = $('trek-modal');
   if (trekModal && !trekModal.classList.contains('hidden') && state.currentSite) {
     updateTrekModalContent(

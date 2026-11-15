@@ -39,8 +39,8 @@
       ],
       "horizonMode": "lola_hybrid",
       "nearFieldRadiusKm": 7.2,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 78.0
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 78
     },
     {
       "id": "site04",
@@ -78,8 +78,8 @@
       ],
       "horizonMode": "lola_hybrid",
       "nearFieldRadiusKm": 7.2,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 77.0
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 77
     },
     {
       "id": "site07",
@@ -117,8 +117,8 @@
       ],
       "horizonMode": "lola_hybrid",
       "nearFieldRadiusKm": 7.2,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 354.0
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 354
     },
     {
       "id": "site11",
@@ -156,8 +156,8 @@
       ],
       "horizonMode": "lola_hybrid",
       "nearFieldRadiusKm": 7.2,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 343.0
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 343
     },
     {
       "id": "site20",
@@ -195,8 +195,8 @@
       ],
       "horizonMode": "lola_hybrid",
       "nearFieldRadiusKm": 7.2,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 6.0
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 6
     },
     {
       "id": "site23",
@@ -234,8 +234,8 @@
       ],
       "horizonMode": "lola_hybrid",
       "nearFieldRadiusKm": 9.45,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 2.0
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 2
     },
     {
       "id": "control_eq",
@@ -244,7 +244,7 @@
       "regionType": "equatorial_control",
       "latDeg": 0.674,
       "lonEastDeg": 23.473,
-      "elevationM": -1930.0,
+      "elevationM": -1930,
       "slopeDeg": 0.5,
       "demSourceNear": null,
       "demSourceFar": null,
@@ -260,9 +260,15 @@
         }
       ],
       "horizonMode": "analytic_flat",
-      "nearFieldRadiusKm": 0.0,
-      "farFieldRadiusKm": 0.0,
-      "optimalPanelAzimuthDeg": 269.0
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 269
     }
-  ]
+  ],
+  "si": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "AI-assisted data-generation script; NASA source data",
+    "details": "docs/SI_USAGE.md"
+  }
 }

@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-15T00:00:00Z",
+  "dataMode": "reference",
+  "source": "Historical Apollo, Luna and Chang'e landing sites; real coordinates, analytic flat horizon, local IAU 2000 ephemerides",
+  "sourceUrl": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html",
+  "sites": [
+    {
+      "id": "apollo12",
+      "name": "Apollo 12 — Oceanus Procellarum",
+      "shortName": "Apollo 12",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": -3.0128,
+      "lonEastDeg": 336.5781,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Apollo 12 landed in Oceanus Procellarum on 19 November 1969, near Surveyor 3. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Apollo landing site coordinates",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/apollo12.json"
+    },
+    {
+      "id": "apollo14",
+      "name": "Apollo 14 — Fra Mauro",
+      "shortName": "Apollo 14",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": -3.64589,
+      "lonEastDeg": 342.52806,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Apollo 14 landed in the Fra Mauro highlands on 5 February 1971. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Apollo landing site coordinates",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/apollo14.json"
+    },
+    {
+      "id": "apollo15",
+      "name": "Apollo 15 — Hadley–Apennine",
+      "shortName": "Apollo 15",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 26.13239,
+      "lonEastDeg": 3.6333,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Apollo 15 landed at Hadley–Apennine on 30 July 1971. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Apollo landing site coordinates",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/apollo15.json"
+    },
+    {
+      "id": "apollo16",
+      "name": "Apollo 16 — Descartes",
+      "shortName": "Apollo 16",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": -8.9734,
+      "lonEastDeg": 15.5011,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Apollo 16 landed in the Descartes highlands on 21 April 1972. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Apollo landing site coordinates",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/apollo16.json"
+    },
+    {
+      "id": "apollo17",
+      "name": "Apollo 17 — Taurus–Littrow",
+      "shortName": "Apollo 17",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 20.1911,
+      "lonEastDeg": 30.7723,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Apollo 17 landed in Taurus–Littrow on 11 December 1972, the last crewed lunar landing. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Apollo landing site coordinates",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/apollo17.json"
+    },
+    {
+      "id": "luna9",
+      "name": "Luna 9 — Oceanus Procellarum",
+      "shortName": "Luna 9",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 7.08,
+      "lonEastDeg": 295.63,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Luna 9 made the first soft landing on the Moon on 3 February 1966 in Oceanus Procellarum. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Lunar landing sites",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/luna9.json"
+    },
+    {
+      "id": "luna16",
+      "name": "Luna 16 — Mare Fecunditatis",
+      "shortName": "Luna 16",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": -0.68,
+      "lonEastDeg": 56.3,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Luna 16 made the first robotic lunar sample return in September 1970 in Mare Fecunditatis. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Lunar landing sites",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/luna16.json"
+    },
+    {
+      "id": "luna17",
+      "name": "Luna 17 — Mare Imbrium",
+      "shortName": "Luna 17",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 38.28,
+      "lonEastDeg": 325,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Luna 17 delivered the Lunokhod 1 rover to Mare Imbrium in November 1970. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Lunar landing sites",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/luna17.json"
+    },
+    {
+      "id": "luna21",
+      "name": "Luna 21 — Le Monnier",
+      "shortName": "Luna 21",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 25.85,
+      "lonEastDeg": 30.45,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Luna 21 delivered the Lunokhod 2 rover to Le Monnier in January 1973. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+      "citations": [
+        {
+          "label": "NASA NSSDCA — Lunar landing sites",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/luna21.json"
+    },
+    {
+      "id": "change3",
+      "name": "Chang'e 3 — Mare Imbrium",
+      "shortName": "Chang'e 3",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 44.12,
+      "lonEastDeg": 340.49,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Chang'e 3 landed in northern Mare Imbrium in December 2013 and deployed the Yutu rover. International reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "CNSA — Chang'e program",
+          "url": "https://www.cnsa.gov.cn/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/change3.json"
+    },
+    {
+      "id": "change5",
+      "name": "Chang'e 5 — Oceanus Procellarum",
+      "shortName": "Chang'e 5",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": 43.06,
+      "lonEastDeg": 308.08,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Chang'e 5 returned lunar samples from northern Oceanus Procellarum in December 2020. International reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "CNSA — Chang'e program",
+          "url": "https://www.cnsa.gov.cn/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/change5.json"
+    },
+    {
+      "id": "change6",
+      "name": "Chang'e 6 — Apollo Basin",
+      "shortName": "Chang'e 6",
+      "regionType": "historical",
+      "category": "historical",
+      "latDeg": -41.64,
+      "lonEastDeg": 206.01,
+      "elevationM": null,
+      "slopeDeg": null,
+      "demSourceNear": null,
+      "demSourceFar": null,
+      "description": "Chang'e 6 returned the first samples from the lunar far side, in Apollo Basin (South Pole–Aitken), in June 2024. Earth is not directly visible, so a relay is required. International reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+      "citations": [
+        {
+          "label": "CNSA — Chang'e program",
+          "url": "https://www.cnsa.gov.cn/"
+        }
+      ],
+      "horizonMode": "analytic_flat",
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
+      "dataQuality": "Analytic horizon (historical reference)",
+      "horizonSource": "analytic_flat",
+      "ephemSource": "iau2000_local",
+      "role": "reference",
+      "horizonFile": "horizon/change6.json"
+    }
+  ],
+  "si": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "AI-assisted data-generation script; NASA source data",
+    "details": "docs/SI_USAGE.md"
+  }
+}

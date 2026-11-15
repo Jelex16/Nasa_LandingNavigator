@@ -68,7 +68,7 @@ Use the real app, desktop viewport, default settings and the default English UI:
 1. **Title**: Lunar Landing Site Navigator — from NASA data to a landing decision.
 2. **Problem**: south-pole lighting and communication; existing tools are complex; launch dates slip.
 3. **Solution**: pick a site/date; see Sun and Earth against the real LOLA horizon; read the verdict;
-   compare 12 sites, sweep 36 months, A/B two scenarios, share/export a scenario and open the guide.
+   compare 28 sites, sweep 36 months, A/B two scenarios, share/export a scenario and open the guide.
 4. **Demo**: Malapert 2026-11-14 verdict; launch slip to May 2027; optional A/B with Chang'e 4
    (far side, 0% DTE) to show the relay problem.
 5. **Data**: LOLA 5 m/80 m, Horizons DE441, 4,032-sample validation, international references labelled

@@ -162,9 +162,9 @@ const MESSAGES = {
     "site.source": "Horizon: {horizon} · Ephemerides: {ephem}",
     "site.customName": "Custom site",
     "site.customDescription.lola":
-      "User-defined site. Evaluated with local ephemerides and the LOLA horizon from {site}, {km} km away; it is not a DEM at the point. Slope and elevation are not available.",
+      "User-defined site. Evaluated with local ephemerides and the LOLA horizon from {site}, {km} km away (nearest real LOLA profile within 10 km); it is not a DEM at the point. Slope and elevation are not available.",
     "site.customDescription.flat":
-      "User-defined site. Evaluated with local ephemerides and an approximate flat horizon because there is no LOLA profile within 300 km. It must not be interpreted as terrain certification.",
+      "User-defined site. Evaluated with local ephemerides and an approximate flat horizon because there is no real LOLA profile within 10 km. It must not be interpreted as terrain certification.",
     "horizon.hybrid": "LOLA hybrid (5 m + 80 m/px)",
     "horizon.regional": "LOLA 80 m/px regional",
     "horizon.analytic": "analytic flat",
@@ -183,15 +183,34 @@ const MESSAGES = {
     "quality.analytic": "Analytic horizon",
     "quality.unavailable": "No LOLA DEM available",
     "quality.customLola": "Approximate · LOLA horizon from {site}",
-    "quality.customFlat": "Approximate · flat horizon",
+    "quality.customFlat": "Approximate · flat horizon (no LOLA within 10 km)",
     "quality.approx": "Approximate",
+    "terrain.title": "Terrain validation (cross-DEM)",
+    "terrain.method":
+      "5 m/px near-field DEM vs 80 m/px regional DEM over each site's near-field radial range ({minKm}–{maxKm} km), {azimuths} azimuths, 2 m mast. It measures cross-product agreement, not absolute accuracy: both products derive from LOLA and do not resolve rocks below their pixel size.",
+    "terrain.aggregate": "{samples} azimuth comparisons · RMS {rms}° · max {max}°",
+    "terrain.caption":
+      "Per-site angular difference between the near-field and regional horizons.",
+    "terrain.colSite": "Site",
+    "terrain.colRms": "RMS (°)",
+    "terrain.colMax": "Max (°)",
+    "terrain.colSamples": "Azimuths",
+    "group.candidates": "Artemis III candidates",
+    "group.historical": "Historical & other programs",
+    "group.clps": "CLPS & commercial",
+    "group.international": "International references",
+    "group.custom": "Custom coordinates",
     "program.artemis3": "Artemis III",
     "program.nonOfficial": "Non-official point",
     "program.haworthReference": "Haworth · reference",
     "program.historicalReference": "Historical reference",
+    "program.nasaApollo": "NASA · Apollo",
+    "program.ussrLuna": "USSR · Luna",
     "program.isro": "ISRO · reference",
     "program.jaxa": "JAXA · reference",
-    "program.cnsa": "CNSA · reference",
+    "program.cnsa": "CNSA · Chang'e",
+    "program.intuitiveMachines": "Intuitive Machines · CLPS",
+    "program.firefly": "Firefly · CLPS",
     "program.custom": "User-defined coordinates",
     "description.site23":
       "Elevated massif with a hybrid LOLA horizon: 5 m/px in the near field and 80 m/px out to 100 km. Its geometry favors Earth visibility, but the Sun stays low and local relief controls the energy windows.",
@@ -217,6 +236,38 @@ const MESSAGES = {
       "Japan's SLIM lander touched down at Shioli (13.32°S, 25.25°E) in January 2024. This equatorial reference uses an analytic flat horizon and local IAU 2000 ephemerides; the local terrain horizon is not modeled with LOLA here.",
     "description.change4":
       "China's Chang'e 4 landed in Von Kármán crater on the lunar far side (45.46°S, 177.59°E) in January 2019. From the far side the Earth is not directly visible, so the mission relies on a relay. This reference uses an analytic flat horizon and local IAU 2000 ephemerides.",
+    "description.apollo12":
+      "Apollo 12 landed in Oceanus Procellarum on 19 November 1969, near Surveyor 3. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.apollo14":
+      "Apollo 14 landed in the Fra Mauro highlands on 5 February 1971. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.apollo15":
+      "Apollo 15 landed at Hadley–Apennine on 30 July 1971. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.apollo16":
+      "Apollo 16 landed in the Descartes highlands on 21 April 1972. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.apollo17":
+      "Apollo 17 landed in Taurus–Littrow on 11 December 1972, the last crewed lunar landing. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.luna9":
+      "Luna 9 made the first soft landing on the Moon on 3 February 1966 in Oceanus Procellarum. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+    "description.luna16":
+      "Luna 16 made the first robotic lunar sample return in September 1970 in Mare Fecunditatis. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+    "description.luna17":
+      "Luna 17 delivered the Lunokhod 1 rover to Mare Imbrium in November 1970. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+    "description.luna21":
+      "Luna 21 delivered the Lunokhod 2 rover to Le Monnier in January 1973. Historical reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides.",
+    "description.change3":
+      "Chang'e 3 landed in northern Mare Imbrium in December 2013 and deployed the Yutu rover. International reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.change5":
+      "Chang'e 5 returned lunar samples from northern Oceanus Procellarum in December 2020. International reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.change6":
+      "Chang'e 6 returned the first samples from the lunar far side, in Apollo Basin (South Pole–Aitken), in June 2024. Earth is not directly visible, so a relay is required. International reference with real coordinates, an analytic flat horizon and local IAU 2000 ephemerides; not a LOLA terrain analysis.",
+    "description.im1_odysseus":
+      "Intuitive Machines' IM-1 Odysseus landed near Malapert A at 80.13°S, 1.44°E on 22 February 2024, the first commercial soft landing. This reference uses a regional 80 m/px LOLA horizon (no 5 m/px near-field DEM) and local IAU 2000 ephemerides. IM-1 lies near the northern edge of the 80S DEM, so distant relief may be underrepresented to the north.",
+    "description.im2_athena":
+      "Intuitive Machines' IM-2 Athena landed in the Mons Mouton region at 84.7906°S, 29.1957°E on 6 March 2025 and came to rest on its side. This reference uses a regional 80 m/px LOLA horizon and local IAU 2000 ephemerides.",
+    "description.blue_ghost_1":
+      "Firefly's Blue Ghost Mission 1 landed near Mons Latreille in Mare Crisium (18.56°N, 61.81°E) on 2 March 2025. This reference uses an analytic flat horizon and local IAU 2000 ephemerides; it is not a LOLA terrain analysis.",
+    "description.im3_reiner_gamma":
+      "Intuitive Machines' IM-3 (PRISM) is a future CLPS target in the Reiner Gamma region (representative point 7.5°N, 59.0°W). This reference uses an analytic flat horizon and local IAU 2000 ephemerides; the site is not yet occupied.",
     "action.simulate": "Simulate",
     "action.pause": "Pause",
     "action.compare": "Compare",
@@ -581,9 +632,9 @@ const MESSAGES = {
     "site.source": "Horizonte: {horizon} · Efemérides: {ephem}",
     "site.customName": "Sitio personalizado",
     "site.customDescription.lola":
-      "Sitio definido por el usuario. Se evalúa con efemérides locales y el horizonte LOLA de {site}, a {km} km; no es un DEM del punto. Pendiente y elevación no están disponibles.",
+      "Sitio definido por el usuario. Se evalúa con efemérides locales y el horizonte LOLA de {site}, a {km} km (el perfil LOLA real más cercano dentro de 10 km); no es un DEM del punto. Pendiente y elevación no están disponibles.",
     "site.customDescription.flat":
-      "Sitio definido por el usuario. Se evalúa con efemérides locales y un horizonte plano aproximado porque no hay un perfil LOLA a menos de 300 km. No debe interpretarse como una certificación del terreno.",
+      "Sitio definido por el usuario. Se evalúa con efemérides locales y un horizonte plano aproximado porque no hay un perfil LOLA real a ≤10 km. No debe interpretarse como una certificación del terreno.",
     "horizon.hybrid": "LOLA híbrido (5 m + 80 m/px)",
     "horizon.regional": "LOLA regional 80 m/px",
     "horizon.analytic": "analítico plano",
@@ -602,15 +653,35 @@ const MESSAGES = {
     "quality.analytic": "Horizonte analítico",
     "quality.unavailable": "Sin DEM LOLA disponible",
     "quality.customLola": "Aproximado · horizonte LOLA de {site}",
-    "quality.customFlat": "Aproximado · horizonte plano",
+    "quality.customFlat": "Aproximado · horizonte plano (sin LOLA a ≤10 km)",
     "quality.approx": "Aproximado",
+    "terrain.title": "Validación del terreno (entre DEM)",
+    "terrain.method":
+      "DEM de 5 m/px en campo cercano frente al DEM regional de 80 m/px en el rango radial de campo cercano de cada sitio ({minKm}–{maxKm} km), {azimuths} azimuts, mástil de 2 m. Mide la concordancia entre productos, no la precisión absoluta: ambos derivan de LOLA y no resuelven rocas por debajo de su píxel.",
+    "terrain.aggregate":
+      "{samples} comparaciones por azimut · RMS {rms}° · máximo {max}°",
+    "terrain.caption":
+      "Diferencia angular por sitio entre el horizonte de campo cercano y el regional.",
+    "terrain.colSite": "Sitio",
+    "terrain.colRms": "RMS (°)",
+    "terrain.colMax": "Máx (°)",
+    "terrain.colSamples": "Azimuts",
+    "group.candidates": "Candidatos Artemis III",
+    "group.historical": "Históricos y otros programas",
+    "group.clps": "CLPS y comerciales",
+    "group.international": "Referencias internacionales",
+    "group.custom": "Coordenadas personalizadas",
     "program.artemis3": "Artemis III",
     "program.nonOfficial": "Punto no oficial",
     "program.haworthReference": "Haworth · referencia",
     "program.historicalReference": "Referencia histórica",
+    "program.nasaApollo": "NASA · Apollo",
+    "program.ussrLuna": "URSS · Luna",
     "program.isro": "ISRO · referencia",
     "program.jaxa": "JAXA · referencia",
-    "program.cnsa": "CNSA · referencia",
+    "program.cnsa": "CNSA · Chang'e",
+    "program.intuitiveMachines": "Intuitive Machines · CLPS",
+    "program.firefly": "Firefly · CLPS",
     "program.custom": "Coordenadas definidas por el usuario",
     "description.site23":
       "Macizo elevado con un horizonte LOLA híbrido de 5 m/px en el campo cercano y 80 m/px hasta 100 km. Su geometría favorece la visibilidad de la Tierra, pero el Sol permanece bajo y el relieve local condiciona las ventanas de energía.",
@@ -636,6 +707,38 @@ const MESSAGES = {
       "Sitio de referencia de la misión japonesa SLIM en Shioli (13.32°S, 25.25°E), 2024. Usa un horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
     "description.change4":
       "Sitio de referencia de la misión china Chang'e 4 en Von Kármán (45.46°S, 177.59°E), 2019, en la cara oculta. La Tierra no es visible directamente; la misión depende de un relé. Usa un horizonte analítico plano y efemérides IAU 2000 locales.",
+    "description.apollo12":
+      "Apollo 12 aterrizó en Oceanus Procellarum el 19 de noviembre de 1969, cerca de Surveyor 3. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.apollo14":
+      "Apollo 14 aterrizó en las tierras altas de Fra Mauro el 5 de febrero de 1971. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.apollo15":
+      "Apollo 15 aterrizó en Hadley–Apennine el 30 de julio de 1971. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.apollo16":
+      "Apollo 16 aterrizó en las tierras altas de Descartes el 21 de abril de 1972. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.apollo17":
+      "Apollo 17 aterrizó en Taurus–Littrow el 11 de diciembre de 1972, el último alunizaje tripulado. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.luna9":
+      "Luna 9 logró el primer aterrizaje suave en la Luna el 3 de febrero de 1966 en Oceanus Procellarum. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales.",
+    "description.luna16":
+      "Luna 16 logró el primer retorno robótico de muestras lunares en septiembre de 1970 en Mare Fecunditatis. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales.",
+    "description.luna17":
+      "Luna 17 entregó el rover Lunokhod 1 en Mare Imbrium en noviembre de 1970. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales.",
+    "description.luna21":
+      "Luna 21 entregó el rover Lunokhod 2 en Le Monnier en enero de 1973. Referencia histórica con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales.",
+    "description.change3":
+      "Chang'e 3 aterrizó en el norte de Mare Imbrium en diciembre de 2013 y desplegó el rover Yutu. Referencia internacional con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.change5":
+      "Chang'e 5 retornó muestras del norte de Oceanus Procellarum en diciembre de 2020. Referencia internacional con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.change6":
+      "Chang'e 6 retornó las primeras muestras de la cara oculta lunar, en la cuenca Apollo (South Pole–Aitken), en junio de 2024. La Tierra no es visible directamente, así que requiere un relé. Referencia internacional con coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.im1_odysseus":
+      "El IM-1 Odysseus de Intuitive Machines aterrizó cerca de Malapert A a 80.13°S, 1.44°E el 22 de febrero de 2024, el primer alunizaje comercial suave. Esta referencia usa un horizonte LOLA regional de 80 m/px (sin DEM de 5 m/px en el punto) y efemérides IAU 2000 locales. IM-1 está cerca del borde norte del DEM 80S, así que el relieve lejano hacia el norte puede estar subrepresentado.",
+    "description.im2_athena":
+      "El IM-2 Athena de Intuitive Machines aterrizó en la región de Mons Mouton a 84.7906°S, 29.1957°E el 6 de marzo de 2025 y quedó sobre un costado. Esta referencia usa un horizonte LOLA regional de 80 m/px y efemérides IAU 2000 locales.",
+    "description.blue_ghost_1":
+      "El Blue Ghost 1 de Firefly aterrizó cerca de Mons Latreille en Mare Crisium (18.56°N, 61.81°E) el 2 de marzo de 2025. Esta referencia usa un horizonte analítico plano y efemérides IAU 2000 locales; no es un análisis LOLA del terreno.",
+    "description.im3_reiner_gamma":
+      "El IM-3 (PRISM) de Intuitive Machines es un objetivo CLPS futuro en la región de Reiner Gamma (punto representativo 7.5°N, 59.0°O). Esta referencia usa un horizonte analítico plano y efemérides IAU 2000 locales; el sitio aún no ha sido ocupado.",
     "action.simulate": "Simular",
     "action.pause": "Pausa",
     "action.compare": "Comparar",

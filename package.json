@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "description": "Lunar south-pole landing-site decision tool with real NASA LOLA terrain and JPL Horizons ephemerides (NASA Space Apps 2026).",
+  "siDisclosure": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "Code drafting, review, tests, documentation and data-generation scripts; not the challenge idea or scientific interpretation.",
+    "details": "docs/SI_USAGE.md"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,8 +17,11 @@
     "test": "node --test",
     "data:fix-azimuth": "node scripts/fix_horizon_azimuth.mjs",
     "data:regional-horizons": "python scripts/build_regional_horizons.py --north-mode true",
+    "data:clps-horizons": "python scripts/build_clps_horizons.py",
+    "data:terrain-validation": "python scripts/validate_horizons.py",
     "data:sweep": "node scripts/build_monthly_sweep.mjs",
     "data:flat-horizons": "node scripts/build_flat_horizons.mjs",
+    "data:si-metadata": "node scripts/add_si_metadata.mjs",
     "data:manifest": "node scripts/update_manifest.mjs"
   },
   "devDependencies": {

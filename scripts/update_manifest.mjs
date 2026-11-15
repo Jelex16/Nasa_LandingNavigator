@@ -55,6 +55,43 @@ function sourceFor(relative) {
         iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
     };
   }
+  if (relative === 'sites-historical.json') {
+    const historical = readJson(path.join(DATA, relative));
+    return {
+      source:
+        historical.source ??
+        'Historical Apollo, Luna and Chang\'e landing sites; analytic flat horizon; local IAU 2000',
+      sourceUrl:
+        historical.sourceUrl ??
+        'https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html',
+      generatedUtc:
+        historical.generatedUtc ??
+        iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
+    };
+  }
+  if (relative === 'sites-clps.json') {
+    const clps = readJson(path.join(DATA, relative));
+    return {
+      source:
+        clps.source ??
+        'CLPS and commercial landing sites; regional LOLA 80 m/px or analytic flat; local IAU 2000',
+      sourceUrl:
+        clps.sourceUrl ?? 'https://science.nasa.gov/lunar-discovery/deliveries',
+      generatedUtc:
+        clps.generatedUtc ?? iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
+    };
+  }
+  if (relative === 'terrain-validation.json') {
+    const validation = readJson(path.join(DATA, relative));
+    return {
+      source:
+        'Cross-DEM terrain validation: 5 m/px near-field vs 80 m/px regional LOLA DEMs',
+      sourceUrl: 'https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/',
+      generatedUtc:
+        validation.generatedUtc ??
+        iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
+    };
+  }
   if (relative.startsWith('horizon/')) {
     const horizon = readJson(path.join(DATA, relative));
     if (horizon.provenance === 'analytic_flat') {
@@ -62,6 +99,15 @@ function sourceFor(relative) {
         source:
           horizon.source ?? 'Analytic flat horizon (reference); no LOLA terrain',
         sourceUrl: horizon.sourceUrl ?? 'https://ssd.jpl.nasa.gov/horizons/',
+        generatedUtc:
+          horizon.generatedUtc ??
+          iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
+      };
+    }
+    if (horizon.provenance === 'lola_regional_80m') {
+      return {
+        source: 'Regional LOLA 80 m/px; true-north azimuth',
+        sourceUrl: 'https://pgda.gsfc.nasa.gov/products/90',
         generatedUtc:
           horizon.generatedUtc ??
           iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
@@ -108,7 +154,14 @@ const next = {
   version,
   generatedUtc: iso(Date.now()),
   referenceSitesNote:
-    "International reference sites (Chandrayaan-3, SLIM, Chang'e 4) use analytic flat horizons and the local IAU 2000 engine; they are not LOLA terrain analyses.",
+    "Historical, international and CLPS/commercial reference sites use analytic flat horizons except IM-1 and IM-2 (regional 80 m/px LOLA). They are context, not Artemis III candidates and not flight-certified terrain analyses.",
+  siDisclosure: {
+    assisted: true,
+    tools: "Gemini-family AI coding assistant",
+    scope:
+      "Code drafting, review, tests, documentation and data-generation scripts; not the challenge idea or scientific interpretation.",
+    details: "docs/SI_USAGE.md"
+  },
   files
 };
 

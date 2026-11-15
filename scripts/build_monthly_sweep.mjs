@@ -228,10 +228,14 @@ fs.mkdirSync(outDir, { recursive: true });
 const catalog = readJson(path.join(DATA, 'sites.json'));
 const extra = readJson(path.join(DATA, 'sites-extra.json'));
 const international = readJson(path.join(DATA, 'sites-international.json'));
+const historical = readJson(path.join(DATA, 'sites-historical.json'));
+const clps = readJson(path.join(DATA, 'sites-clps.json'));
 const records = [
   ...catalog.sites,
   ...extra.sites,
-  ...international.sites
+  ...international.sites,
+  ...historical.sites,
+  ...clps.sites
 ].filter((record) => (onlySite ? record.id === onlySite : true));
 if (records.length === 0) {
   console.error(`No hay sitios para el filtro --site ${onlySite}`);

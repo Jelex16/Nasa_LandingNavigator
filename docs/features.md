@@ -30,8 +30,14 @@ context and are not ranked as candidates.
 | SLIM (Shioli) | International reference | Analytic flat (approx.) | local IAU 2000 |
 | Chang'e 4 (Von Kármán) | International reference, far side | Analytic flat (approx.) | local IAU 2000 |
 
+- **Historical and other programs**: Apollo 12, 14, 15, 16, 17; Luna 9, 16, 17, 21; Chang'e 3, 5, 6.
+  Real coordinates, analytic flat horizons and local IAU 2000 ephemerides. They are labeled
+  `REFERENCE`, not Artemis III candidates.
+- **CLPS and commercial**: IM-1 Odysseus and IM-2 Athena use a regional 80 m/px LOLA horizon; Blue
+  Ghost 1 and the future IM-3 Reiner Gamma target use an analytic flat horizon. IM-1 is near the
+  northern edge of the 80S DEM, so distant relief may be underrepresented to the north.
 - **Custom coordinates**: latitude/longitude validation; the app uses the nearest real LOLA horizon
-  within 300 km and labels the distance. If no site is within 300 km it uses a flat analytic horizon.
+  within 10 km and labels the distance. If no site is within 10 km it uses a flat analytic horizon.
   Slope and elevation are shown as “—”; the result is explicitly approximate.
 - **International references** are included for comparison and education only. They use real mission
   coordinates but **not** LOLA terrain at those points; their horizon is analytic flat and their
@@ -90,7 +96,7 @@ Statuses and hard limits:
 
 ## 5. Comparisons
 
-- **Comparison matrix**: all 12 sites with the same start date, window, profile, panel and mast.
+- **Comparison matrix**: all 28 sites with the same start date, window, profile, panel and mast.
   Columns: score/status, energy, continuous eclipse, DTE center, DTE outage and local slope. Rows are
   clickable; references carry a `REFERENCE` badge. Export CSV.
 - **Side-by-side A/B**: a visual comparison of two site/date scenarios with the current profile,
@@ -98,7 +104,7 @@ Statuses and hard limits:
   slope and the mission index (references show `REFERENCE`). A delta table shows B−A, coloured by
   direction. “Load in main view” opens either scenario. A/B is visual; use Share/Export after loading
   a scenario.
-- **Site × date matrix**: 12 sites × 36 months with a metric selector (Score, Sun %, DTE %, outage).
+- **Site × date matrix**: 28 sites × 36 months with a metric selector (Score, Sun %, DTE %, outage).
   Reference rows are marked; the note explains they are context, not ranked candidates. Click a cell
   to load that site and date. Export CSV.
 
@@ -188,18 +194,26 @@ All exports are client-side downloads; no server or account is required.
 ## 10. Data, validation and provenance
 
 - **LOLA 5 m/px landing-site DEMs**: near field for six sites.
-- **LOLA 80S 80 m/px regional DEM**: far field to 100 km and Nobile/Haworth.
+- **LOLA 80S 80 m/px regional DEM**: far field to 100 km and Nobile, Haworth, IM-1 and IM-2.
 - **JPL Horizons DE441**: apparent topocentric Sun/Earth az/el/distance, 1 h step, 2026-01-01 to
   2029-02-01, cubic Hermite interpolation in the browser.
 - **Horizon model**: 720 azimuth bins (0.5°), five mast heights, lunar curvature `r²/(2R_M)`,
   airless horizon (no atmospheric refraction).
 - **Validation**: 4,032 off-grid samples against Horizons; RMS 5×10⁻⁶°, maximum 1.22×10⁻⁴° (the UI
-  rounds to 1×10⁻⁵° and 1.2×10⁻⁴°). The local IAU 2000 engine is a fallback and was spot-checked
-  against Horizons; it is not covered by the full 4,032-sample validation.
-- **Data manifest**: `public/data/manifest.json` lists 35 derived files with sizes and SHA-256
+  rounds to 1×10⁻⁵° and 1.2×10⁻⁴°). The local IAU 2000 engine is used for sites without precomputed
+  Horizons ephemerides and as a fallback; it was spot-checked against Horizons and is not covered by
+  the full 4,032-sample validation.
+- **Terrain cross-validation**: `public/data/terrain-validation.json` compares the 5 m/px near-field
+  DEM with the 80 m/px regional DEM over each site's near-field range (24 azimuths, 2 m mast).
+  Aggregate RMS 0.51°, maximum 2.18°. It measures cross-product agreement, not absolute terrain
+  accuracy: both products derive from LOLA and do not resolve rocks below their pixel size.
+- **Data manifest**: `public/data/manifest.json` lists 70 derived files with sizes and SHA-256
   checksums; `npm run data:manifest` regenerates it. The original DEMs (~0.5 GB) are not distributed.
 - **International references**: analytic flat horizons and local IAU 2000; not LOLA terrain analyses.
   The manifest carries a `referenceSitesNote`, and the data modal states it.
+- **Historical and CLPS references**: Apollo, Luna and Chang'e use analytic flat horizons and local
+  IAU 2000. IM-1/IM-2 use regional 80 m/px LOLA; Blue Ghost 1 and IM-3 are analytic flat. They are
+  reference points, not Artemis III candidates.
 - **3D textures**: LROC WAC and LOLA previews (2k/1k); they are visual only and are not used for the
   score.
 
@@ -223,8 +237,8 @@ All exports are client-side downloads; no server or account is required.
   Monte Carlo uncertainty.
 - The horizon is a 1D profile per azimuth; the 2.5D panorama is a shaded representation, not a 3D
   mesh.
-- Nobile/Haworth use 80 m/px regional terrain; custom and international reference sites use
-  approximate or analytic flat horizons.
+- Nobile, Haworth, IM-1 and IM-2 use 80 m/px regional terrain; historical, international and
+  non-polar CLPS/commercial reference sites use analytic flat horizons.
 - The score is a decision index, not a probability of success. `gMaxHours` is a lower bound inside
   the 28-day window.
 - The 3D globe, Sun/Earth spheres and preview textures are illustrative and not to scale.
@@ -240,10 +254,13 @@ npm run preview
 npm test               # engine, data, i18n and export tests
 
 npm run data:sweep             # 36 monthly windows for all sites
-npm run data:flat-horizons     # flat horizons for the international references
+npm run data:flat-horizons     # flat horizons for historical, CLPS and international references
+npm run data:terrain-validation # 5 m/px vs 80 m/px cross-DEM validation
+npm run data:si-metadata       # AI-disclosure metadata in every derived JSON
 npm run data:manifest          # sizes and SHA-256 for public/data
 npm run data:fix-azimuth       # idempotent azimuth correction
 npm run data:regional-horizons # Nobile/Haworth from the regional DEM
+npm run data:clps-horizons     # IM-1/IM-2 from the regional DEM
 ```
 
 ## 14. Key files

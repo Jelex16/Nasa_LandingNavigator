@@ -6,7 +6,20 @@ eclipses, visibilidad directa a Tierra (DTE), cortes de comunicaciones y el efec
 
 Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator**.
 
-> English summary: this is a static Vite web app that compares twelve lunar sites (nine curated plus
+## Uso de inteligencia artificial (SI)
+
+Este proyecto usó un asistente de codificación con IA de la familia Gemini como apoyo al desarrollo:
+redacción y refactorización de código, tests, documentación y scripts de generación de datos
+derivados. La idea del reto, el alcance científico, la selección de sitios, los perfiles de misión y
+la interpretación de resultados fueron definidos por el equipo; la SI no se usó para concebir la
+solución. Los DEM LOLA y las efemérides de JPL Horizons son datos auténticos de NASA/JPL; no se
+generaron mediciones con IA. No se incluyen imágenes, vídeos ni audio generados con IA.
+
+La declaración completa está en [`docs/SI_USAGE.es.md`](docs/SI_USAGE.es.md). `package.json` y
+`public/data/manifest.json` incluyen `siDisclosure`, y cada JSON derivado de `public/data` incluye un
+objeto `si`.
+
+> English summary: this is a static Vite web app that compares 28 lunar sites (25 curated plus
 > three international references) using real NASA LOLA horizon profiles and JPL Horizons DE441
 > Sun/Earth ephemerides. It includes a 2.5D LOLA horizon panorama, a 28-day power/DTE timeline, a
 > transparent multi-criteria score, a site comparison matrix, a site × date heatmap, a visual
@@ -21,17 +34,18 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
 
 ## Qué incluye
 
-- **12 sitios**: 8 sitios polares —Malapert Massif, Connecting Ridge, Shackleton Rim (punto LOLA no
+- **28 sitios**: 8 polares —Malapert Massif, Connecting Ridge, Shackleton Rim (punto LOLA no
   oficial), Peak near Shackleton, de Gerlache Rim, Mons Mouton/Leibnitz Beta, Nobile Rim 1 y Haworth—
-  más Apollo 11 como referencia ecuatorial y 3 referencias internacionales: Chandrayaan-3 (Shiv
-  Shakti), SLIM (Shioli) y Chang'e 4 (Von Kármán).
+  más 13 históricos (Apollo 11–17, Luna 9/16/17/21 y Chang'e 3/5/6), 4 CLPS/comerciales (IM-1
+  Odysseus, IM-2 Athena, Blue Ghost 1 e IM-3 Reiner Gamma) y 3 referencias internacionales:
+  Chandrayaan-3 (Shiv Shakti), SLIM (Shioli) y Chang'e 4 (Von Kármán).
 - **Horizontes LOLA reales**:
   - 6 sitios polares con DEM local de **5 m/px** + DEM regional **80 m/px** hasta 100 km (SUNDIAL hybrid).
-  - Nobile Rim 1 y Haworth con **DEM regional LOLA 80 m/px** únicamente; se etiquetan como tal.
-  - Apollo 11 con horizonte analítico plano (referencia, no candidato).
-  - **Referencias internacionales** con horizonte analítico plano e IAU 2000 local; **no** son análisis
-    LOLA del terreno. Chang'e 4 está en la cara oculta: DTE 0% y necesidad de relé. Chandrayaan-3 a
-    69.4°S es una simplificación porque la iluminación polar depende del terreno.
+  - Nobile Rim 1, Haworth, IM-1 e IM-2 con **DEM regional LOLA 80 m/px** únicamente; se etiquetan
+    como tal. IM-1 está cerca del borde del DEM 80S y se advierte de la cobertura parcial.
+  - Apollo 11 y el resto de referencias históricas, CLPS no polares e internacionales con horizonte
+    analítico plano; **no** son análisis LOLA del terreno. Chang'e 4 y Chang'e 6 están en la cara
+    oculta: DTE 0% y necesidad de relé.
 - **Efemérides JPL Horizons DE441**: azimut/elevación aparentes del Sol y la Tierra, paso de 1 h,
   2026-01-01 → 2029-02-01, con interpolación cúbica de Hermite en el cliente.
 - **Panorama 2.5D** de 360°: silueta LOLA, relieve sombreado, trayectoria solar de 24 h, bucle de
@@ -47,11 +61,11 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
   el score y el veredicto del sitio, la comparación, el barrido y la matriz. Cumplir los cuatro
   umbrales es `GO`. En modo estricto (por defecto), cualquier umbral incumplido es `NO-GO`; sin modo
   estricto, un umbral incumplido es `PRECAUCIÓN` si el índice es ≥50; si no, `NO-GO`.
-- **Comparación de los 12 sitios** con la misma fecha de inicio, ventana, perfil, panel y mástil.
+- **Comparación de los 28 sitios** con la misma fecha de inicio, ventana, perfil, panel y mástil.
   Filas seleccionables; las referencias llevan badge `REFERENCE`.
 - **A/B lado a lado**: dos escenarios sitio/fecha con radares LOLA, veredictos, métricas y tabla de
   deltas B−A; “Cargar en vista principal” abre cualquiera de los dos.
-- **Matriz sitio × fecha**: 12 sitios × 36 meses con selector de métrica (score, Sol, DTE o corte);
+- **Matriz sitio × fecha**: 28 sitios × 36 meses con selector de métrica (score, Sol, DTE o corte);
   una celda carga ese sitio y esa fecha en la vista principal. Las filas de referencia están marcadas.
 - **Compartir y exportar**: enlace de escenario con sitio/fecha/perfil/panel/mástil/idioma; botón
   Compartir; JSON del escenario con la serie de 672 puntos; CSV de comparación, barrido y matriz.
@@ -189,10 +203,16 @@ Horizons para 4.032 muestras:
 - **Error máximo: 1.22×10⁻⁴°** (la UI lo redondea a 1.2×10⁻⁴°)
 - Aceptación: RMS < 0.01° y máximo < 0.05° → **PASS**.
 
-El motor local IAU 2000 (usado para Nobile/Haworth, las referencias internacionales, coordenadas
-personalizadas y como fallback fuera de cobertura) se comparó puntualmente con Horizons en
+El motor local IAU 2000 (usado para Nobile/Haworth, los sitios históricos, CLPS e internacionales,
+las coordenadas personalizadas y como fallback fuera de cobertura) se comparó puntualmente con Horizons en
 `-89.5°, 0°` el 2026-11-14: Δaz Sol 0.016°, Δel −0.001°; Δaz Tierra 0.011°, Δel 0.0003°. No
 sustituye la validación completa del pipeline.
+
+`public/data/terrain-validation.json` añade una comparación entre productos DEM: el DEM de 5 m/px
+de campo cercano frente al DEM regional de 80 m/px, en los mismos 24 azimuts y el mismo rango radial
+(mástil 2 m). Resultado agregado: RMS 0.51°, máximo 2.18° en 144 comparaciones. Mide la concordancia
+entre dos productos LOLA, no la precisión absoluta del terreno; ninguno resuelve rocas por debajo de
+su píxel. Se muestra en el modal de datos.
 
 Las referencias internacionales no están cubiertas por esta validación LOLA: su horizonte es
 analítico plano y sus efemérides son IAU 2000 local. Se incluyen para comparación y educación, no
@@ -206,16 +226,23 @@ como candidatos certificados.
 # Nobile/Haworth desde el DEM regional 80 m/px (norte geográfico)
 python scripts/build_regional_horizons.py --north-mode true
 
+# IM-1/IM-2 desde el DEM regional 80 m/px (norte geográfico)
+npm run data:clps-horizons
+
+# Validación cruzada 5 m/px vs 80 m/px (requiere Python con rasterio y los DEM del pipeline)
+npm run data:terrain-validation
+
 # Corregir los 6 horizontes híbridos heredados (idempotente)
 npm run data:fix-azimuth
 
-# Regenerar el barrido mensual 2026–2028 de los 12 sitios
+# Regenerar el barrido mensual 2026–2028 de los 28 sitios
 npm run data:sweep
 
-# Regenerar los horizontes planos de las referencias internacionales
+# Regenerar los horizontes planos de las referencias históricas, CLPS e internacionales
 npm run data:flat-horizons
 
-# Regenerar el manifiesto de datos y sus checksums
+# Reaplicar metadatos de IA y regenerar el manifiesto de datos y sus checksums
+npm run data:si-metadata
 npm run data:manifest
 ```
 
@@ -247,7 +274,7 @@ incluyen.
 - **Referencias internacionales**: Chandrayaan-3, SLIM y Chang'e 4 usan un horizonte analítico plano
   y IAU 2000 local, no LOLA; se muestran como `REFERENCE`. Chandrayaan-3 a 69.4°S es una
   simplificación; Chang'e 4 está en la cara oculta (DTE 0%, relé).
-- **Coordenadas personalizadas**: usan el horizonte LOLA del sitio más cercano a ≤300 km o un
+- **Coordenadas personalizadas**: usan el horizonte LOLA del sitio más cercano a ≤10 km o un
   horizonte plano; pendiente y elevación no están disponibles.
 - **Globo 3D**: las texturas son previews y las esferas Sol/Tierra son ilustrativas y no a escala; no
   entran en el score.

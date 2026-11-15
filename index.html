@@ -462,7 +462,7 @@
         <div class="modal-header">
           <div class="modal-title-with-badge">
             <h2 id="matrix-modal-title">Matriz sitio × fecha</h2>
-            <span class="m-badge" id="matrix-modal-badge">12 sitios × 36 meses · 2026–2028</span>
+            <span class="m-badge" id="matrix-modal-badge">28 sitios × 36 meses · 2026–2028</span>
           </div>
           <button class="btn-modal-close" id="close-matrix-modal" type="button" aria-label="Cerrar matriz">&times;</button>
         </div>
@@ -513,7 +513,7 @@
               <dt>Horizonte</dt>
               <dd>
                 <strong>LOLA 5 m/px + 80 m/px</strong>
-                <span>Seis sitios con DEM local de 5 m/px y DEM regional de 80 m/px hasta 100 km. Nobile y Haworth usan solo el DEM regional de 80 m/px.</span>
+                <span>Seis sitios con DEM local de 5 m/px y DEM regional de 80 m/px hasta 100 km. Nobile, Haworth, IM-1 e IM-2 usan solo el DEM regional de 80 m/px.</span>
               </dd>
             </div>
             <div class="provenance-row">
@@ -527,7 +527,7 @@
               <dt>Validación</dt>
               <dd>
                 <strong>RMS 1×10⁻⁵° · máx 1.2×10⁻⁴°</strong>
-                <span>Comparación fuera de malla contra Horizons (4.032 muestras) del pipeline SUNDIAL; el motor local IAU 2000 se usa solo como fallback.</span>
+                <span>Comparación fuera de malla contra Horizons (4.032 muestras) del pipeline SUNDIAL; el motor local IAU 2000 se usa para sitios sin efemérides Horizons precalculadas y como fallback.</span>
               </dd>
             </div>
             <div class="provenance-row">
@@ -539,6 +539,13 @@
             </div>
           </dl>
 
+          <div class="data-section" id="terrain-validation-section" hidden>
+            <label class="sec-label" id="terrain-validation-title">Validación del terreno</label>
+            <p class="data-note" id="terrain-validation-method"></p>
+            <p class="data-note terrain-validation-summary" id="terrain-validation-summary"></p>
+            <div class="terrain-validation-table-wrap" id="terrain-validation-table"></div>
+          </div>
+
           <div class="data-section">
             <label class="sec-label">Fuentes y procedencia:</label>
             <ul class="data-source-list">
@@ -547,6 +554,10 @@
               <li><a href="https://ssd-api.jpl.nasa.gov/doc/horizons.html" target="_blank" rel="noreferrer">NASA/JPL Horizons API · DE441</a></li>
               <li><a href="https://doi.org/10.1016/j.pss.2020.105119" target="_blank" rel="noreferrer">Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites</a></li>
               <li><a href="https://doi.org/10.1016/j.icarus.2010.10.030" target="_blank" rel="noreferrer">Mazarico et al. (2011), Illumination conditions of the lunar polar regions</a></li>
+              <li><a href="https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_sites.html" target="_blank" rel="noreferrer">NASA NSSDCA · Apollo/Luna landing-site coordinates</a></li>
+              <li><a href="https://science.nasa.gov/lunar-discovery/deliveries" target="_blank" rel="noreferrer">NASA CLPS · deliveries and targets</a></li>
+              <li><a href="https://lroc.im-ldi.com/" target="_blank" rel="noreferrer">NASA/ASU LROC · landed-site imagery</a></li>
+              <li><a href="https://www.cnsa.gov.cn/" target="_blank" rel="noreferrer">CNSA · Chang'e program</a></li>
             </ul>
           </div>
 
@@ -569,7 +580,16 @@
             </p>
             <p class="data-note">
               Los sitios internacionales de referencia (Chandrayaan-3, SLIM, Chang'e 4) usan un horizonte
-              analítico plano y el motor IAU 2000 local; no son análisis de terreno LOLA.
+              analítico plano y el motor IAU 2000 local; no son análisis de terreno LOLA. Los sitios
+              históricos, CLPS y comerciales se marcan como referencia: Apollo, Luna y Chang'e usan
+              horizonte analítico plano; IM-1 e IM-2 usan LOLA regional de 80 m/px; IM-3 es un objetivo
+              futuro. No son candidatos Artemis III.
+            </p>
+            <p class="data-note">
+              Uso de inteligencia artificial (SI): el proyecto declara el uso de un asistente de
+              codificación con IA de la familia Gemini en docs/SI_USAGE.md. Los datos derivados
+              incluyen un campo si y el manifiesto incluye siDisclosure. No se incluyen imágenes,
+              vídeos ni audio generados con IA.
             </p>
           </div>
         </div>

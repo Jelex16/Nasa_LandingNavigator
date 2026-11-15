@@ -30,8 +30,15 @@ como contexto y no se clasifican como candidatos.
 | SLIM (Shioli) | Referencia internacional | Analítico plano (aprox.) | IAU 2000 local |
 | Chang'e 4 (Von Kármán) | Referencia internacional, cara oculta | Analítico plano (aprox.) | IAU 2000 local |
 
+- **Históricos y otros programas**: Apollo 12, 14, 15, 16, 17; Luna 9, 16, 17, 21; Chang'e 3, 5, 6.
+  Coordenadas reales, horizonte analítico plano y efemérides IAU 2000 locales. Se marcan como
+  `REFERENCE`, no como candidatos Artemis III.
+- **CLPS y comerciales**: IM-1 Odysseus e IM-2 Athena usan horizonte LOLA regional de 80 m/px;
+  Blue Ghost 1 y el objetivo futuro IM-3 Reiner Gamma usan horizonte analítico plano. IM-1 está
+  cerca del borde norte del DEM 80S, así que el relieve lejano hacia el norte puede estar
+  subrepresentado.
 - **Coordenadas personalizadas**: validación de latitud/longitud; se usa el horizonte LOLA real del
-  sitio más cercano a ≤300 km y se muestra la distancia. Si no hay sitio a ≤300 km, horizonte plano.
+  sitio más cercano a ≤10 km y se muestra la distancia. Si no hay sitio a ≤10 km, horizonte plano.
   Pendiente y elevación se muestran como “—”; el resultado es explícitamente aproximado.
 - **Referencias internacionales**: solo para comparación y educación. Usan coordenadas reales de
   misión, pero **no** topografía LOLA en esos puntos; su horizonte es analítico plano y sus efemérides
@@ -92,7 +99,7 @@ Estados y límites duros:
 
 ## 5. Comparaciones
 
-- **Matriz comparativa**: los 12 sitios con la misma fecha, ventana, perfil, panel y mástil.
+- **Matriz comparativa**: los 28 sitios con la misma fecha, ventana, perfil, panel y mástil.
   Columnas: score/estado, energía, eclipse continuo, DTE centro, corte DTE y pendiente local. Filas
   clicables; las referencias llevan badge `REFERENCE`. Exportación CSV.
 - **A/B lado a lado**: comparación visual de dos escenarios sitio/fecha con el perfil, panel y mástil
@@ -100,7 +107,7 @@ Estados y límites duros:
   pendiente y el índice de misión (las referencias muestran `REFERENCE`). Una tabla de deltas muestra
   B−A con color según la dirección. “Cargar en vista principal” abre cualquiera de los escenarios.
   A/B es visual; usa Compartir/Exportar después de cargar un escenario.
-- **Matriz sitio × fecha**: 12 sitios × 36 meses con selector de métrica (Score, Sol %, DTE %, corte).
+- **Matriz sitio × fecha**: 28 sitios × 36 meses con selector de métrica (Score, Sol %, DTE %, corte).
   Las filas de referencia están marcadas; la nota explica que son contexto, no candidatos
   clasificados. Clic en una celda para cargar sitio y fecha. Exportación CSV.
 
@@ -194,18 +201,27 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
 ## 10. Datos, validación y procedencia
 
 - **DEM LOLA 5 m/px de sitios de aterrizaje**: campo cercano de seis sitios.
-- **DEM regional LOLA 80S 80 m/px**: campo lejano a 100 km y Nobile/Haworth.
+- **DEM regional LOLA 80S 80 m/px**: campo lejano a 100 km y Nobile, Haworth, IM-1 e IM-2.
 - **JPL Horizons DE441**: az/el/distancia aparentes topocéntricas de Sol/Tierra, paso de 1 h,
   2026-01-01 a 2029-02-01, interpolación cúbica de Hermite en el navegador.
 - **Modelo de horizonte**: 720 bins de azimut (0.5°), cinco alturas de mástil, curvatura lunar
   `r²/(2R_M)`, horizonte airless (sin refracción atmosférica).
 - **Validación**: 4.032 muestras fuera de malla contra Horizons; RMS 5×10⁻⁶°, máximo 1.22×10⁻⁴°
-  (la UI redondea a 1×10⁻⁵° y 1.2×10⁻⁴°). El motor IAU 2000 local es fallback y se comparó
-  puntualmente con Horizons; no cubre la validación completa de 4.032 muestras.
-- **Manifiesto de datos**: `public/data/manifest.json` lista 35 archivos derivados con tamaños y
+  (la UI redondea a 1×10⁻⁵° y 1.2×10⁻⁴°). El motor IAU 2000 local se usa para sitios sin efemérides
+  Horizons precalculadas y como fallback; se comparó puntualmente con Horizons y no cubre la
+  validación completa de 4.032 muestras.
+- **Validación cruzada del terreno**: `public/data/terrain-validation.json` compara el DEM de 5 m/px
+  de campo cercano con el DEM regional de 80 m/px en el rango de campo cercano de cada sitio
+  (24 azimuts, mástil de 2 m). RMS agregado 0.51°, máximo 2.18°. Mide la concordancia entre
+  productos, no la precisión absoluta: ambos derivan de LOLA y no resuelven rocas por debajo de su
+  píxel.
+- **Manifiesto de datos**: `public/data/manifest.json` lista 70 archivos derivados con tamaños y
   SHA-256; `npm run data:manifest` lo regenera. Los DEM originales (~0.5 GB) no se distribuyen.
 - **Referencias internacionales**: horizontes analíticos planos e IAU 2000 local; no son análisis de
   terreno LOLA. El manifiesto incluye `referenceSitesNote` y el modal de datos lo indica.
+- **Referencias históricas y CLPS**: Apollo, Luna y Chang'e usan horizonte analítico plano e IAU 2000
+  local. IM-1/IM-2 usan LOLA regional de 80 m/px; Blue Ghost 1 e IM-3 son planos. Son puntos de
+  referencia, no candidatos Artemis III.
 - **Texturas 3D**: previews LROC WAC y LOLA (2k/1k); son visuales y no se usan para el score.
 
 ## 11. Accesibilidad, responsive y tests
@@ -227,8 +243,9 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
   constelaciones de relé ni incertidumbre Monte Carlo.
 - El horizonte es un perfil 1D por azimut; el panorama 2.5D es una representación sombreada, no un
   mesh 3D.
-- Nobile/Haworth usan terreno regional de 80 m/px; los sitios personalizados y las referencias
-  internacionales usan horizontes aproximados o analíticos planos.
+- Nobile, Haworth, IM-1 e IM-2 usan terreno regional de 80 m/px; los sitios históricos,
+  internacionales y CLPS/comerciales no polares usan horizontes analíticos planos; los sitios
+  personalizados usan el horizonte LOLA más cercano a ≤10 km o uno plano.
 - El score es un índice de decisión, no una probabilidad de éxito. `gMaxHours` es una cota inferior
   dentro de la ventana de 28 días.
 - El globo 3D, las esferas Sol/Tierra y las texturas preview son ilustrativos y no están a escala.

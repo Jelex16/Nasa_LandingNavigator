@@ -38,9 +38,9 @@
         }
       ],
       "horizonMode": "lola_regional_80m",
-      "nearFieldRadiusKm": 0.0,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 0.0,
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 0,
       "dataQuality": "LOLA 80 m/px regional",
       "horizonSource": "lola_80m_regional",
       "ephemSource": "iau2000_local",
@@ -82,14 +82,20 @@
         }
       ],
       "horizonMode": "lola_regional_80m",
-      "nearFieldRadiusKm": 0.0,
-      "farFieldRadiusKm": 100.0,
-      "optimalPanelAzimuthDeg": 0.0,
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 100,
+      "optimalPanelAzimuthDeg": 0,
       "dataQuality": "LOLA 80 m/px regional",
       "horizonSource": "lola_80m_regional",
       "ephemSource": "iau2000_local",
       "role": "candidate",
       "horizonFile": "horizon/haworth_rim.json"
     }
-  ]
+  ],
+  "si": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "AI-assisted data-generation script; NASA source data",
+    "details": "docs/SI_USAGE.md"
+  }
 }

@@ -1744,6 +1744,58 @@ html, body {
   border-radius: 2px;
 }
 
+.terrain-validation-summary {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.terrain-validation-table-wrap {
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.terrain-validation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.terrain-validation-table caption {
+  caption-side: top;
+  text-align: left;
+  color: var(--ink-3);
+  font-size: 11px;
+  padding-bottom: 6px;
+}
+
+.terrain-validation-table th,
+.terrain-validation-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.terrain-validation-table th:first-child,
+.terrain-validation-table td:first-child {
+  text-align: left;
+}
+
+.terrain-validation-table th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.terrain-validation-table td {
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+}
+
 .decision-formula {
   font-family: var(--font-mono);
   font-size: 13px;

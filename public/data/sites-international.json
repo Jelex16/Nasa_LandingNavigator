@@ -28,9 +28,9 @@
         }
       ],
       "horizonMode": "analytic_flat",
-      "nearFieldRadiusKm": 0.0,
-      "farFieldRadiusKm": 0.0,
-      "optimalPanelAzimuthDeg": 0.0,
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
       "dataQuality": "Analytic horizon (reference)",
       "horizonSource": "analytic_flat",
       "ephemSource": "iau2000_local",
@@ -60,9 +60,9 @@
         }
       ],
       "horizonMode": "analytic_flat",
-      "nearFieldRadiusKm": 0.0,
-      "farFieldRadiusKm": 0.0,
-      "optimalPanelAzimuthDeg": 0.0,
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
       "dataQuality": "Analytic horizon (reference)",
       "horizonSource": "analytic_flat",
       "ephemSource": "iau2000_local",
@@ -92,14 +92,20 @@
         }
       ],
       "horizonMode": "analytic_flat",
-      "nearFieldRadiusKm": 0.0,
-      "farFieldRadiusKm": 0.0,
-      "optimalPanelAzimuthDeg": 0.0,
+      "nearFieldRadiusKm": 0,
+      "farFieldRadiusKm": 0,
+      "optimalPanelAzimuthDeg": 0,
       "dataQuality": "Analytic horizon (reference)",
       "horizonSource": "analytic_flat",
       "ephemSource": "iau2000_local",
       "role": "international",
       "horizonFile": "horizon/change4.json"
     }
-  ]
+  ],
+  "si": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "AI-assisted data-generation script; NASA source data",
+    "details": "docs/SI_USAGE.md"
+  }
 }

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "generatedUtc": "2026-11-15T09:16:25Z",
+  "method": "near_5m_vs_regional_80m_same_radial_range",
+  "azimuthSamples": 24,
+  "azimuthStepDeg": 15,
+  "mastHeightM": 2,
+  "sampleStepM": 5,
+  "minimumRadiusM": 25,
+  "nearFieldMinKm": 7.2,
+  "nearFieldMaxKm": 9.45,
+  "curvatureTerm": "r^2/(2R), R=1737400 m",
+  "aggregate": {
+    "samples": 144,
+    "meanAbsDeg": 0.3523,
+    "rmsDeg": 0.5091,
+    "maxDeg": 2.184,
+    "p95Deg": 1.0148
+  },
+  "sites": [
+    {
+      "siteId": "site01",
+      "siteShortName": "Connecting Ridge",
+      "azimuthSamples": 24,
+      "azimuthStepDeg": 15,
+      "nearFieldRadiusKm": 7.2,
+      "datumOffsetM": 0.05,
+      "samples": 24,
+      "meanAbsDeg": 0.4189,
+      "rmsDeg": 0.5019,
+      "maxDeg": 1.0912,
+      "p95Deg": 1.0018,
+      "maxAzimuthDeg": 120
+    },
+    {
+      "siteId": "site04",
+      "siteShortName": "Shackleton Rim",
+      "azimuthSamples": 24,
+      "azimuthStepDeg": 15,
+      "nearFieldRadiusKm": 7.2,
+      "datumOffsetM": -0.11,
+      "samples": 24,
+      "meanAbsDeg": 0.2991,
+      "rmsDeg": 0.6586,
+      "maxDeg": 2.184,
+      "p95Deg": 1.6318,
+      "maxAzimuthDeg": 150
+    },
+    {
+      "siteId": "site07",
+      "siteShortName": "Peak near Shackleton",
+      "azimuthSamples": 24,
+      "azimuthStepDeg": 15,
+      "nearFieldRadiusKm": 7.2,
+      "datumOffsetM": -0.1,
+      "samples": 24,
+      "meanAbsDeg": 0.4554,
+      "rmsDeg": 0.5212,
+      "maxDeg": 1.0193,
+      "p95Deg": 0.7799,
+      "maxAzimuthDeg": 195
+    },
+    {
+      "siteId": "site11",
+      "siteShortName": "de Gerlache Rim",
+      "azimuthSamples": 24,
+      "azimuthStepDeg": 15,
+      "nearFieldRadiusKm": 7.2,
+      "datumOffsetM": 0.25,
+      "samples": 24,
+      "meanAbsDeg": 0.4727,
+      "rmsDeg": 0.5529,
+      "maxDeg": 1.0829,
+      "p95Deg": 0.9885,
+      "maxAzimuthDeg": 330
+    },
+    {
+      "siteId": "site20",
+      "siteShortName": "Leibnitz Beta",
+      "azimuthSamples": 24,
+      "azimuthStepDeg": 15,
+      "nearFieldRadiusKm": 7.2,
+      "datumOffsetM": 0.08,
+      "samples": 24,
+      "meanAbsDeg": 0.1351,
+      "rmsDeg": 0.2019,
+      "maxDeg": 0.547,
+      "p95Deg": 0.4721,
+      "maxAzimuthDeg": 60
+    },
+    {
+      "siteId": "site23",
+      "siteShortName": "Malapert Massif",
+      "azimuthSamples": 24,
+      "azimuthStepDeg": 15,
+      "nearFieldRadiusKm": 9.45,
+      "datumOffsetM": 0.11,
+      "samples": 24,
+      "meanAbsDeg": 0.3324,
+      "rmsDeg": 0.5012,
+      "maxDeg": 1.3852,
+      "p95Deg": 0.9538,
+      "maxAzimuthDeg": 255
+    }
+  ],
+  "notes": "Cross-DEM agreement between the 5 m/px landing-site DEM and the 80 m/px regional LOLA DEM over the same near-field radial range, 24 azimuths and a 2 m mast. Values are absolute horizon-angle differences in degrees. This is not an absolute terrain-accuracy claim: both products derive from LOLA and do not resolve rocks below their pixel size.",
+  "si": {
+    "assisted": true,
+    "tools": "Gemini-family AI coding assistant",
+    "scope": "AI-assisted data-generation script; NASA source data",
+    "details": "docs/SI_USAGE.md"
+  }
+}

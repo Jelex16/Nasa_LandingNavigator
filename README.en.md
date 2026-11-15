@@ -8,15 +8,28 @@ NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator.
 
 Missions to the Moon's south pole face extreme lighting and communication constraints. A ridge a few degrees high can decide whether a lander gets solar power, a direct radio link to Earth, both, or neither. Existing tools (QuickMap, Moon Trek, Horizons) are built for detailed analysis, not for rapid scenario comparison. When a launch date slips, planners need to re-evaluate sites and dates quickly.
 
+## AI (SI) usage
+
+This project used a Gemini-family AI coding assistant as a development aid for code drafting and
+refactoring, tests, documentation and the scripts that generate derived data products. The team
+defined the challenge idea, scientific scope, site selection, mission profiles and interpretation of
+results; SI was not used to conceive the solution. NASA LOLA DEMs and JPL Horizons ephemerides are
+authentic NASA/JPL source data; no measurements were generated with AI. No AI-generated images,
+video or audio are included.
+
+The full disclosure is in [`docs/SI_USAGE.md`](docs/SI_USAGE.md). `package.json` and
+`public/data/manifest.json` include `siDisclosure`, and every derived JSON under `public/data`
+includes a top-level `si` object.
+
 ## What it does
 
-- **Pick a site and a date**: nine curated sites (Malapert, Connecting Ridge, Shackleton, Peak near Shackleton, de Gerlache, Mons Mouton, Nobile, Haworth, Apollo 11 as a reference), three international reference sites (Chandrayaan-3, SLIM, Chang'e 4) or custom lunar coordinates.
+- **Pick a site and a date**: 28 curated sites — eight polar sites (Malapert, Connecting Ridge, Shackleton, Peak near Shackleton, de Gerlache, Mons Mouton, Nobile, Haworth), thirteen historical sites (Apollo 11–17, Luna 9/16/17/21, Chang'e 3/5/6), four CLPS/commercial sites (IM-1 Odysseus, IM-2 Athena, Blue Ghost 1, IM-3 Reiner Gamma) and three international references (Chandrayaan-3, SLIM, Chang'e 4) — or custom lunar coordinates. The selector groups them by category.
 - **See Sun and Earth against the real LOLA horizon**: a 2.5D horizon panorama, a polar radar, and a 28-day Sun/Earth elevation timeline.
 - **Read a plain-language verdict first**: percent of hours with sunlight, percent of time the Earth's center is visible (DTE), the longest continuous DTE blackout, and a secondary mission index.
 - **Run a launch-slip sweep**: 36 monthly 28-day windows from 2026 to 2028 with energy, DTE, longest outage, and next Earthset. Click a month to load that date in the main view.
-- **Compare sites with the same assumptions**: a 12-site comparison matrix with energy, eclipse, DTE, comms/outage, slope, and a transparent multi-criteria score.
+- **Compare sites with the same assumptions**: a 28-site comparison matrix with energy, eclipse, DTE, comms/outage, slope, and a transparent multi-criteria score.
 - **Side-by-side A/B**: two site/date scenarios with compact LOLA radars, verdicts, metrics, a B−A delta table and “load in main view” for either scenario.
-- **Site × date matrix**: 12 sites × 36 months with a metric selector (score, Sun, DTE, outage); reference rows are marked. Click a cell to load that site and date in the main view.
+- **Site × date matrix**: 28 sites × 36 months with a metric selector (score, Sun, DTE, outage); reference rows are marked. Click a cell to load that site and date in the main view.
 - **Share and export**: the scenario is encoded in the URL and copied by **Share**; export scenario JSON (with the 672-point series) and CSV for the comparison, sweep and site × date matrix.
 - **Educational guide**: **How to read** opens a bilingual quick start, metric definitions, why the south pole is hard, a glossary, “try this” examples and limits.
 - **Explore mission profiles**: direct-to-Earth demo, night-surviving rover, crewed outpost, relay/store-and-forward, and a custom profile. All weights and thresholds are visible.
@@ -38,7 +51,7 @@ The tool is designed for three audiences:
 | Source | Use |
 |---|---|
 | NASA PGDA LOLA 5 m/px landing-site DEMs | Near-field horizon for six sites |
-| NASA PGDA LOLA 80S 80 m/px regional DEM | Far field to 100 km; Nobile and Haworth only |
+| NASA PGDA LOLA 80S 80 m/px regional DEM | Far field to 100 km; Nobile, Haworth, IM-1 and IM-2 only |
 | NASA/JPL Horizons DE441 | Apparent topocentric Sun/Earth azimuth, elevation, and distance, 1 h step |
 | NASA LRO / ASU LROC QuickMap | Official site links and preview textures |
 | NASA Solar System Treks (Moon Trek) | Official site links and LOLA layers |
@@ -46,10 +59,12 @@ The tool is designed for three audiences:
 - Horizon profiles: 720 azimuth bins (0.5°), five mast heights (0.5, 2, 5, 10, 20 m), lunar curvature correction.
 - Ephemerides: JPL Horizons DE441, 2026-01-01 to 2029-02-01, cubic Hermite interpolation in the browser.
 - Validation: 4,032 off-grid samples against Horizons; **RMS 5e-6°** (shown as 1e-5° in the UI), maximum error **1.22e-4°** (shown as 1.2e-4°).
-- Nobile and Haworth use the regional 80 m/px DEM and the local IAU 2000 engine for ephemerides; this is labeled in the UI.
+- Terrain cross-validation: `public/data/terrain-validation.json` compares the 5 m/px near-field DEM with the 80 m/px regional DEM over each site's near-field range (24 azimuths, 2 m mast). Aggregate RMS 0.51°, maximum 2.18°. It measures cross-product agreement, not absolute accuracy; both products derive from LOLA.
+- Nobile, Haworth, IM-1 and IM-2 use the regional 80 m/px DEM and the local IAU 2000 engine for ephemerides; this is labeled in the UI. IM-1 is near the northern edge of the 80S DEM, so distant relief may be underrepresented to the north.
+- Historical, international and non-polar CLPS/commercial reference sites use analytic flat horizons and the local IAU 2000 engine; they are labeled `REFERENCE` and are not Artemis III candidates.
 - The 3D globe textures are previews only, and the Sun/Earth spheres in the 3D scene are illustrative and not to scale. The analysis uses the LOLA horizon files and the Horizons ephemerides, not the textures.
 - **International reference sites** (Chandrayaan-3, SLIM, Chang'e 4) use real mission coordinates but **not** LOLA terrain at those points: their horizon is analytic flat and their ephemerides are the local IAU 2000 engine. They are labeled `REFERENCE` and are not ranked as candidates. Chang'e 4 is on the far side, so its DTE is 0% and a relay is required; Chandrayaan-3 at 69.4°S is a simplification because polar illumination is terrain-sensitive.
-- **Data manifest**: `public/data/manifest.json` lists 35 derived files with sizes and SHA-256 checksums. The manifest includes `referenceSitesNote` for the international references. The original DEMs (~0.5 GB) are not distributed.
+- **Data manifest**: `public/data/manifest.json` lists 70 derived files with sizes and SHA-256 checksums. The manifest includes `referenceSitesNote` for the international references. The original DEMs (~0.5 GB) are not distributed.
 
 ## Run it
 
@@ -89,7 +104,7 @@ npm test
 
 ## Limitations
 
-This is decision-support and educational software, **not flight-certified**. It does not model rocks below the DEM resolution, thermal state, batteries, rover mobility, relay constellations, or a certified landing point. The horizon is a 1D profile per azimuth; the 2.5D panorama is a shaded representation. `gMaxHours` is a lower bound because it is measured inside a 28-day window. Nobile and Haworth use 80 m/px regional terrain; custom coordinates use the nearest LOLA horizon within 300 km or a flat horizon. International references use analytic flat horizons and local IAU 2000; they are context, not LOLA analyses. The 3D globe and Sun/Earth spheres are illustrative and not to scale. Ephemeris coverage is 2026-01-01 to 2029-02-01. The score is a decision index, not a probability of success.
+This is decision-support and educational software, **not flight-certified**. It does not model rocks below the DEM resolution, thermal state, batteries, rover mobility, relay constellations, or a certified landing point. The horizon is a 1D profile per azimuth; the 2.5D panorama is a shaded representation. `gMaxHours` is a lower bound because it is measured inside a 28-day window. Nobile, Haworth, IM-1 and IM-2 use 80 m/px regional terrain; custom coordinates use the nearest real LOLA horizon within 10 km or a flat horizon. International references use analytic flat horizons and local IAU 2000; they are context, not LOLA analyses. The 3D globe and Sun/Earth spheres are illustrative and not to scale. Ephemeris coverage is 2026-01-01 to 2029-02-01. The score is a decision index, not a probability of success.
 
 ## References
 
