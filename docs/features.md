@@ -99,11 +99,11 @@ Statuses and hard limits:
 
 - Mission date/time in UTC, with a custom date option.
 - Presets: example window (Nov 2026), southern summer solstice (Dec 2026), southern winter solstice
-  (Jun 2026), real time (clamped to the 2026–2029 coverage) and custom date.
+  (Jun 2026), real time (clamped to the 2026–2036 coverage) and custom date.
 - ±1 hour / ±1 day steps, a 28-day scrubber, and playback at 1x/10x/60x.
 - The 28-day evaluation window starts at the mission date; playback changes only the displayed
   instant, not the evaluation window.
-- **Launch-slip sweep**: 36 monthly 28-day windows from 2026 to 2028, with energy for the current
+- **Launch-slip sweep**: 120 monthly 28-day windows from 2026 to 2035, with energy for the current
   panel, Sun %, DTE %, longest outage, next Earthset and score. Click a month or a table date to load
   it in the main view. DTE/outage are precomputed with a 2 m mast; the UI warns if the current mast
   differs.
@@ -118,7 +118,7 @@ Statuses and hard limits:
   slope and the mission index (references show `REFERENCE`). A delta table shows B−A, coloured by
   direction. “Load in main view” opens either scenario. A/B is visual; use Share/Export after loading
   a scenario.
-- **Site × date matrix**: 28 sites × 36 months with a metric selector (Score, Sun %, DTE %, outage).
+- **Site × date matrix**: 28 sites × 120 months with a metric selector (Score, Sun %, DTE %, outage).
   Reference rows are marked; the note explains they are context, not ranked candidates. Click a cell
   to load that site and date. Export CSV.
 
@@ -171,7 +171,7 @@ The current scenario is encoded in the URL and kept up to date:
 |---|---|---|
 | `site` | Curated site id | e.g. `site23`, `nobile_rim_1`, `change4`, `control_eq` |
 | `lat`, `lon` | Custom coordinates (takes precedence over `site`) | lat −90…90, lon 0…360 |
-| `date` | Mission start, ISO UTC | 2026-01-01 … 2029-01-01 |
+| `date` | Mission start, ISO UTC | 2026-01-01 … 2035-12-01 |
 | `profile` | Mission profile id | `technology_demo`, `night_survivor`, `crewed_outpost`, `relay_store_forward` |
 | `panel` | Solar panel | `horizontal`, `vertical_fixed`, `vertical_tracker` |
 | `mast` | Mast height in metres | `0.5`, `2`, `5`, `10`, `20` |
@@ -190,9 +190,9 @@ All exports are client-side downloads; no server or account is required.
   flags and energy).
 - **Export CSV** (comparison): one row per site with role, coordinates, score, energy, eclipse, DTE,
   outage, slope and data sources.
-- **Export CSV** (sweep): 36 monthly rows with energy for the current panel, Sun %, DTE %, outage,
+- **Export CSV** (sweep): 120 monthly rows with energy for the current panel, Sun %, DTE %, outage,
   Earthset and score.
-- **Export CSV** (site × date matrix): 28 site rows × 36 monthly scores, with the role column.
+- **Export CSV** (site × date matrix): 28 site rows × 120 monthly scores, with the role column.
 
 ## 9. Educational guide
 
@@ -210,7 +210,7 @@ All exports are client-side downloads; no server or account is required.
 - **LOLA 5 m/px landing-site DEMs**: near field for six sites.
 - **LOLA 80S 80 m/px regional DEM**: far field to 100 km and Nobile, Haworth, IM-1 and IM-2.
 - **JPL Horizons DE441**: apparent topocentric Sun/Earth az/el/distance, 1 h step, 2026-01-01 to
-  2029-02-01, cubic Hermite interpolation in the browser.
+  2036-01-01, cubic Hermite interpolation in the browser.
 - **Horizon model**: 720 azimuth bins (0.5°), five mast heights, lunar curvature `r²/(2R_M)`,
   airless horizon (no atmospheric refraction).
 - **Validation**: 4,032 off-grid samples against Horizons; RMS 5×10⁻⁶°, maximum 1.22×10⁻⁴° (the UI
@@ -256,7 +256,7 @@ All exports are client-side downloads; no server or account is required.
 - The score is a decision index, not a probability of success. `gMaxHours` is a lower bound inside
   the 28-day window.
 - The 3D globe, Sun/Earth spheres and preview textures are illustrative and not to scale.
-- Ephemeris coverage is 2026-01-01 to 2029-02-01; there is no live Horizons query in the app.
+- Ephemeris coverage is 2026-01-01 to 2036-01-01; there is no live Horizons query in the app.
 
 ## 13. Commands
 
@@ -267,7 +267,8 @@ npm run build
 npm run preview
 npm test               # engine, data, i18n and export tests
 
-npm run data:sweep             # 36 monthly windows for all sites
+npm run data:ephemerides       # 10-year JPL Horizons ephemerides (network)
+npm run data:sweep             # 120 monthly windows for all sites
 npm run data:flat-horizons     # flat horizons for historical, CLPS and international references
 npm run data:terrain-validation # 5 m/px vs 80 m/px cross-DEM validation
 npm run data:si-metadata       # AI-disclosure metadata in every derived JSON

@@ -32,6 +32,8 @@ const argValue = (name) => {
 };
 const onlySite = argValue('--site');
 const selfCheck = args.includes('--self-check');
+const startYear = Number(argValue('--start-year') ?? 2026);
+const endYear = Number(argValue('--end-year') ?? 2035);
 const outDir = path.resolve(ROOT, argValue('--out-dir') ?? path.join('public', 'data', 'sweep'));
 
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -80,7 +82,7 @@ function adaptSite(record, horizon) {
 
 function monthlyStarts() {
   const starts = [];
-  for (let year = 2026; year <= 2028; year += 1) {
+  for (let year = startYear; year <= endYear; year += 1) {
     for (let month = 0; month < 12; month += 1) {
       starts.push(Date.UTC(year, month, 1, 0, 0, 0));
     }
@@ -179,9 +181,9 @@ function buildPoint(site, startMs, sampleAt) {
   return point;
 }
 
-function validateSweep(sweep) {
-  if (sweep.points.length !== 36) {
-    throw new Error(`${sweep.siteId}: se esperaban 36 puntos, hay ${sweep.points.length}`);
+function validateSweep(sweep, expectedPoints) {
+  if (sweep.points.length !== expectedPoints) {
+    throw new Error(`${sweep.siteId}: se esperaban ${expectedPoints} puntos, hay ${sweep.points.length}`);
   }
   let previous = 0;
   for (const point of sweep.points) {
@@ -260,7 +262,7 @@ for (const record of records) {
       site.ephem = decodeEphemeris(readArrayBuffer(ephemFile));
     }
     const sampleAt = (ms) => sampleSite(site, ms);
-    const endMs = site.ephem ? ephemerisEndUtcMs(site.ephem) : Date.UTC(2029, 1, 1);
+    const endMs = site.ephem ? ephemerisEndUtcMs(site.ephem) : Date.UTC(endYear + 1, 0, 1);
     const points = [];
     for (const startMs of starts) {
       const lastSampleMs = startMs + (SAMPLE_COUNT - 1) * STEP_HOURS * 3_600_000;
@@ -295,7 +297,7 @@ for (const record of records) {
       },
       points
     };
-    validateSweep(sweep);
+    validateSweep(sweep, starts.length);
     if (selfCheck) selfCheckPoint(site, points[0], sampleAt);
     const output = path.join(outDir, `${site.id}.json`);
     fs.writeFileSync(output, JSON.stringify(sweep));
@@ -303,7 +305,7 @@ for (const record of records) {
     const dte = points.map((point) => point.dteCenterPct);
     const cut = points.map((point) => point.gMaxHours);
     console.log(
-      `${site.id}: ${points.length}/36 ventanas, ` +
+      `${site.id}: ${points.length}/${starts.length} ventanas, ` +
         `energía ${Math.min(...energy).toFixed(1)}–${Math.max(...energy).toFixed(1)} kWh/m², ` +
         `DTE ${Math.min(...dte).toFixed(1)}–${Math.max(...dte).toFixed(1)}%, ` +
         `corte ${Math.min(...cut).toFixed(1)}–${Math.max(...cut).toFixed(1)} h, ` +

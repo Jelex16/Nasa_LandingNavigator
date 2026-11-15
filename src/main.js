@@ -301,7 +301,7 @@ function parseScenarioURL(sites) {
   if (![...params.keys()].length) return null;
   const result = {};
   const min = new Date(Date.UTC(2026, 0, 1));
-  const max = new Date(Date.UTC(2029, 0, 1));
+  const max = new Date(Date.UTC(2035, 11, 1));
   const rawDate = params.get('date');
   const date = rawDate ? new Date(rawDate) : null;
   if (date && Number.isFinite(date.getTime())) {
@@ -1261,7 +1261,7 @@ function initConfigControls() {
 function initTimeControls() {
   updateDateTimeInput();
   datetimeInput.min = '2026-01-01T00:00';
-  datetimeInput.max = '2029-01-01T00:00';
+  datetimeInput.max = '2035-12-01T00:00';
 
   datetimeInput.addEventListener('change', (event) => {
     if (!event.target.value) return;
@@ -1288,7 +1288,7 @@ function initTimeControls() {
     else if (value === 'clps-winter') state.baseDate = new Date(Date.UTC(2026, 5, 21, 12, 0, 0));
     else {
       const minDate = new Date(Date.UTC(2026, 0, 1, 0, 0, 0));
-      const maxDate = new Date(Date.UTC(2029, 0, 1, 0, 0, 0));
+      const maxDate = new Date(Date.UTC(2035, 11, 1, 0, 0, 0));
       state.baseDate = clampDate(new Date(), minDate, maxDate);
     }
     state.currentDate = new Date(state.baseDate);

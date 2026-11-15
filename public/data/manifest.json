@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "version": "1.0.3",
-  "generatedUtc": "2026-11-15T09:33:21.232Z",
+  "generatedUtc": "2026-11-15T18:13:59.921Z",
   "dataMode": "real",
   "horizonModel": "Hybrid LOLA profile: 5 m/px landing-site DEM near field + 80 m/px LOLA 80S regional DEM to R=100 km; lunar curvature term r^2/(2R_Moon); five mast heights 0.5, 2, 5, 10, 20 m.",
   "ephemSource": "JPL Horizons API, DE441, apparent topocentric az/el and distance, 1 h step",
@@ -76,7 +76,7 @@
   ],
   "coverage": {
     "startUtc": "2026-01-01T00:00:00Z",
-    "endUtc": "2029-02-01T00:00:00Z",
+    "endUtc": "2036-01-01T00:00:00Z",
     "stepHours": 1,
     "cosmicTargets": [
       "Sun (10)",
@@ -86,56 +86,56 @@
   "files": [
     {
       "path": "ephem/control_eq.bin",
-      "bytes": 649220,
-      "sha256": "c389b5739a3c8bde4cf09809d968bc7e06d602c06f47d77c34a545cc0a7f4d16",
+      "bytes": 2103620,
+      "sha256": "7f84a4331fb96a4d4b127e0584be548655b62c994e65ba75e0729cd594f104e5",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
       "path": "ephem/site01.bin",
-      "bytes": 649216,
-      "sha256": "bb5a30eae625d7f902107591ab5295b5130242baa172bd4639815c0e2b4d8c2e",
+      "bytes": 2103616,
+      "sha256": "adad0bcf25372abec0a68b2bce5c1c489c85bd199f69371b63d83f77bdc70526",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
       "path": "ephem/site04.bin",
-      "bytes": 649216,
-      "sha256": "88eea4af8a4dfe94ba64ba5373fece5dfd54dc7c3ed8cc19efc9cd4c8c9ff9ab",
+      "bytes": 2103616,
+      "sha256": "4332c30ca99dcebd0b69d307b0a50dc9741a123f92c0428b77395e89472a8cdf",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
       "path": "ephem/site07.bin",
-      "bytes": 649216,
-      "sha256": "a42eb0039d292eaa7cd15394e348427cef3b287c85fe3a4b2d99111a9ba539fd",
+      "bytes": 2103616,
+      "sha256": "a1ff5dce141e755166db70190cd194651bb6cd82d16075a540f30beccda80193",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
       "path": "ephem/site11.bin",
-      "bytes": 649216,
-      "sha256": "ca49604d4a37a2ad0aafd0573fc0befe256bb70d729cc51b9320b8dc98c1c90f",
+      "bytes": 2103616,
+      "sha256": "db7231e23f3a6ee21ba36d2c759d53941bb03c79a3c5c1dd3dbb25d0696be8da",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
       "path": "ephem/site20.bin",
-      "bytes": 649216,
-      "sha256": "833485e11a8a5ee69a6f6ff5e8cbbea42060ae3888efbd510723dbe5636f3b87",
+      "bytes": 2103616,
+      "sha256": "ef31f5dfbc6d7a3e9f3507b4f4371f2e0137f4c327144f149fae6719f66ccd9a",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
     {
       "path": "ephem/site23.bin",
-      "bytes": 649216,
-      "sha256": "2520dbecbc3e0f7897f0a03556a6155f799e8d87ce46fecb8c6894debb8791d0",
+      "bytes": 2103616,
+      "sha256": "7fc140d1e0319e761fc3fc08eaedd2f8d505e39b4e59dc48a2c2db5f0031074c",
       "source": "JPL Horizons API (DE441), observer tables, QUANTITIES=4,20",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
@@ -406,224 +406,224 @@
     },
     {
       "path": "sweep/apollo12.json",
-      "bytes": 11048,
-      "sha256": "d085de20ba2a19ca9ad3f8bb5cc629cab53df7fe29a2de15e162a4c9e45ee621",
+      "bytes": 35030,
+      "sha256": "45a71f160aa8c087352f8ed466e70feb176a5f96ba8bd0cda0ecad2735457aa2",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:32.126Z"
     },
     {
       "path": "sweep/apollo14.json",
-      "bytes": 11047,
-      "sha256": "324a948ab6d2f63e514c05323ef2dd38bc55e2ad70b335b9c1b640b23a5b092a",
+      "bytes": 35049,
+      "sha256": "7a49ce4f6a37ba9b525a62803418ddd90afbe2ffdb07818720aeb22eb3463fc0",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:35.160Z"
     },
     {
       "path": "sweep/apollo15.json",
-      "bytes": 10967,
-      "sha256": "fbbce81bcf02c706e3cd9e35b58732bf63d0ad73dfa4ca4c9fd966ad4a54047b",
+      "bytes": 34849,
+      "sha256": "7097d71fe9b40d37345ccc64cb56110d406490798026201b289f7af67a35e5b2",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:38.614Z"
     },
     {
       "path": "sweep/apollo16.json",
-      "bytes": 11045,
-      "sha256": "87437baf0ef1dcf8518315562308e7053ea5fce9cfee8398280a6e088edc4836",
+      "bytes": 35055,
+      "sha256": "9387d15e731ab2ad1dd410fd0119bc0a27e28f5483d3f174de4bcf9931a2419a",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:41.212Z"
     },
     {
       "path": "sweep/apollo17.json",
-      "bytes": 10982,
-      "sha256": "dbaa13ff244be66edc187e22648b55706ae65db36102f5b8b409791acabfb8a5",
+      "bytes": 34862,
+      "sha256": "1e0f652950cf768deda5eb6f1a617297b7e8b0082bdc4c95292be8441e859c8c",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:43.706Z"
     },
     {
       "path": "sweep/blue_ghost_1.json",
-      "bytes": 10960,
-      "sha256": "86bb8fc71314a4fda5567f14611b9ed2ff549628e89d6d7f8ce7450af91d9a81",
+      "bytes": 34836,
+      "sha256": "6a7dabac0ec595627c1fdede5985f8f41753842fc7c768dd9163dfedea89b21e",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:57.746Z"
     },
     {
       "path": "sweep/chandrayaan3.json",
-      "bytes": 11067,
-      "sha256": "4f428caaec65623dc2d8b7ea102018e2a0510a628348b7190e2187cf9c6d23ca",
+      "bytes": 35153,
+      "sha256": "06fae03825455cbfb82286465010966ba188d66c2065c111c389d954baef3692",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T01:56:36.710Z"
     },
     {
       "path": "sweep/change3.json",
-      "bytes": 10973,
-      "sha256": "dc376b91fc16ef6f077648729a7ed579e5f1ff9cf9499dbf6345f1a4b9bb898b",
+      "bytes": 34853,
+      "sha256": "537b86fe532f20d257082889f999303f7579365aaac5c3cfbe43cfe72709d403",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:50.685Z"
     },
     {
       "path": "sweep/change4.json",
-      "bytes": 11048,
-      "sha256": "cd9949e13942227fce10642217deae7aa9f25bcb502df701372e286ef8c119b9",
+      "bytes": 35106,
+      "sha256": "3ec330cbd1621b5eeba75186c7b5d4b2c7e9f9f6c88ce54c0573bf18757aacc7",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T01:56:45.959Z"
     },
     {
       "path": "sweep/change5.json",
-      "bytes": 10974,
-      "sha256": "ec506873301e0ccf9a0614b352d12847ca18ad45b08e6c06782386a1504ed16e",
+      "bytes": 34860,
+      "sha256": "d017e390343f846d3d1090e6dfcf0d3549b79cf0eabd234f695a0e212cff6dcd",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:52.053Z"
     },
     {
       "path": "sweep/change6.json",
-      "bytes": 11053,
-      "sha256": "629964d6129d611e7303d9f4bb20e4092737c30f983e2b2799c9883e416bbeae",
+      "bytes": 35111,
+      "sha256": "db5161d76da811a4a631ba84c23cb842499d252c1dc8b17b99360f4a011ade74",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:53.484Z"
     },
     {
       "path": "sweep/control_eq.json",
-      "bytes": 11068,
-      "sha256": "963c988bfa81281cf153ca3de0d00952ecd4b36da7f4ad55b9698c0b58e431a0",
+      "bytes": 35154,
+      "sha256": "aa313c8c2839326a35e7ff0c0042f559eb2fd05e0c0bdc412f949b0ae999b9c9",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/haworth_rim.json",
-      "bytes": 10516,
-      "sha256": "918e33ced0d4f8bbfa123c30fca1c0ee4d327cf1791028d939691b7ad4c1d510",
+      "bytes": 33366,
+      "sha256": "d18f40f7d40ae46ff08b44da2306bbe85edad44934cea2472cd3c529ae5d36d5",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/im1_odysseus.json",
-      "bytes": 11040,
-      "sha256": "ee1e48903fe2804cebaf9830558f2fa79e25486ce1c3529dec737ad2064ffe11",
+      "bytes": 35070,
+      "sha256": "27b6ecf180045887a8e39d9fc431be365573ddf639e378f1acff21d20b782060",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:54.960Z"
     },
     {
       "path": "sweep/im2_athena.json",
-      "bytes": 12001,
-      "sha256": "237bab4768cfbf0fccdd32c28e1ed467ea4fb1bcc762aeb52ceeedc1da3974ff",
+      "bytes": 38306,
+      "sha256": "9828a488a16d79f4522c2703453076e8c22c77d4233e570d453226aa5b564e18",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:56.274Z"
     },
     {
       "path": "sweep/im3_reiner_gamma.json",
-      "bytes": 10973,
-      "sha256": "2ad81e95ccbec5090cee8b71701fb47093ecd2de8c7c4abd91fe8bacaffaf777",
+      "bytes": 34853,
+      "sha256": "9b66267700f50a6cabbd66a2e0cf05207cfacf31ed6f9412881e7fcc35b971e3",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:59.211Z"
     },
     {
       "path": "sweep/luna16.json",
-      "bytes": 10991,
-      "sha256": "d558eba2945377a4b866dc2987d7513f59a545e492e1e5deb01dd39f83c7dbda",
+      "bytes": 34910,
+      "sha256": "583cb13581567e7cec68b01078f4b5e3a9073592aca479e4379543390bbae325",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:46.502Z"
     },
     {
       "path": "sweep/luna17.json",
-      "bytes": 10964,
-      "sha256": "e0bb0d65136707428dd475a35b173e803dded1b6e9288a63bc32d7cf815a0500",
+      "bytes": 34842,
+      "sha256": "23a9608b3ac85c0aac114213d44ee365cbb24160df605908018f8d145b8cc081",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:47.848Z"
     },
     {
       "path": "sweep/luna21.json",
-      "bytes": 10952,
-      "sha256": "52ebc94836ccc9f792822435dab10f4651b5cf893a449726374add04b268be01",
+      "bytes": 34834,
+      "sha256": "ccb1d0f95c074e3fc90dd90b45578d4e23c4a00a7c5431299a35c6fe42075be8",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:49.212Z"
     },
     {
       "path": "sweep/luna9.json",
-      "bytes": 10979,
-      "sha256": "fb408da775e9fffc735ca2969725d78df0f983824e3c2cdff6c973b44ba9aeb6",
+      "bytes": 34869,
+      "sha256": "df305fc24d51eaf0e4b42d33d1b65a7f4732bac6a28ef095b2f899faf9f8fdfd",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T09:26:45.109Z"
     },
     {
       "path": "sweep/nobile_rim_1.json",
-      "bytes": 12014,
-      "sha256": "41ee891ed5642a0f2250becc556d596174d1eacf43aa866d482ccbef2dcac538",
+      "bytes": 38381,
+      "sha256": "8f3484e450ba742f6de891431a1f32db119eeb9c61de5eff3807d279164f7841",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/site01.json",
-      "bytes": 11850,
-      "sha256": "c3746f75ff9bfb06d5c54d28de233acd21f278fb1b391a6faffc3879af7c271f",
+      "bytes": 37863,
+      "sha256": "01d64a9720487d7d8d15aaa7652b49203248934e99fe49de95bb764dc96bcdb2",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/site04.json",
-      "bytes": 10662,
-      "sha256": "fa583ea06b80aa8d77404c4cd5da8f3da76d341f032f817982fe30f9756bd338",
+      "bytes": 34999,
+      "sha256": "86d3ed7879a103955a813ba1cf725ab0bbca4c28b4d8d892f935f01637afe6bb",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/site07.json",
-      "bytes": 11878,
-      "sha256": "fab1ff8b91e2d53a00b4bab0af55fff7d2e1f21267009f6053dc1112c8e110b3",
+      "bytes": 38007,
+      "sha256": "8e0e17527c1aad748731510a1179967baecb910131a57da6050e07dfe83be207",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/site11.json",
-      "bytes": 11953,
-      "sha256": "1bd723b02cff386afab46e4f44571be0125b68c837cd8281542a32d3da231dcc",
+      "bytes": 38118,
+      "sha256": "ee10163ee3116339071ba9cf1c7fb63a42bdd3f11e27611f2d470311755bef04",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/site20.json",
-      "bytes": 11764,
-      "sha256": "1f630c788bb97eb13dde581320507817ac479bce9da23afb6d561b8a0b9e7277",
+      "bytes": 37560,
+      "sha256": "34fd45ea40b157dcbed4d49d446f202fd1838b71fdcc6209b1364e4e8e887508",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/site23.json",
-      "bytes": 11821,
-      "sha256": "3af00aac5b2b9326d5e63f4f2d0c7a7dfa8eb4755e8a63359c0284a15e6b6255",
+      "bytes": 37678,
+      "sha256": "1837f9a939de8ffb753262b075cbb3c08a019af7f2c5bf10ae12b4c68f5aa382",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T23:39:39.616Z"
     },
     {
       "path": "sweep/slim.json",
-      "bytes": 11016,
-      "sha256": "6793c7d7916e0a53ea3f7b5cbc21eec3e93e6f9f7e3229f591b9c7ec27dabc17",
+      "bytes": 35016,
+      "sha256": "73adb5a92c9f8d23135752622b4229c9e92475de5f8954a8e92f860093e6eea0",
       "source": "Monthly launch-slip sweep (28-day windows) from LOLA horizons and JPL Horizons/IAU 2000 ephemerides",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-15T01:56:44.493Z"

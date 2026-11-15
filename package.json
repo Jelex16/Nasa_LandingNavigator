@@ -15,6 +15,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test",
+    "data:ephemerides": "node scripts/build_jpl_ephemerides.mjs",
     "data:fix-azimuth": "node scripts/fix_horizon_azimuth.mjs",
     "data:regional-horizons": "python scripts/build_regional_horizons.py --north-mode true",
     "data:clps-horizons": "python scripts/build_clps_horizons.py",

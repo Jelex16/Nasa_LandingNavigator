@@ -19,7 +19,7 @@ const ephem = decodeEphemeris(
 test('site23 ephemeris decodes with the expected header and Horizons values', () => {
   assert.equal(ephem.siteId, 'site23');
   assert.equal(ephem.stepHours, 1);
-  assert.equal(ephem.count, 27049);
+  assert.equal(ephem.count, 87649);
 
   const sample = sampleEphemeris(ephem, Date.UTC(2026, 10, 14, 0, 0, 0));
   assert.ok(Math.abs(sample.sun.azDeg - 126.8731) < 0.001);

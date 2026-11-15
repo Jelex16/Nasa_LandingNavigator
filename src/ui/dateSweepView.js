@@ -153,9 +153,10 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
     `;
   }).join('');
 
+  const labelEvery = Math.max(1, Math.ceil(points.length / 12));
   const xTicks = points
     .map((point, index) => {
-      if (index % 3 !== 0 && index !== points.length - 1) return '';
+      if (index % labelEvery !== 0 && index !== points.length - 1) return '';
       return `<text x="${xFor(index)}" y="${VIEW_H - 12}" text-anchor="middle" class="sweep-axis-text">${monthLabel(Date.parse(point.startUtc))}</text>`;
     })
     .join('');

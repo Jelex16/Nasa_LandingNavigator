@@ -55,7 +55,7 @@ The team defined and remains responsible for:
 
 - `npm test`: catalog, horizon, sweep, regression, i18n and export tests.
 - `npm run build`: production build.
-- Browser checks: grouped site selector, 28-site comparison, 28×36 matrix, IM-1/IM-2 regional
+- Browser checks: grouped site selector, 28-site comparison, 28×120 matrix, IM-1/IM-2 regional
   horizons and sweeps, and English/Spanish rendering.
 - Numerical provenance: LOLA 5 m/px + 80 m/px, lunar curvature, 720 bins, five mast heights, local
   IAU 2000 for sites without precomputed Horizons ephemerides, and the 4,032-sample Horizons

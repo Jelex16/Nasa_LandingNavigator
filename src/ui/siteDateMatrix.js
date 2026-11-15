@@ -156,7 +156,7 @@ function buildHtml(sweeps, context, metric) {
     </div>
     ${mastWarning}
     <div class="matrix-scroll">
-      <table class="matrix-table">
+      <table class="matrix-table" style="min-width: ${Math.max(920, points.length * 22 + 150)}px">
         <thead><tr><th scope="col" class="matrix-corner">${t('matrix.site')}</th>${header}</tr></thead>
         <tbody>${rows}</tbody>
       </table>

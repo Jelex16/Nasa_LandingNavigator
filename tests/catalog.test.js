@@ -76,13 +76,13 @@ test('IM-1 and IM-2 use the regional LOLA horizon inside the 80S DEM', () => {
   }
 });
 
-test('the new sites have 36-month sweeps for the comparison matrix', () => {
+test('the new sites have 120-month sweeps for the comparison matrix', () => {
   for (const site of newSites) {
     const sweepUrl = new URL(`sweep/${site.id}.json`, DATA);
     assert.ok(existsSync(sweepUrl), `${site.id}: missing sweep`);
     const sweep = JSON.parse(readFileSync(sweepUrl, 'utf8'));
     assert.equal(sweep.siteId, site.id);
-    assert.equal(sweep.points.length, 36);
+    assert.equal(sweep.points.length, 120);
     assert.equal(sweep.assumptions.windowDays, 28);
   }
 });

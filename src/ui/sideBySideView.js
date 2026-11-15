@@ -203,14 +203,14 @@ export function renderSideBySide(container, { sites, left, right, context, onCom
           <label class="sr-only" for="ab-site-a">${t('ab.site')}</label>
           <select id="ab-site-a" data-ab-site="a">${scenarioOptions(sites, left.site.id)}</select>
           <label class="ab-date-label" for="ab-date-a">${t('ab.date')}</label>
-          <input id="ab-date-a" data-ab-date="a" type="datetime-local" min="2026-01-01T00:00" max="2029-01-01T00:00" value="${toDatetimeLocal(left.startMs)}" />
+          <input id="ab-date-a" data-ab-date="a" type="datetime-local" min="2026-01-01T00:00" max="2035-12-01T00:00" value="${toDatetimeLocal(left.startMs)}" />
         </div>
         <div class="ab-control">
           <span class="ab-scenario-label">${t('ab.scenarioB')}</span>
           <label class="sr-only" for="ab-site-b">${t('ab.site')}</label>
           <select id="ab-site-b" data-ab-site="b">${scenarioOptions(sites, right.site.id)}</select>
           <label class="ab-date-label" for="ab-date-b">${t('ab.date')}</label>
-          <input id="ab-date-b" data-ab-date="b" type="datetime-local" min="2026-01-01T00:00" max="2029-01-01T00:00" value="${toDatetimeLocal(right.startMs)}" />
+          <input id="ab-date-b" data-ab-date="b" type="datetime-local" min="2026-01-01T00:00" max="2035-12-01T00:00" value="${toDatetimeLocal(right.startMs)}" />
         </div>
         <button class="nav-action-btn ab-compare-btn" id="ab-compare-btn" type="button">${t('ab.compare')}</button>
       </div>

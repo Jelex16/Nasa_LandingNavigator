@@ -104,11 +104,11 @@ Estados y límites duros:
 
 - Fecha/hora de misión en UTC, con opción de fecha personalizada.
 - Presets: ventana de ejemplo (nov 2026), solsticio de verano sur (dic 2026), solsticio de invierno
-  sur (jun 2026), tiempo real (limitado a la cobertura 2026–2029) y fecha personalizada.
+  sur (jun 2026), tiempo real (limitado a la cobertura 2026–2036) y fecha personalizada.
 - Pasos ±1 hora / ±1 día, scrubber de 28 días y playback 1x/10x/60x.
 - La ventana de evaluación de 28 días empieza en la fecha de misión; el playback solo cambia el
   instante mostrado, no la ventana.
-- **Barrido de launch slip**: 36 ventanas mensuales de 28 días, 2026–2028, con energía para el panel
+- **Barrido de launch slip**: 120 ventanas mensuales de 28 días, 2026–2035, con energía para el panel
   actual, Sol %, DTE %, corte máximo, próximo Earthset y score. Clic en un mes o en una fecha de la
   tabla para cargarla en la vista principal. DTE/corte se precalculan con mástil 2 m; la UI avisa si
   el mástil actual es distinto.
@@ -123,7 +123,7 @@ Estados y límites duros:
   pendiente y el índice de misión (las referencias muestran `REFERENCE`). Una tabla de deltas muestra
   B−A con color según la dirección. “Cargar en vista principal” abre cualquiera de los escenarios.
   A/B es visual; usa Compartir/Exportar después de cargar un escenario.
-- **Matriz sitio × fecha**: 28 sitios × 36 meses con selector de métrica (Score, Sol %, DTE %, corte).
+- **Matriz sitio × fecha**: 28 sitios × 120 meses con selector de métrica (Score, Sol %, DTE %, corte).
   Las filas de referencia están marcadas; la nota explica que son contexto, no candidatos
   clasificados. Clic en una celda para cargar sitio y fecha. Exportación CSV.
 
@@ -179,7 +179,7 @@ El escenario actual se codifica en la URL y se mantiene actualizado:
 |---|---|---|
 | `site` | id de sitio curado | p. ej. `site23`, `nobile_rim_1`, `change4`, `control_eq` |
 | `lat`, `lon` | coordenadas personalizadas (tienen prioridad sobre `site`) | lat −90…90, lon 0…360 |
-| `date` | inicio de misión, ISO UTC | 2026-01-01 … 2029-01-01 |
+| `date` | inicio de misión, ISO UTC | 2026-01-01 … 2035-12-01 |
 | `profile` | id de perfil | `technology_demo`, `night_survivor`, `crewed_outpost`, `relay_store_forward` |
 | `panel` | panel solar | `horizontal`, `vertical_fixed`, `vertical_tracker` |
 | `mast` | altura de mástil en metros | `0.5`, `2`, `5`, `10`, `20` |
@@ -198,9 +198,9 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
   fracciones visibles, flags y energía).
 - **Exportar CSV** (comparación): una fila por sitio con rol, coordenadas, score, energía, eclipse,
   DTE, corte, pendiente y fuentes de datos.
-- **Exportar CSV** (barrido): 36 filas mensuales con energía del panel actual, Sol %, DTE %, corte,
+- **Exportar CSV** (barrido): 120 filas mensuales con energía del panel actual, Sol %, DTE %, corte,
   Earthset y score.
-- **Exportar CSV** (matriz sitio × fecha): 28 filas de sitios × 36 scores mensuales, con columna de rol.
+- **Exportar CSV** (matriz sitio × fecha): 28 filas de sitios × 120 scores mensuales, con columna de rol.
 
 ## 9. Guía educativa
 
@@ -219,7 +219,7 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
 - **DEM LOLA 5 m/px de sitios de aterrizaje**: campo cercano de seis sitios.
 - **DEM regional LOLA 80S 80 m/px**: campo lejano a 100 km y Nobile, Haworth, IM-1 e IM-2.
 - **JPL Horizons DE441**: az/el/distancia aparentes topocéntricas de Sol/Tierra, paso de 1 h,
-  2026-01-01 a 2029-02-01, interpolación cúbica de Hermite en el navegador.
+  2026-01-01 a 2036-01-01, interpolación cúbica de Hermite en el navegador.
 - **Modelo de horizonte**: 720 bins de azimut (0.5°), cinco alturas de mástil, curvatura lunar
   `r²/(2R_M)`, horizonte airless (sin refracción atmosférica).
 - **Validación**: 4.032 muestras fuera de malla contra Horizons; RMS 5×10⁻⁶°, máximo 1.22×10⁻⁴°
@@ -265,7 +265,7 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
 - El score es un índice de decisión, no una probabilidad de éxito. `gMaxHours` es una cota inferior
   dentro de la ventana de 28 días.
 - El globo 3D, las esferas Sol/Tierra y las texturas preview son ilustrativos y no están a escala.
-- La cobertura de efemérides es 2026-01-01 a 2029-02-01; no hay consulta en vivo a Horizons.
+- La cobertura de efemérides es 2026-01-01 a 2036-01-01; no hay consulta en vivo a Horizons.
 
 ## 13. Comandos
 
@@ -276,7 +276,8 @@ npm run build
 npm run preview
 npm test               # motor, datos, i18n y exportación
 
-npm run data:sweep             # 36 ventanas mensuales para todos los sitios
+npm run data:ephemerides       # efemérides JPL Horizons de 10 años (red)
+npm run data:sweep             # 120 ventanas mensuales para todos los sitios
 npm run data:flat-horizons     # horizontes planos de las referencias internacionales
 npm run data:manifest          # tamaños y SHA-256 de public/data
 npm run data:fix-azimuth       # corrección de azimut idempotente

@@ -55,7 +55,7 @@ El equipo definió y sigue siendo responsable de:
 
 - `npm test`: tests de catálogo, horizontes, barridos, regresión, i18n y exportación.
 - `npm run build`: build de producción.
-- Comprobaciones en navegador: selector agrupado, comparación de 28 sitios, matriz 28×36,
+- Comprobaciones en navegador: selector agrupado, comparación de 28 sitios, matriz 28×120,
   horizontes y barridos regionales de IM-1/IM-2, y renderizado en inglés y español.
 - Procedencia numérica: LOLA 5 m/px + 80 m/px, curvatura lunar, 720 bins, cinco alturas de mástil,
   IAU 2000 local para sitios sin efemérides Horizons precalculadas y validación de 4.032 muestras

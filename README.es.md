@@ -31,13 +31,13 @@ una fecha de lanzamiento, los planificadores necesitan reevaluar sitios y fechas
 - **Lee primero un veredicto en lenguaje claro**: porcentaje de horas con Sol, porcentaje de tiempo
   con el centro de la Tierra visible (DTE), el corte DTE continuo más largo y un índice de misión
   secundario.
-- **Ejecuta un barrido de fechas (launch slip)**: 36 ventanas mensuales de 28 días entre 2026 y 2028,
+- **Ejecuta un barrido de fechas (launch slip)**: 120 ventanas mensuales de 28 días entre 2026 y 2035,
   con energía, DTE, corte máximo y próximo Earthset. Un clic carga esa fecha en la vista principal.
 - **Compara sitios con los mismos supuestos**: matriz de comparación de 28 sitios con energía,
   eclipse, DTE, comunicaciones/corte, pendiente y un score multicriterio transparente.
 - **A/B lado a lado**: dos escenarios sitio/fecha con radares LOLA compactos, veredictos, métricas,
   tabla de deltas B−A y “cargar en vista principal” para cualquiera de los dos.
-- **Matriz sitio × fecha**: 28 sitios × 36 meses con selector de métrica (score, Sol, DTE, corte);
+- **Matriz sitio × fecha**: 28 sitios × 120 meses con selector de métrica (score, Sol, DTE, corte);
   las filas de referencia están marcadas. Un clic en una celda carga ese sitio y esa fecha.
 - **Comparte y exporta**: el escenario se codifica en la URL y se copia con **Compartir**; exporta
   JSON del escenario (con la serie de 672 puntos) y CSV de la comparación, el barrido y la matriz.
@@ -67,7 +67,7 @@ del panel, no un presupuesto eléctrico completo.
 | Barrido de fechas | Panorama 2.5D del horizonte |
 |:---:|:---:|
 | [![Barrido de fechas](docs/screenshots/03-sweep.png)](docs/screenshots/03-sweep.png) | [![Panorama 2.5D del horizonte LOLA](docs/screenshots/04-panorama.png)](docs/screenshots/04-panorama.png) |
-| 36 ventanas mensuales de 2026 a 2028. | Terreno LOLA, trayectoria solar y bucle de libración terrestre. |
+| 120 ventanas mensuales de 2026 a 2035. | Terreno LOLA, trayectoria solar y bucle de libración terrestre. |
 
 **Línea de tiempo de 28 días** — ventanas de visibilidad Sol/Tierra frente al horizonte LOLA.
 
@@ -98,7 +98,7 @@ La declaración completa está en [`docs/SI_USAGE.es.md`](docs/SI_USAGE.es.md) (
 
 - Horizontes: 720 bins de azimut (0.5°), cinco alturas de mástil (0.5, 2, 5, 10, 20 m) y corrección
   por curvatura lunar.
-- Efemérides: JPL Horizons DE441, 2026-01-01 a 2029-02-01, interpolación cúbica de Hermite en el
+- Efemérides: JPL Horizons DE441, 2026-01-01 a 2036-01-01, interpolación cúbica de Hermite en el
   navegador.
 - Validación: 4.032 muestras fuera de malla contra Horizons; **RMS 5e-6°** (la UI muestra 1e-5°),
   error máximo **1.22e-4°** (la UI muestra 1.2e-4°).
@@ -125,7 +125,8 @@ La declaración completa está en [`docs/SI_USAGE.es.md`](docs/SI_USAGE.es.md) (
   simplificación porque la iluminación polar depende del terreno.
 - **Manifiesto de datos**: `public/data/manifest.json` lista 70 archivos derivados con tamaños y
   checksums SHA-256. El manifiesto incluye `referenceSitesNote` para las referencias internacionales.
-  Los DEM originales (~0.5 GB) no se distribuyen.
+  Los DEM originales (~0.5 GB) no se distribuyen. Las efemérides horarias (2026–2036) se guardan por
+  sitio (~2 MB cada una) y se cargan bajo demanda.
 
 ## Inicio rápido
 
@@ -144,10 +145,11 @@ npm run build
 npm run preview
 ```
 
-Regenerar el barrido mensual y el manifiesto de datos (opcional; los archivos generados están
-versionados):
+Regenerar las efemérides, el barrido mensual y el manifiesto de datos (opcional; los archivos
+generados están versionados; `data:ephemerides` consulta JPL Horizons por red):
 
 ```bash
+npm run data:ephemerides
 npm run data:sweep
 npm run data:flat-horizons
 npm run data:manifest
@@ -194,7 +196,7 @@ días. Nobile, Haworth, IM-1 e IM-2 usan terreno regional de 80 m/px; las coorde
 usan el horizonte LOLA real del sitio más cercano a ≤10 km o un horizonte plano. Las referencias
 internacionales usan horizontes analíticos planos e IAU 2000 local; son contexto, no análisis LOLA.
 El globo 3D y las esferas Sol/Tierra son ilustrativos y no están a escala. La cobertura de efemérides
-es 2026-01-01 a 2029-02-01. El score es un índice de decisión, no una probabilidad de éxito.
+es 2026-01-01 a 2036-01-01. El score es un índice de decisión, no una probabilidad de éxito.
 
 ## Referencias
 
