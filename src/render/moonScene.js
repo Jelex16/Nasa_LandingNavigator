@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { LunarTextureManager } from './lunarTextureManager.js';
+import { siteDescription, siteProgram } from '../topography/lunarData.js';
+
+const POINTER_DRAG_TOLERANCE_PX = 6;
+const POINTER_CLICK_MAX_MS = 700;
+const PIN_POPUP_TIMEOUT_MS = 8000;
 
 function createProceduralEarthTexture() {
   const canvas = document.createElement('canvas');
@@ -68,6 +73,24 @@ export class MoonScene {
     this.controls.dampingFactor = 0.05;
     this.controls.minDistance = 12;
     this.controls.maxDistance = 70;
+    this.cameraTween = null;
+    this.controls.addEventListener('start', () => {
+      this.cameraTween = null;
+    });
+
+    this.raycaster = new THREE.Raycaster();
+    this.pointer = new THREE.Vector2();
+    this.pointerDownInfo = null;
+    this.pinHitMeshes = [];
+    this.pinPopup = null;
+    this.pinPopupAnchor = null;
+    this.pinPopupTimer = null;
+    this.handlePointerDown = this.handlePointerDown.bind(this);
+    this.handlePointerUp = this.handlePointerUp.bind(this);
+    this.handlePointerMove = this.handlePointerMove.bind(this);
+    this.renderer.domElement.addEventListener('pointerdown', this.handlePointerDown);
+    this.renderer.domElement.addEventListener('pointerup', this.handlePointerUp);
+    this.renderer.domElement.addEventListener('pointermove', this.handlePointerMove);
 
     this.moonRadius = 10;
     this.displacementScale = 0.55;
@@ -343,6 +366,8 @@ export class MoonScene {
       this.scene.remove(group);
     });
     this.siteMarkers.clear();
+    this.pinHitMeshes = [];
+    this.hidePinPopup();
 
     sites.forEach((site) => {
       const group = new THREE.Group();
@@ -375,7 +400,17 @@ export class MoonScene {
       tipMesh.position.y = 0.8;
       group.add(tipMesh);
 
-      group.userData = { site, ringMesh, tipMesh };
+      const hitGeom = new THREE.SphereGeometry(0.55, 10, 10);
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitMesh = new THREE.Mesh(hitGeom, hitMat);
+      hitMesh.position.y = 0.45;
+      group.add(hitMesh);
+
+      group.userData = { site, ringMesh, tipMesh, hitMesh };
+      for (const mesh of [ringMesh, pinMesh, tipMesh, hitMesh]) {
+        mesh.userData.siteId = site.id;
+        this.pinHitMeshes.push(mesh);
+      }
       this.scene.add(group);
       this.siteMarkers.set(site.id, group);
     });
@@ -412,22 +447,42 @@ export class MoonScene {
     return sitePos;
   }
 
+  animateCameraTo(position, target, duration = 850) {
+    this.cameraTween = {
+      fromPos: this.camera.position.clone(),
+      toPos: position.clone(),
+      fromTarget: this.controls.target.clone(),
+      toTarget: target.clone(),
+      start: performance.now(),
+      duration: Math.max(1, duration)
+    };
+  }
+
   viewSouthPole() {
+    this.cameraTween = null;
     this.controls.target.set(0, -this.moonRadius, 0);
     this.camera.position.set(0, -this.moonRadius * 2.3, 3);
     this.controls.update();
   }
 
   viewGlobal() {
+    this.cameraTween = null;
     this.controls.target.set(0, 0, 0);
     this.camera.position.set(22, 10, 22);
     this.controls.update();
   }
 
-  viewSite(site) {
+  viewSite(site, { animate = true, duration = 850 } = {}) {
     const target = this.latLonToVector3(site.lat, site.lon, 0);
+    const targetDir = target.clone().normalize();
+    const focusDistance = Math.max(this.controls.minDistance, this.moonRadius * 0.6);
+    const camPos = target.clone().addScaledVector(targetDir, focusDistance);
+    if (animate && !this.motionReduced) {
+      this.animateCameraTo(camPos, target, duration);
+      return;
+    }
+    this.cameraTween = null;
     this.controls.target.copy(target);
-    const camPos = target.clone().multiplyScalar(1.6);
     this.camera.position.copy(camPos);
     this.controls.update();
   }
@@ -468,6 +523,145 @@ export class MoonScene {
     }
   }
 
+  handlePointerDown(event) {
+    if (event.button !== 0) return;
+    this.pointerDownInfo = {
+      x: event.clientX,
+      y: event.clientY,
+      time: performance.now()
+    };
+  }
+
+  handlePointerUp(event) {
+    if (event.button !== 0) return;
+    const down = this.pointerDownInfo;
+    this.pointerDownInfo = null;
+    if (!down) return;
+
+    const moved = Math.hypot(event.clientX - down.x, event.clientY - down.y);
+    if (moved > POINTER_DRAG_TOLERANCE_PX) return;
+    if (performance.now() - down.time > POINTER_CLICK_MAX_MS) return;
+
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const hits = this.raycaster.intersectObjects(this.pinHitMeshes, false);
+    if (!hits.length) {
+      this.hidePinPopup();
+      return;
+    }
+
+    const moonHits = this.raycaster.intersectObject(this.moonMesh, false);
+    if (moonHits.length && moonHits[0].distance < hits[0].distance) {
+      this.hidePinPopup();
+      return;
+    }
+
+    const siteId = hits[0].object.userData.siteId;
+    if (!siteId) return;
+    this.onSelectCallback?.(siteId);
+    const group = this.siteMarkers.get(siteId);
+    if (group?.userData.site) this.showPinPopup(group.userData.site, group);
+  }
+
+  handlePointerMove(event) {
+    if (this.pointerDownInfo) return;
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const hits = this.raycaster.intersectObjects(this.pinHitMeshes, false);
+    let selectable = hits.length > 0;
+    if (selectable) {
+      const moonHits = this.raycaster.intersectObject(this.moonMesh, false);
+      if (moonHits.length && moonHits[0].distance < hits[0].distance) selectable = false;
+    }
+    this.renderer.domElement.style.cursor = selectable ? 'pointer' : '';
+  }
+
+  shortPinDescription(site) {
+    const full = siteDescription(site) || site.targetMission || '';
+    const cut = full.search(/[.!?](\s|$)/);
+    const sentence = cut === -1 ? full : full.slice(0, cut + 1);
+    return sentence.length > 180 ? `${sentence.slice(0, 177).trimEnd()}…` : sentence;
+  }
+
+  showPinPopup(site, anchor) {
+    if (!this.pinPopup) {
+      const el = document.createElement('div');
+      el.className = 'pin-popup';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      document.body.appendChild(el);
+      this.pinPopup = el;
+    }
+
+    const title = document.createElement('strong');
+    title.className = 'pin-popup-title';
+    title.textContent = site.name;
+    const meta = document.createElement('span');
+    meta.className = 'pin-popup-meta';
+    meta.textContent = siteProgram(site);
+    const text = document.createElement('p');
+    text.className = 'pin-popup-text';
+    text.textContent = this.shortPinDescription(site);
+
+    this.pinPopup.replaceChildren(title, meta, text);
+    this.pinPopup.hidden = false;
+    this.pinPopupAnchor = anchor ?? null;
+    this.positionPinPopup();
+
+    clearTimeout(this.pinPopupTimer);
+    this.pinPopupTimer = setTimeout(() => this.hidePinPopup(), PIN_POPUP_TIMEOUT_MS);
+  }
+
+  hidePinPopup() {
+    clearTimeout(this.pinPopupTimer);
+    this.pinPopupTimer = null;
+    this.pinPopupAnchor = null;
+    if (this.pinPopup) this.pinPopup.hidden = true;
+  }
+
+  positionPinPopup() {
+    if (!this.pinPopup || this.pinPopup.hidden || !this.pinPopupAnchor) return;
+    this.camera.updateMatrixWorld();
+
+    const world = new THREE.Vector3();
+    this.pinPopupAnchor.getWorldPosition(world);
+    world.addScaledVector(world.clone().normalize(), 1.0);
+    world.project(this.camera);
+
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const screenX = (world.x * 0.5 + 0.5) * rect.width + rect.left;
+    const screenY = (-world.y * 0.5 + 0.5) * rect.height + rect.top;
+
+    const popup = this.pinPopup;
+    popup.style.visibility = 'hidden';
+    popup.style.left = '0px';
+    popup.style.top = '0px';
+    const pw = popup.offsetWidth;
+    const ph = popup.offsetHeight;
+
+    const margin = 8;
+    let left = screenX + 16;
+    if (left + pw > rect.right - margin) left = screenX - pw - 16;
+    left = Math.max(rect.left + margin, Math.min(left, rect.right - pw - margin));
+
+    let top = screenY - ph - 14;
+    if (top < rect.top + margin) top = screenY + 18;
+    top = Math.max(rect.top + margin, Math.min(top, rect.bottom - ph - margin));
+
+    popup.style.left = `${left}px`;
+    popup.style.top = `${top}px`;
+    popup.style.visibility = 'visible';
+    popup.style.opacity = world.z > 1 ? '0' : '1';
+  }
+
   handleResize() {
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;
@@ -476,14 +670,30 @@ export class MoonScene {
     this.renderer.setSize(this.width, this.height);
   }
 
-  animate() {
+  animate(now = performance.now()) {
     this.animId = requestAnimationFrame(this.animate);
 
     if (this.earthMesh && !this.motionReduced) {
       this.earthMesh.rotation.y += 0.002;
     }
 
-    const time = performance.now() * 0.004;
+    if (this.cameraTween) {
+      const progress = Math.min(1, (now - this.cameraTween.start) / this.cameraTween.duration);
+      const ease = progress < 0.5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
+      this.camera.position.lerpVectors(
+        this.cameraTween.fromPos,
+        this.cameraTween.toPos,
+        ease
+      );
+      this.controls.target.lerpVectors(
+        this.cameraTween.fromTarget,
+        this.cameraTween.toTarget,
+        ease
+      );
+      if (progress >= 1) this.cameraTween = null;
+    }
+
+    const time = now * 0.004;
     this.siteMarkers.forEach((group) => {
       const ring = group.userData.ringMesh;
       if (ring) {
@@ -491,6 +701,7 @@ export class MoonScene {
       }
     });
 
+    this.positionPinPopup();
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -498,8 +709,16 @@ export class MoonScene {
   destroy() {
     cancelAnimationFrame(this.animId);
     window.removeEventListener('resize', this.handleResize);
+    this.hidePinPopup();
     if (this.renderer && this.renderer.domElement) {
+      this.renderer.domElement.removeEventListener('pointerdown', this.handlePointerDown);
+      this.renderer.domElement.removeEventListener('pointerup', this.handlePointerUp);
+      this.renderer.domElement.removeEventListener('pointermove', this.handlePointerMove);
       this.container.removeChild(this.renderer.domElement);
+    }
+    if (this.pinPopup) {
+      this.pinPopup.remove();
+      this.pinPopup = null;
     }
   }
 }

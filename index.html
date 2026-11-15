@@ -88,134 +88,35 @@
           </div>
         </div>
 
-        <div class="site-select-row">
-          <label for="site-select">Sitio LOLA</label>
-          <select id="site-select" class="site-select"></select>
-        </div>
-
-        <section class="verdict-card" aria-labelledby="verdict-heading">
-          <div class="verdict-head">
-            <span class="field-label" id="verdict-heading">Veredicto</span>
-            <div class="verdict-head-actions">
-              <button class="btn-link" id="open-guide-btn" type="button">Cómo leer</button>
-              <button class="btn-link" id="toggle-nn-view-btn" type="button">Ver modelo →</button>
+        <div class="site-input-block">
+          <div class="site-input-head">
+            <span class="field-label" id="site-input-heading">Sitio a evaluar</span>
+            <div class="segmented site-mode-toggle" role="group" aria-label="Modo de entrada del sitio">
+              <button type="button" id="site-mode-catalog" aria-pressed="true">Catálogo</button>
+              <button type="button" id="site-mode-coords" aria-pressed="false">Coordenadas</button>
             </div>
           </div>
 
-          <div class="verdict-headline">
-            <span class="verdict-status status-safe" id="classification-badge">CARGANDO</span>
-            <span class="verdict-score-secondary" title="Índice de decisión; no es una probabilidad de éxito">
-              <span>Índice de misión</span>
-              <span class="verdict-score-value" id="score-number">—</span>
-              <span class="verdict-score-unit">/100</span>
-            </span>
+          <div class="site-panel" id="site-panel-catalog">
+            <label class="sr-only" for="site-select">Sitio LOLA</label>
+            <select id="site-select" class="site-select"></select>
           </div>
 
-          <div class="verdict-key-metrics">
-            <div class="verdict-key-metric">
-              <span class="key-label">Sol</span>
-              <strong id="key-sun">—</strong>
-              <span class="key-sub">horas con Sol</span>
+          <div class="site-panel" id="site-panel-coords" hidden>
+            <div class="custom-inputs-row">
+              <div class="input-block">
+                <label for="custom-lat">Latitud (°S/°N):</label>
+                <input type="number" id="custom-lat" step="0.01" min="-90" max="90" value="-89.5" />
+              </div>
+              <div class="input-block">
+                <label for="custom-lon">Longitud (°E):</label>
+                <input type="number" id="custom-lon" step="0.01" min="0" max="360" value="0" />
+              </div>
+              <button class="btn-apply-coords" id="apply-custom-btn" type="button">Evaluar</button>
             </div>
-            <div class="verdict-key-metric" id="key-dte-card">
-              <span class="key-label">DTE</span>
-              <strong id="key-dte">—</strong>
-              <span class="key-sub" id="key-dte-sub">centro visible</span>
-            </div>
-            <div class="verdict-key-metric" id="key-outage-card">
-              <span class="key-label">Corte</span>
-              <strong id="key-outage">—</strong>
-              <span class="key-sub" id="key-outage-sub">sin DTE</span>
-            </div>
-          </div>
-
-          <p class="verdict-summary" id="verdict-summary" aria-live="polite">Calculando métricas LOLA + Horizons…</p>
-
-          <details class="verdict-details">
-            <summary>Ver desglose del score</summary>
-            <div class="verdict-bar" id="verdict-bar" aria-hidden="true"></div>
-            <ul class="verdict-rows" id="verdict-rows"></ul>
-            <p class="verdict-note" id="classification-text">
-              Calculando métricas LOLA + Horizons…
-            </p>
-          </details>
-
-          <p class="verdict-window" id="score-window-label">
-            Ventana: 28 días desde — · instante —
-          </p>
-          <div class="verdict-actions">
-            <button class="btn-link" id="share-btn" type="button">Compartir</button>
-            <button class="btn-link" id="export-json-btn" type="button">Exportar JSON</button>
-          </div>
-        </section>
-
-        <div class="mission-config-row">
-          <div class="config-block">
-            <label for="mast-select">Mástil</label>
-            <select id="mast-select">
-              <option value="0.5">0.5 m</option>
-              <option value="2" selected>2 m</option>
-              <option value="5">5 m</option>
-              <option value="10">10 m</option>
-              <option value="20">20 m</option>
-            </select>
-          </div>
-          <div class="config-block">
-            <label for="panel-select">Panel</label>
-            <select id="panel-select">
-              <option value="vertical_tracker" selected>Vertical con seguimiento</option>
-              <option value="vertical_fixed">Vertical fijo</option>
-              <option value="horizontal">Horizontal</option>
-            </select>
-          </div>
-          <div class="config-block">
-            <label for="profile-select">Perfil de misión</label>
-            <select id="profile-select">
-              <option value="technology_demo" selected>Demo DTE directo</option>
-              <option value="night_survivor">Rover nocturno</option>
-              <option value="crewed_outpost">Tripulado</option>
-              <option value="relay_store_forward">Relé / store-and-forward</option>
-              <option value="custom">Personalizado</option>
-            </select>
+            <p class="input-error" id="custom-coords-error" role="alert" hidden></p>
           </div>
         </div>
-
-        <section class="custom-profile-panel" id="custom-profile-panel" hidden aria-labelledby="custom-profile-title">
-          <div class="custom-profile-header">
-            <span class="field-label" id="custom-profile-title">Umbrales personalizados</span>
-            <span class="custom-profile-badge">Supuestos del usuario</span>
-          </div>
-          <div class="custom-profile-grid">
-            <div class="input-block">
-              <label for="custom-energy">Energía requerida (kWh/m²)</label>
-              <input type="number" id="custom-energy" min="0" max="5000" step="10" value="300" inputmode="decimal" />
-            </div>
-            <div class="input-block">
-              <label for="custom-eclipse">Eclipse máximo (h)</label>
-              <input type="number" id="custom-eclipse" min="0" max="2000" step="1" value="160" inputmode="decimal" />
-            </div>
-            <div class="input-block">
-              <label for="custom-dte">DTE requerido (%)</label>
-              <input type="number" id="custom-dte" min="0" max="100" step="1" value="60" inputmode="decimal" />
-            </div>
-            <div class="input-block">
-              <label for="custom-outage">Corte DTE máximo (h)</label>
-              <input type="number" id="custom-outage" min="0" max="2000" step="1" value="24" inputmode="decimal" />
-            </div>
-          </div>
-          <label class="custom-profile-strict">
-            <input type="checkbox" id="custom-strict" checked />
-            <span>Modo estricto: cualquier umbral incumplido = NO-GO</span>
-          </label>
-          <p class="custom-profile-note">
-            Tus umbrales son supuestos de misión; no son requisitos NASA. GO = cumple los cuatro. Si falla alguno: NO-GO en estricto; PRECAUCIÓN/NO-GO sin estricto.
-          </p>
-          <p class="input-error" id="custom-profile-error" role="alert" hidden></p>
-          <div class="custom-profile-actions">
-            <button class="btn-apply-coords" id="apply-custom-profile-btn" type="button">Aplicar umbrales</button>
-            <button class="btn-link" id="reset-custom-profile-btn" type="button">Restablecer</button>
-          </div>
-        </section>
 
         <div class="coords-row">
           <div class="coord-badge">
@@ -237,21 +138,139 @@
           <span id="site-data-source">Cargando fuentes…</span>
         </div>
 
-        <details class="custom-coords-toggle" id="custom-coords-details">
-          <summary>Ingresar coordenadas personalizadas</summary>
-          <div class="custom-inputs-row">
-            <div class="input-block">
-              <label for="custom-lat">Latitud (°S/°N):</label>
-              <input type="number" id="custom-lat" step="0.01" min="-90" max="90" value="-89.5" />
-            </div>
-            <div class="input-block">
-              <label for="custom-lon">Longitud (°E):</label>
-              <input type="number" id="custom-lon" step="0.01" min="0" max="360" value="0" />
-            </div>
-            <button class="btn-apply-coords" id="apply-custom-btn" type="button">Evaluar</button>
+        <section class="mission-profile-section" aria-labelledby="mission-profile-heading">
+          <div class="mission-profile-head">
+            <label class="field-label" id="mission-profile-heading" for="profile-select">Perfil de misión</label>
+            <span class="mission-profile-hint">Supuestos de misión · no requisitos NASA</span>
           </div>
-          <p class="input-error" id="custom-coords-error" role="alert" hidden></p>
-        </details>
+
+          <div class="mission-config-row">
+            <div class="config-block config-block--profile">
+              <select id="profile-select">
+                <option value="technology_demo" selected>Demo DTE directo</option>
+                <option value="night_survivor">Rover nocturno</option>
+                <option value="crewed_outpost">Tripulado</option>
+                <option value="relay_store_forward">Relé / store-and-forward</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+            <div class="config-block">
+              <label for="mast-select">Mástil</label>
+              <select id="mast-select">
+                <option value="0.5">0.5 m</option>
+                <option value="2" selected>2 m</option>
+                <option value="5">5 m</option>
+                <option value="10">10 m</option>
+                <option value="20">20 m</option>
+              </select>
+            </div>
+            <div class="config-block">
+              <label for="panel-select">Panel</label>
+              <select id="panel-select">
+                <option value="vertical_tracker" selected>Vertical con seguimiento</option>
+                <option value="vertical_fixed">Vertical fijo</option>
+                <option value="horizontal">Horizontal</option>
+              </select>
+            </div>
+          </div>
+
+          <section class="custom-profile-panel" id="custom-profile-panel" hidden aria-labelledby="custom-profile-title">
+            <div class="custom-profile-header">
+              <span class="field-label" id="custom-profile-title">Umbrales personalizados</span>
+              <span class="custom-profile-badge">Supuestos del usuario</span>
+            </div>
+            <div class="custom-profile-grid">
+              <div class="input-block">
+                <label for="custom-energy">Energía requerida (kWh/m²)</label>
+                <input type="number" id="custom-energy" min="0" max="5000" step="10" value="300" inputmode="decimal" />
+              </div>
+              <div class="input-block">
+                <label for="custom-eclipse">Eclipse máximo (h)</label>
+                <input type="number" id="custom-eclipse" min="0" max="2000" step="1" value="160" inputmode="decimal" />
+              </div>
+              <div class="input-block">
+                <label for="custom-dte">DTE requerido (%)</label>
+                <input type="number" id="custom-dte" min="0" max="100" step="1" value="60" inputmode="decimal" />
+              </div>
+              <div class="input-block">
+                <label for="custom-outage">Corte DTE máximo (h)</label>
+                <input type="number" id="custom-outage" min="0" max="2000" step="1" value="24" inputmode="decimal" />
+              </div>
+            </div>
+            <label class="custom-profile-strict">
+              <input type="checkbox" id="custom-strict" checked />
+              <span>Modo estricto: cualquier umbral incumplido = NO-GO</span>
+            </label>
+            <p class="custom-profile-note">
+              Tus umbrales son supuestos de misión; no son requisitos NASA. GO = cumple los cuatro. Si falla alguno: NO-GO en estricto; PRECAUCIÓN/NO-GO sin estricto.
+            </p>
+            <p class="input-error" id="custom-profile-error" role="alert" hidden></p>
+            <div class="custom-profile-actions">
+              <button class="btn-apply-coords" id="apply-custom-profile-btn" type="button">Aplicar umbrales</button>
+              <button class="btn-link" id="reset-custom-profile-btn" type="button">Restablecer</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="verdict-card" aria-labelledby="verdict-heading">
+          <div class="verdict-head">
+            <span class="field-label" id="verdict-heading">Veredicto</span>
+            <div class="verdict-head-actions">
+              <button class="btn-link" id="open-guide-btn" type="button">¿Cómo funciona?</button>
+            </div>
+          </div>
+
+          <div class="verdict-headline">
+            <span class="verdict-status status-safe" id="classification-badge">CARGANDO</span>
+            <span class="verdict-profile-name" id="verdict-profile-name">Perfil: —</span>
+          </div>
+
+          <p class="verdict-provenance">
+            Datos NASA (LOLA + JPL Horizons). El estado y el índice siguen los umbrales del perfil de misión.
+          </p>
+
+          <div class="verdict-key-metrics">
+            <div class="verdict-key-metric">
+              <span class="key-label">Sol</span>
+              <span class="key-desc">del tiempo</span>
+              <strong id="key-sun">—</strong>
+            </div>
+            <div class="verdict-key-metric" id="key-dte-card">
+              <span class="key-label">DTE</span>
+              <span class="key-desc">centro visible</span>
+              <strong id="key-dte">—</strong>
+              <span class="key-sub" id="key-dte-sub">≥ 60%</span>
+            </div>
+            <div class="verdict-key-metric" id="key-outage-card">
+              <span class="key-label">Corte</span>
+              <span class="key-desc">sin DTE</span>
+              <strong id="key-outage">—</strong>
+              <span class="key-sub" id="key-outage-sub">≤ 24 h</span>
+            </div>
+          </div>
+
+          <ul class="verdict-checklist" id="verdict-checklist" aria-live="polite"></ul>
+
+          <p class="verdict-summary" id="verdict-summary" aria-live="polite">Calculando métricas LOLA + Horizons…</p>
+
+          <details class="verdict-details">
+            <summary>Ver índice y desglose</summary>
+            <div class="verdict-score-line" title="Índice derivado de los umbrales del perfil de misión; no es un dato NASA ni una probabilidad de éxito">
+              <span class="verdict-score-label">Índice de misión</span>
+              <span class="verdict-score-value" id="score-number">—</span>
+              <span class="verdict-score-unit">/100</span>
+            </div>
+            <div class="verdict-bar" id="verdict-bar" aria-hidden="true"></div>
+            <ul class="verdict-rows" id="verdict-rows"></ul>
+            <p class="verdict-note" id="classification-text">
+              Calculando métricas LOLA + Horizons…
+            </p>
+          </details>
+
+          <p class="verdict-window" id="score-window-label">
+            Ventana: 28 días desde — · instante —
+          </p>
+        </section>
 
         <details class="panel-disclosure" id="site-brief-details">
           <summary>Contexto del sitio</summary>
@@ -287,6 +306,11 @@
             </div>
           </div>
         </details>
+
+        <div class="panel-actions">
+          <button class="btn-link" id="share-btn" type="button">Compartir</button>
+          <button class="btn-link" id="export-json-btn" type="button">Exportar JSON</button>
+        </div>
       </aside>
 
       <aside class="glass-panel right-floating-panel" id="right-panel">
@@ -470,16 +494,25 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+    <div class="modal-backdrop hidden" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
       <div class="modal-window modal-wide modal-guide">
         <div class="modal-header">
           <div class="modal-title-with-badge">
-            <h2 id="guide-modal-title">Cómo leer esta herramienta</h2>
-            <span class="m-badge" id="guide-modal-badge">Apoyo a decisiones · no certificado para vuelo</span>
+            <h2 id="help-modal-title">¿Cómo funciona?</h2>
+            <span class="m-badge" id="help-modal-badge">Apoyo a decisiones · no certificado para vuelo</span>
           </div>
-          <button class="btn-modal-close" id="close-guide-modal" type="button" aria-label="Cerrar guía">&times;</button>
+          <button class="btn-modal-close" id="close-help-modal" type="button" aria-label="Cerrar ayuda">&times;</button>
         </div>
-        <div class="modal-body" id="guide-modal-body"></div>
+        <div class="help-tabs" role="tablist" aria-label="Secciones de ayuda">
+          <button class="help-tab active" id="help-tab-guide" type="button" role="tab" aria-selected="true" aria-controls="help-panel-guide">Guía</button>
+          <button class="help-tab" id="help-tab-model" type="button" role="tab" aria-selected="false" aria-controls="help-panel-model" tabindex="-1">Modelo</button>
+          <button class="help-tab" id="help-tab-sources" type="button" role="tab" aria-selected="false" aria-controls="help-panel-sources" tabindex="-1">Fuentes</button>
+        </div>
+        <div class="modal-body">
+          <div class="help-panel" id="help-panel-guide" role="tabpanel" aria-labelledby="help-tab-guide"></div>
+          <div class="help-panel" id="help-panel-model" role="tabpanel" aria-labelledby="help-tab-model" hidden></div>
+          <div class="help-panel" id="help-panel-sources" role="tabpanel" aria-labelledby="help-tab-sources" hidden></div>
+        </div>
       </div>
     </div>
 

@@ -91,6 +91,10 @@ function currentProfile() {
 }
 
 const siteSelect = $('site-select');
+const siteModeCatalogBtn = $('site-mode-catalog');
+const siteModeCoordsBtn = $('site-mode-coords');
+const sitePanelCatalog = $('site-panel-catalog');
+const sitePanelCoords = $('site-panel-coords');
 const cameraBar = document.querySelector('.floating-camera-bar');
 const siteProgramBadge = $('site-program-badge');
 const siteDescription = $('site-description');
@@ -119,6 +123,8 @@ const scoreNumber = $('score-number');
 const classificationBadge = $('classification-badge');
 const classificationText = $('classification-text');
 const verdictSummary = $('verdict-summary');
+const verdictProfileName = $('verdict-profile-name');
+const verdictChecklist = $('verdict-checklist');
 const verdictBar = $('verdict-bar');
 const verdictRows = $('verdict-rows');
 const scoreWindowLabel = $('score-window-label');
@@ -171,22 +177,27 @@ const abModalBody = $('ab-modal-body');
 const abModalTitle = $('ab-modal-title');
 const abModalBadge = $('ab-modal-badge');
 const closeAbModal = $('close-ab-modal');
-const guideModal = $('guide-modal');
-const guideModalBody = $('guide-modal-body');
-const guideModalTitle = $('guide-modal-title');
-const guideModalBadge = $('guide-modal-badge');
-const closeGuideModal = $('close-guide-modal');
-const horizonsModal = $('horizons-modal');
-const closeHorizonsModal = $('close-horizons-modal');
+const helpModal = $('help-modal');
+const closeHelpModal = $('close-help-modal');
+const helpGuidePanel = $('help-panel-guide');
+const helpModelPanel = $('help-panel-model');
+const helpSourcesPanel = $('help-panel-sources');
+const helpTabs = {
+  guide: $('help-tab-guide'),
+  model: $('help-tab-model'),
+  sources: $('help-tab-sources')
+};
+const helpPanels = {
+  guide: helpGuidePanel,
+  model: helpModelPanel,
+  sources: helpSourcesPanel
+};
 const openHorizonsBtn = $('open-horizons-btn');
 const terrainValidationSection = $('terrain-validation-section');
 const terrainValidationTitle = $('terrain-validation-title');
 const terrainValidationMethod = $('terrain-validation-method');
 const terrainValidationSummary = $('terrain-validation-summary');
 const terrainValidationTable = $('terrain-validation-table');
-const nnModal = $('nn-modal');
-const closeNnModal = $('close-nn-modal');
-const toggleNnViewBtn = $('toggle-nn-view-btn');
 const panoramaModal = $('panorama-modal');
 const closePanoramaModal = $('close-panorama-modal');
 const openPanoramaBtn = $('open-panorama-btn');
@@ -530,17 +541,20 @@ function initModelLayerControls() {
 
 function formatOutage(metrics) {
   const windowHours = metrics.sampleCount * metrics.stepHours;
-  const days = metrics.gMaxHours / 24;
   const capped = metrics.gMaxHours >= windowHours;
-  return `${capped ? '≥' : ''}${capped ? days.toFixed(0) : days.toFixed(1)} ${t('common.days')}`;
+  const days = metrics.gMaxHours / 24;
+  const dayValue = capped ? days.toFixed(0) : days.toFixed(1);
+  const hourValue = Math.round(metrics.gMaxHours);
+  const prefix = capped ? '≥' : '';
+  return `${prefix}${dayValue} d (${prefix}${hourValue} h)`;
 }
 
 function setOutageDisplay(element, metrics) {
   if (!element) return;
   const text = formatOutage(metrics);
-  const split = text.lastIndexOf(' ');
-  const value = split === -1 ? text : text.slice(0, split);
-  const unit = split === -1 ? '' : text.slice(split + 1);
+  const match = text.match(/^(≥?[\d.]+)\s+(.*)$/);
+  const value = match ? match[1] : text;
+  const unit = match ? match[2] : '';
   const valueSpan = document.createElement('span');
   valueSpan.className = 'key-value';
   valueSpan.textContent = value;
@@ -586,12 +600,67 @@ function buildVerdictSummary(analysis) {
   });
 }
 
+function buildChecklist(analysis) {
+  if (!verdictChecklist) return;
+  const { site, metrics: m, profile: p } = analysis;
+  const isReference = site.role === 'reference' || site.role === 'international';
+  verdictChecklist.hidden = isReference;
+  if (isReference) {
+    verdictChecklist.innerHTML = '';
+    return;
+  }
+  const items = [
+    {
+      label: t('check.energy'),
+      value: `${(m.energyWhM2 / 1000).toFixed(1)} kWh/m²`,
+      req: `≥ ${p.energyReqKWhM2}`,
+      pass: m.energyWhM2 >= p.energyReqKWhM2 * 1000
+    },
+    {
+      label: t('check.eclipse'),
+      value: `${m.dMaxHours.toFixed(1)} h`,
+      req: `≤ ${p.dMaxTolHours} h`,
+      pass: m.dMaxHours <= p.dMaxTolHours
+    },
+    {
+      label: t('check.dte'),
+      value: `${m.dteCenterPct.toFixed(0)}%`,
+      req: `≥ ${p.dteReqPct}%`,
+      pass: m.dteCenterPct >= p.dteReqPct
+    },
+    {
+      label: t('check.outage'),
+      value: formatOutage(m),
+      req: `≤ ${p.gMaxTolHours} h`,
+      pass: m.gMaxHours <= p.gMaxTolHours
+    }
+  ];
+  verdictChecklist.innerHTML = items
+    .map(
+      (item) => `<li class="verdict-check ${item.pass ? 'is-pass' : 'is-fail'}">
+        <span class="verdict-check-icon" aria-hidden="true">${item.pass ? '✓' : '✕'}</span>
+        <span class="verdict-check-body">
+          <span class="verdict-check-label">${item.label}</span>
+          <span class="verdict-check-detail"><span>${item.value}</span><span class="verdict-check-req">${t('check.req')} ${item.req}</span></span>
+        </span>
+        <span class="verdict-check-badge">${item.pass ? t('check.pass') : t('check.fail')}</span>
+      </li>`
+    )
+    .join('');
+}
+
 function updateDecisionUI(analysis) {
   scoreNumber.textContent = analysis.scorePercent;
   classificationBadge.className = `verdict-status ${analysis.badgeClass}`;
   classificationBadge.textContent = analysis.status;
   classificationText.textContent = analysis.statusText;
   if (verdictSummary) verdictSummary.textContent = buildVerdictSummary(analysis);
+  if (verdictProfileName) {
+    verdictProfileName.textContent = t('verdict.profile', {
+      name: t(analysis.profile.nameKey)
+    });
+  }
+  buildChecklist(analysis);
 
   const profile = analysis.profile;
   const metrics = analysis.metrics;
@@ -634,7 +703,7 @@ function updateDecisionUI(analysis) {
     },
     {
       label: t('term.comms'),
-      metric: `${analysis.metrics.gMaxHours.toFixed(1)} h`,
+      metric: formatOutage(analysis.metrics),
       weight: weights.comms,
       share: analysis.components.comms,
       title: t('term.commsTitle', {
@@ -908,6 +977,11 @@ async function calculateSeriesAndEvaluate() {
     classificationBadge.className = 'verdict-status status-danger';
     classificationText.textContent = t('action.loadFailed', { message: error.message });
     scoreNumber.textContent = '—';
+    if (verdictProfileName) verdictProfileName.textContent = t('verdict.profile', { name: '—' });
+    if (verdictChecklist) {
+      verdictChecklist.innerHTML = '';
+      verdictChecklist.hidden = true;
+    }
   } finally {
     if (token === state.evaluationToken) setLoading(false);
   }
@@ -959,9 +1033,18 @@ function updateScrollAffordance(element) {
   element.classList.toggle('is-scrollable', element.scrollWidth > element.clientWidth + 1);
 }
 
+function setSiteInputMode(mode) {
+  const showCoords = mode === 'coords';
+  if (sitePanelCatalog) sitePanelCatalog.hidden = showCoords;
+  if (sitePanelCoords) sitePanelCoords.hidden = !showCoords;
+  siteModeCatalogBtn?.setAttribute('aria-pressed', String(!showCoords));
+  siteModeCoordsBtn?.setAttribute('aria-pressed', String(showCoords));
+}
+
 async function prepareSite(site) {
   if (!site) return;
   state.currentSite = site;
+  if (site.role !== 'custom') setSiteInputMode('catalog');
   state.evaluationToken += 1;
   setMastHeight(allSites(), state.mastHeightM);
   updateSitePanel(site);
@@ -978,6 +1061,8 @@ async function prepareSite(site) {
 
 function initSiteSelector(sites) {
   populateSiteSelector(sites);
+  siteModeCatalogBtn?.addEventListener('click', () => setSiteInputMode('catalog'));
+  siteModeCoordsBtn?.addEventListener('click', () => setSiteInputMode('coords'));
   siteSelect.addEventListener('change', () => {
     const found = allSites().find((s) => s.id === siteSelect.value);
     if (found) prepareSite(found);
@@ -1011,6 +1096,7 @@ function initSiteSelector(sites) {
     populateSiteSelector(state.sites);
     siteSelect.value = 'custom-site';
     prepareSite(state.customSite);
+    setSiteInputMode('coords');
   });
 }
 
@@ -1188,7 +1274,15 @@ function initTimeControls() {
 
   presetSelect.addEventListener('change', () => {
     const value = presetSelect.value;
-    if (value === 'custom') return;
+    if (value === 'custom') {
+      datetimeInput.focus({ preventScroll: true });
+      try {
+        datetimeInput.showPicker?.();
+      } catch {
+        // showPicker may be unavailable or blocked; focusing is enough.
+      }
+      return;
+    }
     if (value === 'artemis-2026') state.baseDate = new Date(Date.UTC(2026, 10, 14, 0, 0, 0));
     else if (value === 'clps-summer') state.baseDate = new Date(Date.UTC(2026, 11, 21, 12, 0, 0));
     else if (value === 'clps-winter') state.baseDate = new Date(Date.UTC(2026, 5, 21, 12, 0, 0));
@@ -1475,12 +1569,36 @@ async function openSweep() {
   }
 }
 
-function openGuide() {
-  if (!guideModal) return;
-  guideModalTitle.textContent = t('guide.title');
-  guideModalBadge.textContent = t('guide.badge');
-  renderGuide(guideModalBody);
-  openModal(guideModal);
+function mountHelpPanels() {
+  const modelBody = $('decision-model-body');
+  const sourcesBody = $('data-modal-body');
+  if (helpModelPanel && modelBody) {
+    while (modelBody.firstChild) helpModelPanel.appendChild(modelBody.firstChild);
+  }
+  if (helpSourcesPanel && sourcesBody) {
+    while (sourcesBody.firstChild) helpSourcesPanel.appendChild(sourcesBody.firstChild);
+  }
+  $('nn-modal')?.remove();
+  $('horizons-modal')?.remove();
+}
+
+function selectHelpTab(tab) {
+  for (const [name, button] of Object.entries(helpTabs)) {
+    const active = name === tab;
+    button?.classList.toggle('active', active);
+    button?.setAttribute('aria-selected', String(active));
+    if (button) button.tabIndex = active ? 0 : -1;
+    if (helpPanels[name]) helpPanels[name].hidden = !active;
+  }
+  if (tab === 'guide' && helpGuidePanel) renderGuide(helpGuidePanel);
+  if (tab === 'model' && state.analysis) renderDecisionModel(state.analysis);
+  if (tab === 'sources') loadTerrainValidation().then(renderTerrainValidation);
+}
+
+function openHelp(tab = 'guide') {
+  if (!helpModal) return;
+  selectHelpTab(tab);
+  openModal(helpModal);
 }
 
 async function evaluateABScenario(site, startMs, profile = currentProfile()) {
@@ -1772,19 +1890,12 @@ function initModals() {
   closeSweepModal?.addEventListener('click', () => closeModal(sweepModal));
   closeMatrixModal?.addEventListener('click', () => closeModal(matrixModal));
   closeAbModal?.addEventListener('click', () => closeModal(abModal));
-  closeGuideModal?.addEventListener('click', () => closeModal(guideModal));
-  $('open-guide-btn')?.addEventListener('click', openGuide);
-  openHorizonsBtn.addEventListener('click', async () => {
-    openModal(horizonsModal);
-    await loadTerrainValidation();
-    renderTerrainValidation();
-  });
-  closeHorizonsModal.addEventListener('click', () => closeModal(horizonsModal));
-  toggleNnViewBtn.addEventListener('click', () => {
-    if (state.analysis) renderDecisionModel(state.analysis);
-    openModal(nnModal);
-  });
-  closeNnModal.addEventListener('click', () => closeModal(nnModal));
+  closeHelpModal?.addEventListener('click', () => closeModal(helpModal));
+  for (const [name, button] of Object.entries(helpTabs)) {
+    button?.addEventListener('click', () => selectHelpTab(name));
+  }
+  $('open-guide-btn')?.addEventListener('click', () => openHelp('guide'));
+  openHorizonsBtn.addEventListener('click', () => openHelp('sources'));
 
   const trekModal = $('trek-modal');
   const closeTrekModal = $('close-trek-modal');
@@ -1806,9 +1917,7 @@ function initModals() {
     sweepModal,
     matrixModal,
     abModal,
-    guideModal,
-    horizonsModal,
-    nnModal,
+    helpModal,
     panoramaModal,
     trekModal
   ].filter(Boolean)) {
@@ -1880,11 +1989,13 @@ async function bootstrap() {
       sites.find((site) => site.id === 'site23') ??
       sites[0];
     initSiteSelector(sites);
+    setSiteInputMode(state.currentSite?.role === 'custom' ? 'coords' : 'catalog');
     initConfigControls();
     initCustomProfileControls();
     initTimeControls();
     initCameraHUDControls();
     initModelLayerControls();
+    mountHelpPanels();
     initModals();
     initPanelCollapse();
     initModalKeys();

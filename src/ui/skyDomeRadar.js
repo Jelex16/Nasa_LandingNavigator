@@ -8,6 +8,10 @@ export class SkyDomeRadar {
     this.site = null;
     this.ephemeris = null;
     this.series = [];
+    this.dpr = window.devicePixelRatio || 1;
+    this.radius = 0;
+    this.centerX = 0;
+    this.centerY = 0;
     this.resize = this.resize.bind(this);
     this.resize();
     window.addEventListener('resize', this.resize);
@@ -18,16 +22,16 @@ export class SkyDomeRadar {
   }
 
   resize() {
-    const rect = this.canvas.parentElement.getBoundingClientRect();
-    const size = Math.min(rect.width, rect.height) || 320;
+    const canvas = this.canvas;
+    const cssSize = Math.min(canvas.clientWidth, canvas.clientHeight);
+    if (!Number.isFinite(cssSize) || cssSize <= 0) return;
     this.dpr = window.devicePixelRatio || 1;
-    this.canvas.width = size * this.dpr;
-    this.canvas.height = size * this.dpr;
-    this.canvas.style.width = `${size}px`;
-    this.canvas.style.height = `${size}px`;
-    this.radius = (size * this.dpr) / 2 - 24 * this.dpr;
-    this.centerX = (size * this.dpr) / 2;
-    this.centerY = (size * this.dpr) / 2;
+    canvas.width = Math.round(cssSize * this.dpr);
+    canvas.height = Math.round(cssSize * this.dpr);
+    const pixelSize = cssSize * this.dpr;
+    this.radius = Math.max(1, pixelSize / 2 - 24 * this.dpr);
+    this.centerX = pixelSize / 2;
+    this.centerY = pixelSize / 2;
     this.draw();
   }
 

@@ -37,6 +37,9 @@ como contexto y no se clasifican como candidatos.
   Blue Ghost 1 y el objetivo futuro IM-3 Reiner Gamma usan horizonte analítico plano. IM-1 está
   cerca del borde norte del DEM 80S, así que el relieve lejano hacia el norte puede estar
   subrepresentado.
+- **Modo de entrada del sitio**: un conmutador Catálogo / Coordenadas junto al selector de sitio
+  alterna entre la lista curada y las coordenadas manuales, manteniendo la ubicación separada del
+  perfil de misión.
 - **Coordenadas personalizadas**: validación de latitud/longitud; se usa el horizonte LOLA real del
   sitio más cercano a ≤10 km y se muestra la distancia. Si no hay sitio a ≤10 km, horizonte plano.
   Pendiente y elevación se muestran como “—”; el resultado es explícitamente aproximado.
@@ -46,9 +49,17 @@ como contexto y no se clasifican como candidatos.
   Chandrayaan-3 a 69.4°S es una simplificación porque la iluminación polar depende del terreno.
   Chang'e 4 está en la cara oculta: su DTE es 0% y necesita un relé; es un caso educativo deliberado.
 
-## 2. Veredicto y métricas
+## 2. Perfil de misión, veredicto y métricas
 
-- **Veredicto primero**: `GO`, `CAUTION`, `NO-GO` o `REFERENCE`, con resumen en lenguaje claro.
+- **Perfil de misión primero**: el selector de perfil (con sus umbrales y el panel personalizado) está
+  sobre el veredicto, porque la decisión se evalúa con esos supuestos.
+- **Nota de procedencia**: la tarjeta del veredicto indica que Sol, DTE, corte y eclipse provienen de
+  datos NASA (LOLA + JPL Horizons), mientras que el estado y el índice se derivan de los umbrales del
+  perfil de misión: supuestos del equipo o del usuario, no requisitos NASA.
+- **Tarjeta del veredicto**: estado, nombre del perfil activo, tres KPIs (Sol, DTE, corte), resumen en
+  lenguaje claro y una checklist PASS/FAIL de los cuatro umbrales del perfil (energía, eclipse, DTE,
+  corte). Los sitios de referencia e internacionales ocultan la checklist porque son contexto, no
+  candidatos.
 - **Sol %**: fracción de horas con al menos el 5% del disco solar sobre el horizonte LOLA.
 - **DTE %**: fracción de horas con el centro de la Tierra sobre el horizonte local (directo a Tierra).
   La fracción de disco parcial se calcula y muestra, pero no entra en el score.
@@ -56,9 +67,11 @@ como contexto y no se clasifican como candidatos.
 - **Eclipse continuo máximo**: eclipse solar continuo más largo de la ventana.
 - **Energía**: Wh/m² acumulados para el panel y mástil seleccionados, con DNI corregida por distancia
   Sol–Luna y fracción visible del disco solar.
-- **Índice de misión**: índice ponderado secundario; no es una probabilidad de éxito.
-- **Ver modelo**: fórmula, valores de componentes, pesos, umbrales, perfil y límites.
-- **Ver desglose del score**: puntos por término, métrica cruda y umbral, con el estado de límites.
+- **Índice de misión**: índice ponderado secundario; no es una probabilidad de éxito. Ahora vive
+  dentro del detalle plegable del veredicto, debajo de la checklist.
+- **Ver índice y desglose**: puntos por término, métrica cruda, umbral y el índice de misión.
+- **Ver modelo**: fórmula, valores de componentes, pesos, umbrales, perfil y límites, disponible en la
+  pestaña Modelo del panel de ayuda unificado.
 
 Estados y límites duros:
 
@@ -77,9 +90,10 @@ Estados y límites duros:
   al horizonte del sitio.
 - **Timeline de 28 días**: curvas de elevación de Sol y Tierra, horizonte LOLA por azimut, bandas de
   visibilidad, tooltip con az/el/horizonte/fracciones/energía y clic para saltar.
-- **Globo 3D**: capas preview LROC/LOLA, relieve 1x/2.5x/5x/plano, pines de sitios, líneas de visión
-  Sol/Tierra y presets polo sur/sitio/global. El globo y las esferas Sol/Tierra son ilustrativos y no
-  están a escala; no entran en el score.
+- **Globo 3D**: capas preview LROC/LOLA, relieve 1x/2.5x/5x/plano, pines de sitios (curados y
+  personalizados), líneas de visión Sol/Tierra y presets polo sur/sitio/global. Al hacer clic en un
+  pin se carga ese sitio en el panel de evaluación y se muestra una descripción corta anclada al pin.
+  El globo y las esferas Sol/Tierra son ilustrativos y no están a escala; no entran en el score.
 - **Tarjetas de telemetría**: elevación Sol/Tierra, irradiancia del panel, horizonte LOLA y despeje,
   estado DTE.
 - **Countdowns**: próximo ocaso/amanecer solar, próxima pérdida/Earthrise DTE y DTE continua.
@@ -177,7 +191,7 @@ no la reescriben.
 
 Todas son descargas en cliente; no requieren servidor ni cuenta.
 
-- **Exportar JSON** (tarjeta de veredicto): escenario actual con metadatos del sitio, perfil, panel,
+- **Exportar JSON** (pie del panel): escenario actual con metadatos del sitio, perfil, panel,
   mástil, métricas, componentes, estado y la serie completa de 672 puntos (az/el, horizontes,
   fracciones visibles, flags y energía).
 - **Exportar CSV** (comparación): una fila por sitio con rol, coordenadas, score, energía, eclipse,
@@ -188,7 +202,7 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
 
 ## 9. Guía educativa
 
-**Cómo leer** en la tarjeta del veredicto abre una guía bilingüe con:
+**¿Cómo funciona?** en la tarjeta del veredicto abre un panel de ayuda único con pestañas **Guía / Modelo / Fuentes**:
 
 - **Inicio rápido**: sitio/fecha, veredicto, radar/panorama, Fechas, Comparar, Compartir.
 - **Qué significan las métricas**: Sol %, DTE %, corte, eclipse, energía e índice de misión.

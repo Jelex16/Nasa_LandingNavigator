@@ -10,8 +10,8 @@ The demo should show the two things judges remember:
 2. A launch-slip sweep that changes the decision when the date moves.
 
 If you have a few extra seconds, add a third beat: the **side-by-side A/B** against Chang'e 4, a
-far-side reference with 0% DTE, which makes the relay problem immediate. The **How to read** guide,
-**Share** link and **Export JSON/CSV** buttons are optional supporting beats; do not let them replace
+far-side reference with 0% DTE, which makes the relay problem immediate. The **How does it work?** help
+panel, **Share** link and **Export JSON/CSV** buttons are optional supporting beats; do not let them replace
 the verdict or the sweep.
 
 Use the comparison matrix, the site × date matrix and the A/B to show the trade-off. Do not show
@@ -57,7 +57,7 @@ Use the real app, desktop viewport, default settings and the default English UI:
 - [ ] **Dates** opens the 36-month sweep; the current-date marker is visible.
 - [ ] Clicking May 2027 loads the date and updates the verdict.
 - [ ] Optional: open **Compare → Side-by-side A/B**, choose Chang'e 4 in scenario B and show 0% DTE.
-- [ ] Optional: open **How to read** to show the educational guide; close it before the verdict.
+- [ ] Optional: open **How does it work?** to show the guide, model and sources tabs; close it before the verdict.
 - [ ] Optional: open **Custom**, set a threshold, apply, and show the verdict change.
 - [ ] Optional: **Share** copies a scenario link; **Export JSON/CSV** downloads data.
 - [ ] Record at 30 seconds or less; add English subtitles if the narration is in Spanish.

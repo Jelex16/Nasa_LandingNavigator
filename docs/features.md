@@ -36,6 +36,8 @@ context and are not ranked as candidates.
 - **CLPS and commercial**: IM-1 Odysseus and IM-2 Athena use a regional 80 m/px LOLA horizon; Blue
   Ghost 1 and the future IM-3 Reiner Gamma target use an analytic flat horizon. IM-1 is near the
   northern edge of the 80S DEM, so distant relief may be underrepresented to the north.
+- **Site input mode**: a Catalog / Coordinates toggle next to the site selector switches between the
+  curated site list and manual coordinates, keeping location input separate from the mission profile.
 - **Custom coordinates**: latitude/longitude validation; the app uses the nearest real LOLA horizon
   within 10 km and labels the distance. If no site is within 10 km it uses a flat analytic horizon.
   Slope and elevation are shown as “—”; the result is explicitly approximate.
@@ -46,9 +48,16 @@ context and are not ranked as candidates.
   terrain-sensitive. Chang'e 4 is on the far side, so its DTE is 0% and a relay is required; this is a
   deliberate educational case.
 
-## 2. Verdict and metrics
+## 2. Mission profile, verdict and metrics
 
-- **Verdict first**: `GO`, `CAUTION`, `NO-GO` or `REFERENCE`, with a plain-language summary.
+- **Mission profile first**: the profile selector (with its thresholds and custom panel) sits above the
+  verdict, because the decision is evaluated against those assumptions.
+- **Provenance note**: the verdict card states that Sun, DTE, outage and eclipse come from NASA data
+  (LOLA + JPL Horizons), while the status and mission index derive from the mission-profile thresholds,
+  which are team or user assumptions, not NASA requirements.
+- **Verdict card**: status, active profile name, three KPIs (Sun, DTE, outage), a plain-language
+  summary and a PASS/FAIL checklist of the four profile thresholds (energy, eclipse, DTE, outage).
+  Reference and international sites hide the checklist because they are context, not candidates.
 - **Sunlit %**: fraction of hours with at least 5% of the solar disk above the LOLA horizon.
 - **DTE %**: fraction of hours with the Earth's center above the local horizon (direct-to-Earth).
   The partial-disk fraction is computed and shown but does not enter the score.
@@ -56,9 +65,11 @@ context and are not ranked as candidates.
 - **Longest continuous eclipse**: longest solar eclipse inside the window.
 - **Energy**: accumulated Wh/m² for the selected panel and mast, with DNI corrected by the
   Sun–Moon distance and the visible solar-disk fraction.
-- **Mission index**: a secondary weighted decision index; it is not a probability of success.
-- **View model**: formula, component values, weights, thresholds, profile description and limits.
-- **View score breakdown**: per-term points, raw metric and threshold, with hard-limit status.
+- **Mission index**: a secondary weighted decision index; it is not a probability of success. It now
+  lives inside the collapsible verdict detail, below the checklist.
+- **View index and breakdown**: per-term points, raw metric and threshold, plus the mission index.
+- **View model**: formula, component values, weights, thresholds, profile description and limits,
+  available in the Model tab of the unified help panel.
 
 Statuses and hard limits:
 
@@ -75,9 +86,10 @@ Statuses and hard limits:
   horizon/full-sky modes and true-scale/enlarged disks. The vertical range adapts to the site horizon.
 - **28-day timeline**: Sun and Earth elevation curves, LOLA horizon at each azimuth, shaded
   visibility bands, hover tooltip with az/el/horizon/fractions/energy, and click-to-jump.
-- **3D globe**: LROC/LOLA preview layers, relief 1x/2.5x/5x/plane, site pins, Sun/Earth sightlines,
-  south-pole/site/global camera presets. The globe and the Sun/Earth spheres are illustrative and not
-  to scale; they do not enter the score.
+- **3D globe**: LROC/LOLA preview layers, relief 1x/2.5x/5x/plane, site pins (curated and custom),
+  Sun/Earth sightlines and south-pole/site/global camera presets. Clicking a pin loads that site in
+  the evaluation panel and shows a short description anchored to the pin. The globe and the
+  Sun/Earth spheres are illustrative and not to scale; they do not enter the score.
 - **Telemetry cards**: Sun/Earth elevation, panel irradiance, LOLA horizon and clearance, DTE status.
 - **Countdowns**: next solar sunset/sunrise, next DTE loss/Earthrise, continuous DTE.
 
@@ -171,7 +183,7 @@ do not rewrite it.
 
 All exports are client-side downloads; no server or account is required.
 
-- **Export JSON** (verdict card): the current scenario with site metadata, profile, panel, mast,
+- **Export JSON** (panel footer): the current scenario with site metadata, profile, panel, mast,
   metrics, components, status and the full 672-point series (az/el, horizons, visible fractions,
   flags and energy).
 - **Export CSV** (comparison): one row per site with role, coordinates, score, energy, eclipse, DTE,
@@ -182,7 +194,7 @@ All exports are client-side downloads; no server or account is required.
 
 ## 9. Educational guide
 
-**How to read** in the verdict card opens a bilingual guide with:
+**¿Cómo funciona?** in the verdict card opens one help panel with tabs **Guide / Model / Sources**:
 
 - **Quick start**: site/date, verdict, radar/panorama, Dates, Compare, Share.
 - **What the metrics mean**: Sun %, DTE %, outage, eclipse, energy and mission index.

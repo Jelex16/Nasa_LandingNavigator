@@ -109,6 +109,14 @@ const MESSAGES = {
       "no continuous DTE link: the longest outage is {outage} and the tolerance is {tol} h",
     "verdict.commsOk": "DTE link within tolerance: the longest outage is {outage}",
     "verdict.window": "Window: {days} d from {start} · instant {now}",
+    "verdict.profile": "Profile: {name}",
+    "check.energy": "Energy",
+    "check.eclipse": "Eclipse",
+    "check.dte": "DTE",
+    "check.outage": "DTE outage",
+    "check.req": "req.",
+    "check.pass": "PASS",
+    "check.fail": "FAIL",
     "term.energy": "Energy",
     "term.eclipse": "Eclipse",
     "term.dte": "DTE",
@@ -418,7 +426,7 @@ const MESSAGES = {
       "This tool compares lunar landing sites and dates using real LOLA terrain and JPL Horizons ephemerides. It is decision-support and educational software, not a flight-certified landing analysis.",
     "guide.quickStart.title": "Quick start",
     "guide.quickStart.body":
-      "<ol><li>Pick a curated site or enter custom coordinates.</li><li>Pick a date; the 28-day evaluation window starts there.</li><li>Read the verdict: Sun %, DTE %, and the longest DTE outage.</li><li>If the built-in profiles do not match your mission, choose <strong>Custom</strong> and set the energy, eclipse, DTE and outage thresholds.</li><li>Use the polar radar and the 2.5D panorama to see the Sun and Earth against the LOLA horizon.</li><li>Use <strong>Dates</strong> to sweep 36 months, <strong>Compare</strong> for the site matrix or side-by-side A/B, and <strong>Share</strong> to copy a scenario link.</li></ol>",
+      "<ol><li>Pick a curated site or enter custom coordinates.</li><li>Pick a date; the 28-day evaluation window starts there.</li><li>Read the verdict: Sun %, DTE % and the longest DTE outage, then the PASS/FAIL checklist against your profile thresholds.</li><li>If the built-in profiles do not match your mission, choose <strong>Custom</strong> and set the energy, eclipse, DTE and outage thresholds.</li><li>Use the polar radar and the 2.5D panorama to see the Sun and Earth against the LOLA horizon.</li><li>Use <strong>Dates</strong> to sweep 36 months, <strong>Compare</strong> for the site matrix or side-by-side A/B, and <strong>Share</strong> to copy a scenario link.</li></ol>",
     "guide.metrics.title": "What the metrics mean",
     "guide.metrics.body":
       "<dl><dt>Sunlit %</dt><dd>Fraction of hours with at least 5% of the solar disk above the LOLA horizon. It is not necessarily full Sun.</dd><dt>DTE %</dt><dd>Fraction of hours with the Earth's center above the local horizon (direct-to-Earth).</dd><dt>Outage</dt><dd>Longest continuous DTE blackout inside the 28-day window.</dd><dt>Eclipse</dt><dd>Longest continuous solar eclipse inside the window.</dd><dt>Energy</dt><dd>Solar energy accumulated over 28 days for the selected panel and mast.</dd><dt>Mission index</dt><dd>A weighted decision index from energy, eclipse, DTE and outage. It is not a probability of success.</dd></dl>",
@@ -578,6 +586,14 @@ const MESSAGES = {
       "enlace DTE dentro de tolerancia: el corte más largo es de {outage}",
     "verdict.window":
       "Ventana: {days} d desde {start} · instante {now}",
+    "verdict.profile": "Perfil: {name}",
+    "check.energy": "Energía",
+    "check.eclipse": "Eclipse",
+    "check.dte": "DTE",
+    "check.outage": "Corte DTE",
+    "check.req": "req.",
+    "check.pass": "CUMPLE",
+    "check.fail": "NO CUMPLE",
     "term.energy": "Energía",
     "term.eclipse": "Eclipse",
     "term.dte": "DTE",
@@ -889,7 +905,7 @@ const MESSAGES = {
       "Esta herramienta compara sitios y fechas de alunizaje con topografía LOLA real y efemérides JPL Horizons. Es apoyo a decisiones y software educativo, no un análisis de aterrizaje certificado.",
     "guide.quickStart.title": "Inicio rápido",
     "guide.quickStart.body":
-      "<ol><li>Elige un sitio curado o introduce coordenadas personalizadas.</li><li>Elige una fecha; la ventana de evaluación de 28 días empieza ahí.</li><li>Lee el veredicto: % Sol, % DTE y el corte DTE más largo.</li><li>Si los perfiles predefinidos no representan tu misión, elige <strong>Personalizado</strong> y define los umbrales de energía, eclipse, DTE y corte.</li><li>Usa el radar polar y el panorama 2.5D para ver el Sol y la Tierra contra el horizonte LOLA.</li><li>Usa <strong>Fechas</strong> para barrer 36 meses, <strong>Comparar</strong> para la matriz o el A/B, y <strong>Compartir</strong> para copiar un enlace del escenario.</li></ol>",
+      "<ol><li>Elige un sitio curado o introduce coordenadas personalizadas.</li><li>Elige una fecha; la ventana de evaluación de 28 días empieza ahí.</li><li>Lee el veredicto: % Sol, % DTE y el corte DTE más largo, y después la checklist PASS/FAIL contra los umbrales de tu perfil.</li><li>Si los perfiles predefinidos no representan tu misión, elige <strong>Personalizado</strong> y define los umbrales de energía, eclipse, DTE y corte.</li><li>Usa el radar polar y el panorama 2.5D para ver el Sol y la Tierra contra el horizonte LOLA.</li><li>Usa <strong>Fechas</strong> para barrer 36 meses, <strong>Comparar</strong> para la matriz o el A/B, y <strong>Compartir</strong> para copiar un enlace del escenario.</li></ol>",
     "guide.metrics.title": "Qué significan las métricas",
     "guide.metrics.body":
       "<dl><dt>Sol %</dt><dd>Fracción de horas con al menos el 5% del disco solar sobre el horizonte LOLA; no implica Sol pleno.</dd><dt>DTE %</dt><dd>Fracción de horas con el centro de la Tierra sobre el horizonte local (directo a Tierra).</dd><dt>Corte</dt><dd>Corte DTE continuo más largo dentro de la ventana de 28 días.</dd><dt>Eclipse</dt><dd>Eclipse solar continuo más largo de la ventana.</dd><dt>Energía</dt><dd>Energía solar acumulada en 28 días para el panel y mástil seleccionados.</dd><dt>Índice de misión</dt><dd>Índice ponderado de energía, eclipse, DTE y corte; no es una probabilidad de éxito.</dd></dl>",
