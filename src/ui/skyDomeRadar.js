@@ -1,3 +1,5 @@
+import { t } from '../i18n.js';
+
 /**
  * Polar Sky Dome Radar Visualization.
  * Projects the local lunar sky in stereographic/polar coordinates:
@@ -228,7 +230,7 @@ export class SkyDomeRadar {
       // Sun Label
       ctx.fillStyle = sunIsUp ? '#e8b45c' : '#6b6156';
       ctx.font = `bold ${9 * this.dpr}px monospace`;
-      ctx.fillText(`SOL (${sun.el.toFixed(1)}°)`, 0, -8 * this.dpr);
+      ctx.fillText(t('radar.sunLabel', { el: sun.el.toFixed(1) }), 0, -8 * this.dpr);
       ctx.restore();
 
       // Draw Earth
@@ -255,7 +257,11 @@ export class SkyDomeRadar {
       // Earth Label
       ctx.fillStyle = earthIsUp ? '#8fb6d1' : '#6b6156';
       ctx.font = `bold ${9 * this.dpr}px monospace`;
-      ctx.fillText(`TIERRA (${earth.el.toFixed(1)}°)`, 0, 14 * this.dpr);
+      ctx.fillText(
+        t('radar.earthLabel', { el: earth.el.toFixed(1) }),
+        0,
+        14 * this.dpr
+      );
       ctx.restore();
     }
   }

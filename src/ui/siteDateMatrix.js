@@ -1,15 +1,23 @@
 import { scoreComponents } from '../analysis/scoring.js';
+import { getLanguage, t } from '../i18n.js';
 
-const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const MONTHS = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+};
+
+function monthsFor(language) {
+  return language === 'en' ? MONTHS.en : MONTHS.es;
+}
 
 function monthLabel(ms) {
   const date = new Date(ms);
-  return `${MONTHS_ES[date.getUTCMonth()]} ${String(date.getUTCFullYear()).slice(2)}`;
+  return `${monthsFor(getLanguage())[date.getUTCMonth()]} ${String(date.getUTCFullYear()).slice(2)}`;
 }
 
 function fullDateLabel(ms) {
   const date = new Date(ms);
-  return `${date.getUTCDate()} ${MONTHS_ES[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+  return `${date.getUTCDate()} ${monthsFor(getLanguage())[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
 
 function formatDays(hours) {
@@ -71,12 +79,15 @@ function metricDisplay(value, metric) {
 function cellTitle({ siteName, point, context }) {
   const { energyKWh } = pointMetrics(point, context);
   const score = pointScore(point, context);
-  return (
-    `${siteName} · ${fullDateLabel(Date.parse(point.startUtc))}: ` +
-    `score ${score}/100, ${point.sunlitPct.toFixed(0)}% Sol, ` +
-    `${point.dteCenterPct.toFixed(0)}% DTE, corte ${formatDays(point.gMaxHours)}, ` +
-    `${energyKWh.toFixed(1)} kWh/m²`
-  );
+  return t('matrix.cellTitle', {
+    site: siteName,
+    date: fullDateLabel(Date.parse(point.startUtc)),
+    score,
+    sun: point.sunlitPct.toFixed(0),
+    dte: point.dteCenterPct.toFixed(0),
+    outage: formatDays(point.gMaxHours),
+    energy: energyKWh.toFixed(1)
+  });
 }
 
 function isCurrentMonth(point, currentDateMs) {
@@ -119,36 +130,34 @@ function buildHtml(sweeps, context, metric) {
 
   const mastWarning =
     context.mastHeightM !== 2
-      ? `<p class="sweep-warning">DTE y corte están precalculados con mástil 2.0 m; el panel principal usa ${context.mastHeightM.toFixed(1)} m.</p>`
+      ? `<p class="sweep-warning">${t('matrix.mastWarning', {
+          current: context.mastHeightM.toFixed(1)
+        })}</p>`
       : '';
 
   return `
     <div class="matrix-toolbar">
-      <label for="matrix-metric">Métrica</label>
+      <label for="matrix-metric">${t('matrix.metric')}</label>
       <select id="matrix-metric">
-        <option value="score"${metric === 'score' ? ' selected' : ''}>Score</option>
-        <option value="sun"${metric === 'sun' ? ' selected' : ''}>Sol (%)</option>
-        <option value="dte"${metric === 'dte' ? ' selected' : ''}>DTE (%)</option>
-        <option value="cut"${metric === 'cut' ? ' selected' : ''}>Corte DTE</option>
+        <option value="score"${metric === 'score' ? ' selected' : ''}>${t('matrix.metric.score')}</option>
+        <option value="sun"${metric === 'sun' ? ' selected' : ''}>${t('matrix.metric.sun')}</option>
+        <option value="dte"${metric === 'dte' ? ' selected' : ''}>${t('matrix.metric.dte')}</option>
+        <option value="cut"${metric === 'cut' ? ' selected' : ''}>${t('matrix.metric.cut')}</option>
       </select>
       <div class="matrix-legend">
-        <span><i class="matrix-good"></i>cumple</span>
-        <span><i class="matrix-warn"></i>marginal</span>
-        <span><i class="matrix-bad"></i>no cumple</span>
+        <span><i class="matrix-good"></i>${t('matrix.legend.good')}</span>
+        <span><i class="matrix-warn"></i>${t('matrix.legend.warn')}</span>
+        <span><i class="matrix-bad"></i>${t('matrix.legend.bad')}</span>
       </div>
     </div>
     ${mastWarning}
     <div class="matrix-scroll">
       <table class="matrix-table">
-        <thead><tr><th scope="col" class="matrix-corner">Sitio</th>${header}</tr></thead>
+        <thead><tr><th scope="col" class="matrix-corner">${t('matrix.site')}</th>${header}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <p class="data-note">
-      Cada celda es una ventana de 28 días desde el día 1 del mes. Score con el perfil actual;
-      energía con el panel actual; DTE y corte con mástil 2 m. Haz clic en una celda para cargar
-      ese sitio y esa fecha en la vista principal.
-    </p>
+    <p class="data-note">${t('matrix.note')}</p>
   `;
 }
 

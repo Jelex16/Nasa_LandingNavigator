@@ -12,10 +12,15 @@ import {
   setMastHeight,
   getCustomSite,
   getQuickMapUrl,
-  getMoonTrekUrl
+  getMoonTrekUrl,
+  dataQualityLabel,
+  siteProgram,
+  siteDescription as localizedSiteDescription,
+  horizonSourceLabel
 } from './topography/lunarData.js';
 import { loadEphemeris } from './ephemeris/jplEphemeris.js';
 import {
+  buildStatus,
   findNextEvents,
   makeSky,
   panelIrradianceWm2,
@@ -26,6 +31,17 @@ import {
 } from './analysis/scoring.js';
 import { azElToMcmf, clamp } from './analysis/geometry.js';
 import { sampleSite, evaluateSiteScenario } from './analysis/sampling.js';
+import {
+  applyStaticTranslations,
+  getLanguage,
+  initLanguage,
+  initLanguageSwitcher,
+  t
+} from './i18n.js';
+
+initLanguage();
+applyStaticTranslations();
+initLanguageSwitcher(() => refreshLanguageUI());
 
 const DAY_MS = 86_400_000;
 const WINDOW_MS = WINDOW_DAYS * DAY_MS;
@@ -210,21 +226,10 @@ function allSites() {
   return state.customSite ? [...state.sites, state.customSite] : [...state.sites];
 }
 
-const HORIZON_SOURCE_LABELS = {
-  lola_hybrid: 'LOLA híbrido (5 m + 80 m/px)',
-  lola_80m_regional: 'LOLA regional 80 m/px',
-  analytic_flat: 'analítico plano',
-  lola_nearest: 'LOLA de sitio cercano (aprox.)',
-  approx_flat: 'plano aproximado',
-  approx: 'aproximado',
-  unavailable: 'sin datos',
-  unknown: 'sin clasificar'
-};
-
 function updateSitePanel(site) {
   hudSiteName.textContent = site.name;
-  siteProgramBadge.textContent = site.program;
-  siteDescription.textContent = site.description;
+  siteProgramBadge.textContent = siteProgram(site);
+  siteDescription.textContent = localizedSiteDescription(site);
   siteSlopeVal.textContent =
     site.maxSlopeDeg == null ? '—' : `${Number(site.maxSlopeDeg).toFixed(1)}°`;
   siteElevVal.textContent =
@@ -232,19 +237,20 @@ function updateSitePanel(site) {
       ? '—'
       : `${site.elevationKm >= 0 ? '+' : ''}${site.elevationKm.toFixed(2)} km`;
   hudCoords.textContent = `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`;
-  siteDataQuality.textContent = site.dataQuality;
-  const horizonLabel = site.horizonReferenceName
-    ? `LOLA de ${site.horizonReferenceName} (aprox.)`
-    : HORIZON_SOURCE_LABELS[site.horizonSource] ?? site.horizonSource;
+  siteDataQuality.textContent = dataQualityLabel(site);
+  const horizonLabel = horizonSourceLabel(site);
   const referenceNote =
     site.horizonReferenceKm == null ? '' : ` · ${site.horizonReferenceKm.toFixed(0)} km`;
-  siteDataSource.textContent = `Horizonte: ${horizonLabel}${referenceNote} · Efemérides: ${site.ephemSource === 'jpl_horizons' ? 'JPL Horizons DE441' : 'IAU 2000 local'}`;
+  siteDataSource.textContent = t('site.source', {
+    horizon: `${horizonLabel}${referenceNote}`,
+    ephem: site.ephemSource === 'jpl_horizons' ? t('ephem.horizons') : t('ephem.iau')
+  });
   const radarLabel =
     site.horizonSource === 'analytic_flat'
-      ? 'Analítico'
+      ? t('radar.analytic')
       : site.isRealLola
-        ? 'LOLA real'
-        : 'Aproximado';
+        ? t('radar.real')
+        : t('radar.approx');
   $('radar-source-badge').textContent = radarLabel;
 
   const quickMapUrl = getQuickMapUrl(site);
@@ -268,7 +274,7 @@ function updateTrekModalContent(site, quickMapUrl, moonTrekUrl) {
     if (element) element.textContent = value;
   };
   setText('trek-modal-site-name', site.name);
-  setText('trek-modal-program', site.program);
+  setText('trek-modal-program', siteProgram(site));
   setText(
     'trek-modal-coords',
     `${Math.abs(site.lat).toFixed(2)}°${site.lat < 0 ? 'S' : 'N'}, ${site.lon.toFixed(2)}°E`
@@ -283,8 +289,8 @@ function updateTrekModalContent(site, quickMapUrl, moonTrekUrl) {
     'trek-modal-slope',
     site.maxSlopeDeg == null ? '—' : `${Number(site.maxSlopeDeg).toFixed(1)}°`
   );
-  setText('trek-modal-quality', site.dataQuality);
-  setText('trek-modal-geology', site.geology ?? site.description);
+  setText('trek-modal-quality', dataQualityLabel(site));
+  setText('trek-modal-geology', site.geology ?? localizedSiteDescription(site));
   const quickMapButton = $('trek-modal-quickmap-btn');
   const moonTrekButton = $('trek-modal-moontrek-btn');
   if (quickMapButton) quickMapButton.href = quickMapUrl;
@@ -318,22 +324,33 @@ function formatOutage(metrics) {
   const windowHours = metrics.sampleCount * metrics.stepHours;
   const days = metrics.gMaxHours / 24;
   const capped = metrics.gMaxHours >= windowHours;
-  return `${capped ? '≥' : ''}${capped ? days.toFixed(0) : days.toFixed(1)} días`;
+  return `${capped ? '≥' : ''}${capped ? days.toFixed(0) : days.toFixed(1)} ${t('common.days')}`;
 }
 
 function buildVerdictSummary(analysis) {
   const { metrics: m, profile: p, site } = analysis;
   if (site.role === 'reference') {
-    return `Sitio de referencia: ${m.dteCenterPct.toFixed(0)}% de DTE y ${m.sunlitPct.toFixed(0)}% de horas con Sol. No es un candidato polar.`;
+    return t('verdict.referenceSummary', {
+      dte: m.dteCenterPct.toFixed(0),
+      sun: m.sunlitPct.toFixed(0)
+    });
   }
   if (site.role === 'custom') {
-    return `Estimación con horizonte aproximado: ${m.sunlitPct.toFixed(0)}% de horas con Sol, ${m.dteCenterPct.toFixed(0)}% de DTE y un corte máximo de ${formatOutage(m)}.`;
+    return t('verdict.customSummary', {
+      sun: m.sunlitPct.toFixed(0),
+      dte: m.dteCenterPct.toFixed(0),
+      outage: formatOutage(m)
+    });
   }
   const commsText =
     m.gMaxHours >= p.gMaxTolHours
-      ? `sin enlace DTE continuo: el corte más largo es de ${formatOutage(m)} y la tolerancia es ${p.gMaxTolHours} h`
-      : `enlace DTE dentro de tolerancia: el corte más largo es de ${formatOutage(m)}`;
-  return `${m.sunlitPct.toFixed(0)}% de las horas con Sol, ${m.dteCenterPct.toFixed(0)}% de DTE y ${commsText}.`;
+      ? t('verdict.commsOut', { outage: formatOutage(m), tol: p.gMaxTolHours })
+      : t('verdict.commsOk', { outage: formatOutage(m) });
+  return t('verdict.summary', {
+    sun: m.sunlitPct.toFixed(0),
+    dte: m.dteCenterPct.toFixed(0),
+    comms: commsText
+  });
 }
 
 function updateDecisionUI(analysis) {
@@ -359,36 +376,41 @@ function updateDecisionUI(analysis) {
   const weightSum = weights.energy + weights.dark + weights.dte + weights.comms;
   const terms = [
     {
-      label: 'Energía',
+      label: t('term.energy'),
       metric: `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`,
       weight: weights.energy,
       share: analysis.components.energy,
-      title: `Requerido ${analysis.profile.energyReqKWhM2} kWh/m²; el score se satura al alcanzarlo.`
+      title: t('term.energyTitle', { req: analysis.profile.energyReqKWhM2 })
     },
     {
-      label: 'Eclipse',
+      label: t('term.eclipse'),
       metric: `${analysis.metrics.dMaxHours.toFixed(1)} h`,
       weight: weights.dark,
       share: analysis.components.dark,
-      title: `Tolerancia ${analysis.profile.dMaxTolHours} h de eclipse continuo.`
+      title: t('term.eclipseTitle', { tol: analysis.profile.dMaxTolHours })
     },
     {
-      label: 'DTE',
+      label: t('term.dte'),
       metric: `${analysis.metrics.dteCenterPct.toFixed(0)}%`,
       weight: weights.dte,
       share: analysis.components.dte,
-      title: `Requerido ${analysis.profile.dteReqPct}%; disco parcial ${analysis.metrics.dtePartialPct.toFixed(0)}%.`
+      title: t('term.dteTitle', {
+        req: analysis.profile.dteReqPct,
+        partial: analysis.metrics.dtePartialPct.toFixed(0)
+      })
     },
     {
-      label: 'Comms',
+      label: t('term.comms'),
       metric: `${analysis.metrics.gMaxHours.toFixed(1)} h`,
       weight: weights.comms,
       share: analysis.components.comms,
-      title: `Tolerancia ${analysis.profile.gMaxTolHours} h; ${
-        analysis.metrics.gMaxHours >= analysis.profile.gMaxTolHours
-          ? 'fuera de tolerancia: 0/100.'
-          : 'dentro de tolerancia.'
-      }`
+      title: t('term.commsTitle', {
+        tol: analysis.profile.gMaxTolHours,
+        state:
+          analysis.metrics.gMaxHours >= analysis.profile.gMaxTolHours
+            ? t('term.commsOut')
+            : t('term.commsIn')
+      })
     }
   ];
 
@@ -404,7 +426,11 @@ function updateDecisionUI(analysis) {
     segment.className = `verdict-bar-seg verdict-level-${level}`;
     segment.style.width = `${points}%`;
     if (points <= 0) segment.classList.add('is-zero');
-    segment.title = `${term.label}: ${points.toFixed(1)} de ${maxPoints.toFixed(1)} puntos`;
+    segment.title = t('term.points', {
+      label: term.label,
+      points: points.toFixed(1),
+      max: maxPoints.toFixed(1)
+    });
     verdictBar.appendChild(segment);
 
     const row = document.createElement('li');
@@ -424,10 +450,10 @@ function updateDecisionUI(analysis) {
 
 function renderDecisionModel(analysis) {
   const components = [
-    ['Energía', `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`, analysis.profile.weights.energy, analysis.components.energy],
-    ['Eclipse', `${analysis.metrics.dMaxHours.toFixed(1)} h`, analysis.profile.weights.dark, analysis.components.dark],
-    ['DTE', `${analysis.metrics.dteCenterPct.toFixed(0)}%`, analysis.profile.weights.dte, analysis.components.dte],
-    ['Comms', `${analysis.metrics.gMaxHours.toFixed(1)} h`, analysis.profile.weights.comms, analysis.components.comms]
+    [t('term.energy'), `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`, analysis.profile.weights.energy, analysis.components.energy],
+    [t('term.eclipse'), `${analysis.metrics.dMaxHours.toFixed(1)} h`, analysis.profile.weights.dark, analysis.components.dark],
+    [t('term.dte'), `${analysis.metrics.dteCenterPct.toFixed(0)}%`, analysis.profile.weights.dte, analysis.components.dte],
+    [t('term.comms'), `${analysis.metrics.gMaxHours.toFixed(1)} h`, analysis.profile.weights.comms, analysis.components.comms]
   ];
   const container = $('decision-components');
   if (container) {
@@ -445,16 +471,25 @@ function renderDecisionModel(analysis) {
   }
   const profileEl = $('decision-profile');
   if (profileEl) {
-    profileEl.textContent = `${analysis.profile.name}: energía ≥ ${analysis.profile.energyReqKWhM2} kWh/m²; eclipse ≤ ${analysis.profile.dMaxTolHours} h; DTE ≥ ${analysis.profile.dteReqPct}%; corte DTE ≤ ${analysis.profile.gMaxTolHours} h. Panel: ${PANELS[analysis.panelType].label}; mástil: ${analysis.mastHeightM.toFixed(1)} m.`;
+    profileEl.textContent = t('model.profile', {
+      name: t(analysis.profile.nameKey),
+      energy: analysis.profile.energyReqKWhM2,
+      eclipse: analysis.profile.dMaxTolHours,
+      dte: analysis.profile.dteReqPct,
+      outage: analysis.profile.gMaxTolHours,
+      panel: t(PANELS[analysis.panelType].labelKey),
+      mast: analysis.mastHeightM.toFixed(1)
+    });
   }
   const commsNote = $('decision-comms-note');
   if (commsNote) {
     const p = analysis.profile;
     const m = analysis.metrics;
-    commsNote.textContent =
-      `Comms = 1 − corte DTE máximo / tolerancia. En este perfil, un corte ≥ ${p.gMaxTolHours} h da 0/100; ` +
-      `no significa que falte el dato. DTE usa el centro de la Tierra (${m.dteCenterPct.toFixed(0)}% del tiempo); ` +
-      `el disco parcial (${m.dtePartialPct.toFixed(0)}%) se calcula pero no entra en el score.`;
+    commsNote.textContent = t('model.commsNote', {
+      tol: p.gMaxTolHours,
+      dte: m.dteCenterPct.toFixed(0),
+      partial: m.dtePartialPct.toFixed(0)
+    });
   }
 }
 
@@ -466,7 +501,11 @@ function updateSimulation() {
   state.currentSky = sky;
 
   clockDisplay.textContent = utcLabel(state.currentDate);
-  scoreWindowLabel.textContent = `Ventana: ${WINDOW_DAYS} d desde ${utcLabel(state.baseDate)} · instante ${utcLabel(state.currentDate)}`;
+  scoreWindowLabel.textContent = t('verdict.window', {
+    days: WINDOW_DAYS,
+    start: utcLabel(state.baseDate),
+    now: utcLabel(state.currentDate)
+  });
   hudSunElev.textContent = `${sky.sun.elDeg >= 0 ? '+' : ''}${sky.sun.elDeg.toFixed(2)}° Elev`;
   hudEarthElev.textContent = `${sky.earth.elDeg >= 0 ? '+' : ''}${sky.earth.elDeg.toFixed(2)}° Elev`;
 
@@ -479,10 +518,21 @@ function updateSimulation() {
     sky.sunVisibleFraction,
     panelAzimuth
   );
-  solarEffVal.textContent = `Irradiancia panel: ${irradiance.toFixed(0)} W/m² · f☉ ${(sky.sunVisibleFraction * 100).toFixed(0)}%`;
-  sunHorizonVal.textContent = `Horizonte LOLA: ${sky.sunHorizonDeg.toFixed(2)}° · despeje ${(sky.sun.elDeg - sky.sunHorizonDeg).toFixed(2)}°`;
-  earthHorizonVal.textContent = `Horizonte LOLA: ${sky.earthHorizonDeg.toFixed(2)}° · despeje ${(sky.earth.elDeg - sky.earthHorizonDeg).toFixed(2)}°`;
-  commLinkStatus.textContent = sky.dteCenter ? 'DTE: centro de Tierra visible' : 'DTE: bloqueada por el horizonte';
+  solarEffVal.textContent = t('telemetry.irradiance', {
+    value: irradiance.toFixed(0),
+    fraction: (sky.sunVisibleFraction * 100).toFixed(0)
+  });
+  sunHorizonVal.textContent = t('telemetry.horizon', {
+    horizon: sky.sunHorizonDeg.toFixed(2),
+    clearance: (sky.sun.elDeg - sky.sunHorizonDeg).toFixed(2)
+  });
+  earthHorizonVal.textContent = t('telemetry.horizon', {
+    horizon: sky.earthHorizonDeg.toFixed(2),
+    clearance: (sky.earth.elDeg - sky.earthHorizonDeg).toFixed(2)
+  });
+  commLinkStatus.textContent = sky.dteCenter
+    ? t('telemetry.dteCenter')
+    : t('telemetry.dteBlocked');
   commLinkStatus.style.color = sky.dteCenter ? 'var(--color-cyan)' : 'var(--color-red)';
 
   state.events = findNextEvents(
@@ -519,61 +569,73 @@ function updateSimulation() {
   const hoursFromBase = (state.currentDate.getTime() - state.baseDate.getTime()) / 3_600_000;
   timeScrubber.value = String(clamp(Math.round(hoursFromBase), 0, WINDOW_HOURS));
   const day = Math.min(WINDOW_DAYS, Math.floor(hoursFromBase / 24) + 1);
-  scrubberDayLabel.textContent = `Día ${day} / ${WINDOW_DAYS}`;
+  scrubberDayLabel.textContent = t('sim.dayShort', { day, total: WINDOW_DAYS });
   timeScrubber.setAttribute(
     'aria-valuetext',
-    `Día ${day} de ${WINDOW_DAYS}, ${utcLabel(state.currentDate)}`
+    t('sim.dayAria', {
+      day,
+      total: WINDOW_DAYS,
+      time: utcLabel(state.currentDate)
+    })
   );
 }
 
 function formatCountdowns(events) {
   if (!events) {
-    sunsetLabel.textContent = 'Próximo evento solar:';
+    sunsetLabel.textContent = t('countdown.nextSolarEvent');
     sunsetCountdown.textContent = '—';
-    sunsetSub.textContent = 'Sin datos de eventos.';
-    earthsetLabel.textContent = 'Próximo evento DTE:';
+    sunsetSub.textContent = t('countdown.noEvents');
+    earthsetLabel.textContent = t('countdown.nextDteEvent');
     earthsetCountdown.textContent = '—';
-    earthsetSub.textContent = 'Sin datos de eventos.';
+    earthsetSub.textContent = t('countdown.noEvents');
     return;
   }
 
   if (events.sunIsUp) {
-    sunsetLabel.textContent = 'Próximo ocaso solar:';
+    sunsetLabel.textContent = t('countdown.nextSunset');
     if (events.nextSunset) {
       sunsetCountdown.textContent = formatDurationMs(events.nextSunset.msRemaining);
-      sunsetSub.textContent = `Ocaso a las ${utcLabel(events.nextSunset.date).slice(11)} UTC`;
+      sunsetSub.textContent = t('countdown.sunsetAt', {
+        time: utcLabel(events.nextSunset.date).slice(11, 16)
+      });
     } else {
-      sunsetCountdown.textContent = 'Sin ocaso';
-      sunsetSub.textContent = 'No hay ocaso solar en la ventana de 28 días.';
+      sunsetCountdown.textContent = t('countdown.noSunset');
+      sunsetSub.textContent = t('countdown.noSunsetWindow');
     }
   } else {
-    sunsetLabel.textContent = 'Próximo amanecer:';
+    sunsetLabel.textContent = t('countdown.nextSunrise');
     if (events.nextSunrise) {
       sunsetCountdown.textContent = formatDurationMs(events.nextSunrise.msRemaining);
-      sunsetSub.textContent = `Amanecer a las ${utcLabel(events.nextSunrise.date).slice(11)} UTC`;
+      sunsetSub.textContent = t('countdown.sunriseAt', {
+        time: utcLabel(events.nextSunrise.date).slice(11, 16)
+      });
     } else {
-      sunsetCountdown.textContent = 'Sin amanecer';
-      sunsetSub.textContent = 'No hay amanecer solar en la ventana de 28 días.';
+      sunsetCountdown.textContent = t('countdown.noSunrise');
+      sunsetSub.textContent = t('countdown.noSunriseWindow');
     }
   }
 
   if (events.earthIsUp) {
-    earthsetLabel.textContent = 'Próxima pérdida DTE:';
+    earthsetLabel.textContent = t('countdown.nextDteLoss');
     if (events.nextEarthset) {
       earthsetCountdown.textContent = formatDurationMs(events.nextEarthset.msRemaining);
-      earthsetSub.textContent = `Pérdida a las ${utcLabel(events.nextEarthset.date).slice(11)} UTC`;
+      earthsetSub.textContent = t('countdown.dteLossAt', {
+        time: utcLabel(events.nextEarthset.date).slice(11, 16)
+      });
     } else {
-      earthsetCountdown.textContent = 'DTE continua';
-      earthsetSub.textContent = 'Sin pérdida del centro de la Tierra en 28 días.';
+      earthsetCountdown.textContent = t('countdown.dteContinuous');
+      earthsetSub.textContent = t('countdown.dteContinuousWindow');
     }
   } else {
-    earthsetLabel.textContent = 'Próximo Earthrise:';
+    earthsetLabel.textContent = t('countdown.nextEarthrise');
     if (events.nextEarthrise) {
       earthsetCountdown.textContent = formatDurationMs(events.nextEarthrise.msRemaining);
-      earthsetSub.textContent = `Reaparición a las ${utcLabel(events.nextEarthrise.date).slice(11)} UTC`;
+      earthsetSub.textContent = t('countdown.earthriseAt', {
+        time: utcLabel(events.nextEarthrise.date).slice(11, 16)
+      });
     } else {
-      earthsetCountdown.textContent = 'Sin Earthrise';
-      earthsetSub.textContent = 'Sin reaparición del centro de la Tierra en 28 días.';
+      earthsetCountdown.textContent = t('countdown.noEarthrise');
+      earthsetSub.textContent = t('countdown.noEarthriseWindow');
     }
   }
 }
@@ -581,7 +643,7 @@ function formatCountdowns(events) {
 async function calculateSeriesAndEvaluate() {
   if (!state.currentSite) return;
   const token = ++state.evaluationToken;
-  setLoading(true, 'Calculando ventana de 28 días con LOLA + Horizons…');
+  setLoading(true, t('action.loading.evaluate'));
   await ensureEphemeris(state.currentSite);
   if (token !== state.evaluationToken) return;
   try {
@@ -599,9 +661,9 @@ async function calculateSeriesAndEvaluate() {
     updateSimulation();
   } catch (error) {
     console.error('No se pudo evaluar el sitio.', error);
-    classificationBadge.textContent = 'SIN DATOS';
+    classificationBadge.textContent = t('status.noData');
     classificationBadge.className = 'verdict-status status-danger';
-    classificationText.textContent = `No se pudo evaluar: ${error.message}`;
+    classificationText.textContent = t('action.loadFailed', { message: error.message });
     scoreNumber.textContent = '—';
   } finally {
     if (token === state.evaluationToken) setLoading(false);
@@ -613,13 +675,13 @@ function populateSiteSelector(sites) {
   for (const site of sites) {
     const option = document.createElement('option');
     option.value = site.id;
-    option.textContent = `${site.name} · ${site.dataQuality}`;
+    option.textContent = `${site.name} · ${dataQualityLabel(site)}`;
     siteSelect.appendChild(option);
   }
   if (state.customSite) {
     const option = document.createElement('option');
     option.value = 'custom-site';
-    option.textContent = `${state.customSite.name} · aproximado`;
+    option.textContent = `${state.customSite.name} · ${dataQualityLabel(state.customSite)}`;
     siteSelect.appendChild(option);
   }
 }
@@ -665,11 +727,11 @@ function initSiteSelector(sites) {
     const lon = Number.parseFloat(lonInput.value);
     let message = '';
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      message = 'Introduce una latitud y una longitud numéricas.';
+      message = t('custom.numeric');
     } else if (lat < -90 || lat > 90) {
-      message = `La latitud debe estar entre -90° y 90°. Has escrito ${lat}°.`;
+      message = t('custom.latRange', { value: lat });
     } else if (lon < 0 || lon > 360) {
-      message = `La longitud debe estar entre 0° y 360°. Has escrito ${lon}°.`;
+      message = t('custom.lonRange', { value: lon });
     }
     if (message) {
       customError.textContent = message;
@@ -754,7 +816,7 @@ function initTimeControls() {
   playPauseBtn.addEventListener('click', () => {
     state.isPlaying = !state.isPlaying;
     playIcon.textContent = state.isPlaying ? '⏸' : '▶';
-    playText.textContent = state.isPlaying ? 'Pausa' : 'Simular';
+    playText.textContent = state.isPlaying ? t('action.pause') : t('action.simulate');
   });
 
   for (const button of document.querySelectorAll('.speed-chip')) {
@@ -789,7 +851,7 @@ function initTimeControls() {
       if (next.getTime() >= max.getTime()) {
         state.isPlaying = false;
         playIcon.textContent = '▶';
-        playText.textContent = 'Simular';
+        playText.textContent = t('action.simulate');
       }
     }
     requestAnimationFrame(simulationLoop);
@@ -869,7 +931,7 @@ function updatePanorama() {
     mastHeightM: state.mastHeightM,
     dateLabel: utcLabel(state.currentDate)
   });
-  panoramaSiteLabel.textContent = `${state.currentSite.name} · ${utcLabel(state.currentDate)} · ${state.currentSite.dataQuality}`;
+  panoramaSiteLabel.textContent = `${state.currentSite.name} · ${utcLabel(state.currentDate)} · ${dataQualityLabel(state.currentSite)}`;
   panoramaSun.textContent = formatAzEl(state.currentSky.sun.azDeg, state.currentSky.sun.elDeg);
   panoramaEarth.textContent = formatAzEl(state.currentSky.earth.azDeg, state.currentSky.earth.elDeg);
   panoramaSunHorizon.textContent = `${state.currentSky.sunHorizonDeg.toFixed(2)}°`;
@@ -879,7 +941,7 @@ function updatePanorama() {
 
 async function openComparison() {
   if (!state.currentSite) return;
-  setLoading(true, 'Evaluando todos los sitios con la misma ventana y supuestos…');
+  setLoading(true, t('action.loading.compare'));
   try {
     const sites = allSites();
     await Promise.all(sites.map(ensureEphemeris));
@@ -901,7 +963,7 @@ async function openComparison() {
         profile: PROFILE_BY_ID[state.profileId],
         mastHeightM: state.mastHeightM,
         panelType: state.panelType,
-        panelLabel: PANELS[state.panelType].label
+        panelLabel: t(PANELS[state.panelType].labelKey)
       },
       (siteId) => {
         const found = allSites().find((site) => site.id === siteId);
@@ -918,7 +980,7 @@ async function openComparison() {
     openModal(comparisonModal);
   } catch (error) {
     console.error('No se pudo comparar los sitios.', error);
-    comparisonModalBody.innerHTML = `<p class="data-note">No se pudo completar la comparación: ${error.message}</p>`;
+    comparisonModalBody.innerHTML = `<p class="data-note">${t('action.error.compare', { message: error.message })}</p>`;
     openModal(comparisonModal);
   } finally {
     setLoading(false);
@@ -927,18 +989,24 @@ async function openComparison() {
 
 async function openSweep() {
   if (!state.currentSite) return;
-  setLoading(true, 'Cargando barrido mensual de fechas…');
+  setLoading(true, t('action.loading.sweep'));
   try {
     const sweep = await loadDateSweep(state.currentSite.id);
     if (sweepModalTitle) {
-      sweepModalTitle.textContent = `Barrido de fechas · ${state.currentSite.name}`;
+      sweepModalTitle.textContent = t('action.sweepTitle', {
+        site: state.currentSite.name
+      });
     }
     if (!sweep) {
-      if (sweepModalBadge) sweepModalBadge.textContent = 'Sin datos precalculados';
-      sweepModalBody.innerHTML = `<p class="data-note">No hay barrido precalculado para ${state.currentSite.name}. Ejecuta <code>npm run data:sweep</code> para generarlo.</p>`;
+      if (sweepModalBadge) sweepModalBadge.textContent = t('action.noSweepBadge');
+      sweepModalBody.innerHTML = `<p class="data-note">${t('action.noSweep', {
+        site: state.currentSite.name
+      })}</p>`;
     } else {
       if (sweepModalBadge) {
-        sweepModalBadge.textContent = `${sweep.points.length} ventanas mensuales · 2026–2028`;
+        sweepModalBadge.textContent = t('action.sweepBadge', {
+          count: sweep.points.length
+        });
       }
       renderDateSweep(sweepModalBody, {
         sweep,
@@ -960,7 +1028,9 @@ async function openSweep() {
     openModal(sweepModal);
   } catch (error) {
     console.error('No se pudo cargar el barrido de fechas.', error);
-    sweepModalBody.innerHTML = `<p class="data-note">No se pudo cargar el barrido: ${error.message}</p>`;
+    sweepModalBody.innerHTML = `<p class="data-note">${t('action.error.sweep', {
+      message: error.message
+    })}</p>`;
     openModal(sweepModal);
   } finally {
     setLoading(false);
@@ -969,7 +1039,7 @@ async function openSweep() {
 
 async function openSiteDateMatrix() {
   if (!state.currentSite) return;
-  setLoading(true, 'Cargando barridos mensuales de los sitios…');
+  setLoading(true, t('action.loading.matrix'));
   try {
     const sites = allSites();
     const sweeps = (
@@ -982,11 +1052,13 @@ async function openSiteDateMatrix() {
     ).filter(Boolean);
 
     if (!sweeps.length) {
-      matrixModalBody.innerHTML =
-        '<p class="data-note">No hay barridos precalculados. Ejecuta <code>npm run data:sweep</code> para generarlos.</p>';
+      matrixModalBody.innerHTML = `<p class="data-note">${t('action.noMatrix')}</p>`;
     } else {
       if (matrixModalBadge) {
-        matrixModalBadge.textContent = `${sweeps.length} sitios × ${sweeps[0].sweep.points.length} meses · 2026–2028`;
+        matrixModalBadge.textContent = t('action.matrixBadge', {
+          sites: sweeps.length,
+          months: sweeps[0].sweep.points.length
+        });
       }
       renderSiteDateMatrix(matrixModalBody, {
         sweeps,
@@ -1009,7 +1081,9 @@ async function openSiteDateMatrix() {
     openModal(matrixModal);
   } catch (error) {
     console.error('No se pudo cargar la matriz sitio × fecha.', error);
-    matrixModalBody.innerHTML = `<p class="data-note">No se pudo cargar la matriz: ${error.message}</p>`;
+    matrixModalBody.innerHTML = `<p class="data-note">${t('action.error.matrix', {
+      message: error.message
+    })}</p>`;
     openModal(matrixModal);
   } finally {
     setLoading(false);
@@ -1124,6 +1198,41 @@ function initModals() {
   }
 }
 
+function refreshLanguageUI() {
+  if (state.customSite) {
+    state.customSite.name = `${t('site.customName')} (${state.customSite.lat.toFixed(2)}°, ${state.customSite.lon.toFixed(2)}°)`;
+    state.customSite.shortName = t('site.customName');
+  }
+  populateSiteSelector(state.sites);
+  if (state.currentSite) {
+    updateSitePanel(state.currentSite);
+    siteSelect.value = state.currentSite.id;
+  }
+  if (state.analysis) {
+    Object.assign(
+      state.analysis,
+      buildStatus(
+        state.analysis.site,
+        state.analysis.metrics,
+        state.analysis.components,
+        state.analysis.profile
+      )
+    );
+    updateDecisionUI(state.analysis);
+    updateSimulation();
+    if (state.panoramaOpen) updatePanorama();
+  }
+  playText.textContent = state.isPlaying ? t('action.pause') : t('action.simulate');
+  const trekModal = $('trek-modal');
+  if (trekModal && !trekModal.classList.contains('hidden') && state.currentSite) {
+    updateTrekModalContent(
+      state.currentSite,
+      getQuickMapUrl(state.currentSite),
+      getMoonTrekUrl(state.currentSite)
+    );
+  }
+}
+
 async function bootstrap() {
   try {
     const sites = await loadLandingSites();
@@ -1153,10 +1262,10 @@ async function bootstrap() {
     console.error('No se pudo inicializar la aplicación.', error);
     // An error is not progress: stop the scan and say what failed.
     loadingOverlay.classList.add('is-error');
-    setLoading(true, `No se pudieron cargar los datos LOLA: ${error.message}`);
+    setLoading(true, t('action.bootstrapFailed', { message: error.message }));
     const strong = loadingOverlay.querySelector('strong');
-    if (strong) strong.textContent = 'Error cargando LOLA + Horizons';
-    classificationBadge.textContent = 'SIN DATOS';
+    if (strong) strong.textContent = t('action.loadingErrorTitle');
+    classificationBadge.textContent = t('status.noData');
     classificationText.textContent = error.message;
   }
 }

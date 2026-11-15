@@ -17,6 +17,7 @@ Missions to the Moon's south pole face extreme lighting and communication constr
 - **Compare sites with the same assumptions**: a comparison matrix with energy, eclipse, DTE, comms/outage, slope, and a transparent multi-criteria score.
 - **Site × date matrix**: 9 sites × 36 months with a metric selector (score, Sun, DTE, outage); click a cell to load that site and date in the main view.
 - **Explore mission profiles**: direct-to-Earth demo, night-surviving rover, crewed outpost, and relay/store-and-forward. All weights and thresholds are visible.
+- **Bilingual UI**: English by default with an EN/ES selector; the choice is persisted locally.
 
 ## Why it matters
 
@@ -74,7 +75,7 @@ npm test
 
 - **30-second video script and 7-slide outline:** [docs/demo.md](docs/demo.md)
 - **Demo video:** add the final link here before submission.
-- The application UI is in Spanish. The submission page, this README, and the demo/subtitles are in English.
+- The application UI defaults to English and can switch to Spanish from the EN/ES selector; the choice is persisted locally. The submission page, this README, and the demo/subtitles are in English.
 
 ## Limitations
 

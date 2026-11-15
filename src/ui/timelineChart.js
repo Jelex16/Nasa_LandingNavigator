@@ -1,3 +1,5 @@
+import { getLanguage, t } from '../i18n.js';
+
 /**
  * Interactive elevation timeline for the 28-day mission window.
  * Both the Sun and Earth curves are compared with the real LOLA terrain
@@ -240,7 +242,9 @@ export class TimelineChart {
       const frac = index / (numTimeMarks - 1);
       const ms = timeStart + frac * timeSpan;
       const date = new Date(ms);
-      const label = `${String(date.getUTCDate()).padStart(2, '0')}/${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const label = getLanguage() === 'en' ? `${month}/${day}` : `${day}/${month}`;
       ctx.fillText(label, timeToX(ms), this.padding.top + this.plotHeight + 6 * this.dpr);
     }
 
@@ -280,13 +284,38 @@ export class TimelineChart {
       ctx.fillText(dateStr, tipX + 8 * this.dpr, tipY + 16 * this.dpr);
       ctx.fillStyle = '#e8b45c';
       ctx.font = `${9.5 * this.dpr}px monospace`;
-      ctx.fillText(`Sol: ${point.sunEl.toFixed(2)}° · horizonte ${sunHorizon.toFixed(2)}°`, tipX + 8 * this.dpr, tipY + 32 * this.dpr);
+      ctx.fillText(
+        t('timeline.sun', {
+          el: point.sunEl.toFixed(2),
+          horizon: sunHorizon.toFixed(2)
+        }),
+        tipX + 8 * this.dpr,
+        tipY + 32 * this.dpr
+      );
       ctx.fillStyle = '#8fb6d1';
-      ctx.fillText(`Tierra: ${point.earthEl.toFixed(2)}° · horizonte ${earthHorizon.toFixed(2)}°`, tipX + 8 * this.dpr, tipY + 48 * this.dpr);
+      ctx.fillText(
+        t('timeline.earth', {
+          el: point.earthEl.toFixed(2),
+          horizon: earthHorizon.toFixed(2)
+        }),
+        tipX + 8 * this.dpr,
+        tipY + 48 * this.dpr
+      );
       ctx.fillStyle = '#7fa96b';
-      ctx.fillText(`f☉ ${(point.sunVisibleFraction * 100).toFixed(0)}% · f⊕ ${(point.earthVisibleFraction * 100).toFixed(0)}%`, tipX + 8 * this.dpr, tipY + 64 * this.dpr);
+      ctx.fillText(
+        t('timeline.fraction', {
+          sun: (point.sunVisibleFraction * 100).toFixed(0),
+          earth: (point.earthVisibleFraction * 100).toFixed(0)
+        }),
+        tipX + 8 * this.dpr,
+        tipY + 64 * this.dpr
+      );
       ctx.fillStyle = '#b3a99c';
-      ctx.fillText(`Energía: ${point.energyWm2?.toFixed(0) ?? '—'} W/m²`, tipX + 8 * this.dpr, tipY + 80 * this.dpr);
+      ctx.fillText(
+        t('timeline.energy', { value: point.energyWm2?.toFixed(0) ?? '—' }),
+        tipX + 8 * this.dpr,
+        tipY + 80 * this.dpr
+      );
     }
   }
 }

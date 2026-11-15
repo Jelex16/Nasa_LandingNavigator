@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Lunar Landing Site Navigator: comparación de sitios de alunizaje con topografía LOLA y efemérides JPL Horizons."
+      content="Lunar Landing Site Navigator: compare lunar landing sites with LOLA topography and JPL Horizons ephemerides."
     />
     <title>Lunar Landing Site Navigator | NASA Space Apps 2026</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,6 +33,11 @@
       </div>
 
       <div class="nav-right">
+        <label class="sr-only" for="language-select">Idioma</label>
+        <select id="language-select" class="language-select" aria-label="Idioma">
+          <option value="en" selected>EN</option>
+          <option value="es">ES</option>
+        </select>
         <div class="clock-chip">
           <span id="clock-display" class="clock-text">—</span>
         </div>
@@ -386,8 +391,8 @@
 
     <noscript>
       <div class="noscript-notice">
-        <strong>Este navegador no ejecuta JavaScript</strong>
-        <span>La herramienta calcula energía, eclipses y visibilidad DTE en el cliente a partir de los datos LOLA y JPL Horizons. Activa JavaScript para usarla.</span>
+        <strong>This browser does not run JavaScript</strong>
+        <span>The tool computes energy, eclipses and DTE visibility in the browser from LOLA and JPL Horizons data. Enable JavaScript to use it.</span>
       </div>
     </noscript>
 

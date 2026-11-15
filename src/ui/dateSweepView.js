@@ -1,25 +1,33 @@
 import { PANELS, scoreComponents } from '../analysis/scoring.js';
+import { getLanguage, t } from '../i18n.js';
 
 const VIEW_W = 1000;
 const VIEW_H = 370;
 const MARGIN = { left: 64, right: 18 };
 const PLOT_W = VIEW_W - MARGIN.left - MARGIN.right;
-const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const MONTHS = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+};
 
 const STRIPS = [
-  { key: 'energy', title: 'Energía (kWh/m²)', top: 22, height: 84, color: 'var(--data-sun)' },
-  { key: 'dte', title: 'DTE (%)', top: 126, height: 74, color: 'var(--data-earth)' },
-  { key: 'cut', title: 'Corte DTE (h)', top: 220, height: 84, color: 'var(--bad)' }
+  { key: 'energy', titleKey: 'sweep.strip.energy', top: 22, height: 84, color: 'var(--data-sun)' },
+  { key: 'dte', titleKey: 'sweep.strip.dte', top: 126, height: 74, color: 'var(--data-earth)' },
+  { key: 'cut', titleKey: 'sweep.strip.cut', top: 220, height: 84, color: 'var(--bad)' }
 ];
+
+function monthsFor(language) {
+  return language === 'en' ? MONTHS.en : MONTHS.es;
+}
 
 function monthLabel(ms) {
   const date = new Date(ms);
-  return `${MONTHS_ES[date.getUTCMonth()]} ${String(date.getUTCFullYear()).slice(2)}`;
+  return `${monthsFor(getLanguage())[date.getUTCMonth()]} ${String(date.getUTCFullYear()).slice(2)}`;
 }
 
 function fullDateLabel(ms) {
   const date = new Date(ms);
-  return `${date.getUTCDate()} ${MONTHS_ES[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+  return `${date.getUTCDate()} ${monthsFor(getLanguage())[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
 
 function niceMax(value, step) {
@@ -33,7 +41,7 @@ function formatDays(hours) {
 
 function earthsetLabel(point) {
   if (point.earthsetHoursFromStart == null) {
-    return point.earthVisibleAtStart ? 'sin Earthset' : 'Tierra oculta';
+    return point.earthVisibleAtStart ? t('sweep.noEarthset') : t('sweep.earthHidden');
   }
   return `${(point.earthsetHoursFromStart / 24).toFixed(1)} d`;
 }
@@ -68,9 +76,22 @@ function pointValues(point, context) {
 }
 
 function thresholdFor(key, profile) {
-  if (key === 'energy') return { value: profile.energyReqKWhM2, label: `req ${profile.energyReqKWhM2}` };
-  if (key === 'dte') return { value: profile.dteReqPct, label: `≥${profile.dteReqPct}%` };
-  return { value: profile.gMaxTolHours, label: `tol ${profile.gMaxTolHours} h` };
+  if (key === 'energy') {
+    return {
+      value: profile.energyReqKWhM2,
+      label: t('sweep.thresholdEnergy', { value: profile.energyReqKWhM2 })
+    };
+  }
+  if (key === 'dte') {
+    return {
+      value: profile.dteReqPct,
+      label: t('sweep.thresholdDte', { value: profile.dteReqPct })
+    };
+  }
+  return {
+    value: profile.gMaxTolHours,
+    label: t('sweep.thresholdCut', { value: profile.gMaxTolHours })
+  };
 }
 
 function stripMax(strip, points, context) {
@@ -148,7 +169,7 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
     return `
       <line x1="${x}" x2="${x}" y1="${STRIPS[0].top}" y2="${STRIPS[2].top + STRIPS[2].height}"
         stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 4" opacity="0.55" />
-      <text x="${x + 4}" y="${STRIPS[0].top + 10}" class="sweep-current-text">fecha actual</text>
+      <text x="${x + 4}" y="${STRIPS[0].top + 10}" class="sweep-current-text">${t('sweep.current')}</text>
     `;
   })();
 
@@ -159,8 +180,8 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
       const values = pointValues(point, context);
       const label =
         `${fullDateLabel(Date.parse(point.startUtc))}: ${values.energyKWh.toFixed(1)} kWh/m², ` +
-        `${values.sunlitPct.toFixed(0)}% Sol, ${values.dteCenterPct.toFixed(0)}% DTE, ` +
-        `corte ${formatDays(values.gMaxHours)}, score ${values.score}/100`;
+        `${values.sunlitPct.toFixed(0)}% ${t('common.sun')}, ${values.dteCenterPct.toFixed(0)}% DTE, ` +
+        `${t('common.outage')} ${formatDays(values.gMaxHours)}, ${t('common.score')} ${values.score}/100`;
       return `<rect class="sweep-hit" data-index="${index}" x="${left}" y="${STRIPS[0].top}"
         width="${right - left}" height="${STRIPS[2].top + STRIPS[2].height - STRIPS[0].top}"
         tabindex="0" role="button" aria-label="${label}" />`;
@@ -184,27 +205,30 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
 
   const mastWarning =
     context.mastHeightM !== sweep.assumptions.mastHeightM
-      ? `<p class="sweep-warning">La curva de DTE y corte está precalculada con mástil ${sweep.assumptions.mastHeightM.toFixed(1)} m; el panel principal usa ${context.mastHeightM.toFixed(1)} m.</p>`
+      ? `<p class="sweep-warning">${t('sweep.mastWarning', {
+          pre: sweep.assumptions.mastHeightM.toFixed(1),
+          current: context.mastHeightM.toFixed(1)
+        })}</p>`
       : '';
 
   container.innerHTML = `
     <div class="sweep-assumptions">
-      <span><b>Sitio:</b> ${context.siteName}</span>
-      <span><b>Muestreo:</b> 36 ventanas mensuales · 2026–2028</span>
-      <span><b>Perfil:</b> ${context.profile.name}</span>
-      <span><b>Panel:</b> ${PANELS[context.panelType].label}</span>
-      <span><b>Mástil:</b> ${context.mastHeightM.toFixed(1)} m</span>
+      <span>${t('sweep.assumptions.site', { name: context.siteName })}</span>
+      <span>${t('sweep.assumptions.sampling')}</span>
+      <span>${t('sweep.assumptions.profile', { name: t(context.profile.nameKey) })}</span>
+      <span>${t('sweep.assumptions.panel', { name: t(PANELS[context.panelType].labelKey) })}</span>
+      <span>${t('sweep.assumptions.mast', { mast: context.mastHeightM.toFixed(1) })}</span>
     </div>
     ${mastWarning}
     <div class="sweep-chart-wrap" id="sweep-chart-wrap">
       <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" role="img"
-        aria-label="Barrido mensual de energía, DTE y corte para ${context.siteName}">
+        aria-label="${t('sweep.chartAria', { site: context.siteName })}">
         ${grid}
         ${thresholds}
         ${currentMarker}
         ${paths.map(({ strip, area }) => `<path d="${area}" fill="${strip.color}" opacity="0.12" />`).join('')}
         ${paths.map(({ strip, line }) => `<path d="${line}" fill="none" stroke="${strip.color}" stroke-width="2" />`).join('')}
-        ${STRIPS.map((strip) => `<text x="${MARGIN.left}" y="${strip.top - 6}" class="sweep-strip-title">${strip.title}</text>`).join('')}
+        ${STRIPS.map((strip) => `<text x="${MARGIN.left}" y="${strip.top - 6}" class="sweep-strip-title">${t(strip.titleKey)}</text>`).join('')}
         ${xTicks}
         ${hitRects}
         <line id="sweep-hover-line" x1="0" x2="0" y1="${STRIPS[0].top}" y2="${STRIPS[2].top + STRIPS[2].height}"
@@ -213,29 +237,25 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
       <div class="sweep-tooltip" id="sweep-tooltip" hidden></div>
     </div>
     <div class="sweep-legend">
-      <span><i style="background: var(--data-sun)"></i>Energía</span>
-      <span><i style="background: var(--data-earth)"></i>DTE</span>
-      <span><i style="background: var(--bad)"></i>Corte</span>
-      <span class="sweep-legend-note">Líneas discontinuas: umbral del perfil</span>
+      <span><i style="background: var(--data-sun)"></i>${t('sweep.legend.energy')}</span>
+      <span><i style="background: var(--data-earth)"></i>${t('sweep.legend.dte')}</span>
+      <span><i style="background: var(--bad)"></i>${t('sweep.legend.cut')}</span>
+      <span class="sweep-legend-note">${t('sweep.legendNote')}</span>
     </div>
-    <p class="sweep-note">
-      Muestreo mensual de ventanas de 28 días. El corte es una cota inferior si dura más que la ventana.
-      Earthset = primera pérdida del centro de Tierra después del inicio; “—” si no ocurre en la ventana.
-      Haz clic en un mes del gráfico o en una fecha de la tabla para cargar esa fecha en la vista principal.
-    </p>
+    <p class="sweep-note">${t('sweep.note')}</p>
     <details class="sweep-table-details">
-      <summary>Ver tabla de 36 meses</summary>
+      <summary>${t('sweep.tableSummary')}</summary>
       <div class="table-responsive">
         <table class="comparison-table sweep-table">
           <thead>
             <tr>
-              <th scope="col">Mes</th>
-              <th scope="col">Energía</th>
-              <th scope="col">Sol</th>
-              <th scope="col">DTE</th>
-              <th scope="col">Corte</th>
-              <th scope="col">Earthset</th>
-              <th scope="col">Score</th>
+              <th scope="col">${t('sweep.headerMonth')}</th>
+              <th scope="col">${t('sweep.headerEnergy')}</th>
+              <th scope="col">${t('sweep.headerSun')}</th>
+              <th scope="col">${t('sweep.headerDte')}</th>
+              <th scope="col">${t('sweep.headerCut')}</th>
+              <th scope="col">${t('sweep.headerEarthset')}</th>
+              <th scope="col">${t('sweep.headerScore')}</th>
             </tr>
           </thead>
           <tbody>${tableRows}</tbody>
@@ -256,14 +276,14 @@ export function renderDateSweep(container, { sweep, context, onSelectDate }) {
     tooltip.innerHTML = `
       <div class="sweep-tip-date">${fullDateLabel(Date.parse(point.startUtc))}</div>
       <div class="sweep-tip-grid">
-        <span>Energía</span><strong>${values.energyKWh.toFixed(1)} kWh/m²</strong>
-        <span>Sol</span><strong>${values.sunlitPct.toFixed(0)}%</strong>
-        <span>DTE</span><strong>${values.dteCenterPct.toFixed(0)}%</strong>
-        <span>Corte</span><strong>${formatDays(values.gMaxHours)}</strong>
-        <span>Earthset</span><strong>${earthsetLabel(point)}</strong>
-        <span>Score</span><strong>${values.score}/100</strong>
+        <span>${t('sweep.tooltip.energy')}</span><strong>${values.energyKWh.toFixed(1)} kWh/m²</strong>
+        <span>${t('sweep.tooltip.sun')}</span><strong>${values.sunlitPct.toFixed(0)}%</strong>
+        <span>${t('sweep.tooltip.dte')}</span><strong>${values.dteCenterPct.toFixed(0)}%</strong>
+        <span>${t('sweep.tooltip.cut')}</span><strong>${formatDays(values.gMaxHours)}</strong>
+        <span>${t('sweep.tooltip.earthset')}</span><strong>${earthsetLabel(point)}</strong>
+        <span>${t('sweep.tooltip.score')}</span><strong>${values.score}/100</strong>
       </div>
-      <div class="sweep-tip-hint">Clic para cargar esta fecha</div>
+      <div class="sweep-tip-hint">${t('sweep.tooltip.hint')}</div>
     `;
     tooltip.hidden = false;
     const rect = wrapper.getBoundingClientRect();

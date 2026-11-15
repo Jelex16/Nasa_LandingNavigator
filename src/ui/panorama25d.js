@@ -11,6 +11,8 @@
  * site.horizonAt(azimuthDeg, mastHeightM) and the precomputed 28-day series.
  */
 
+import { getLanguage, t } from '../i18n.js';
+
 const DEG = Math.PI / 180;
 const TAU = Math.PI * 2;
 const FONT_SANS = '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif';
@@ -23,7 +25,10 @@ const CARDINALS = [
   { az: 180, label: 'S' },
   { az: 270, label: 'W' }
 ];
-const CARDINAL_NAMES = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+const CARDINAL_NAMES = {
+  en: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'],
+  es: ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']
+};
 
 function clamp(value, min, max) {
   return value < min ? min : value > max ? max : value;
@@ -43,7 +48,8 @@ function rgba(hex, alpha) {
 }
 
 function cardinalName(az) {
-  return CARDINAL_NAMES[Math.round(normalizeAzimuth(az) / 45) % 8];
+  const names = getLanguage() === 'en' ? CARDINAL_NAMES.en : CARDINAL_NAMES.es;
+  return names[Math.round(normalizeAzimuth(az) / 45) % 8];
 }
 
 export class Panorama25D {
@@ -196,7 +202,7 @@ export class Panorama25D {
     ctx.fillStyle = 'rgba(138,127,114,0.9)';
     ctx.font = `12px ${FONT_SANS}`;
     ctx.textAlign = 'center';
-    ctx.fillText('Panorama LOLA no disponible', (plot.left + plot.right) / 2, (plot.top + plot.bottom) / 2);
+    ctx.fillText(t('panorama.empty'), (plot.left + plot.right) / 2, (plot.top + plot.bottom) / 2);
   }
 
   drawSky(plot, width) {
@@ -440,7 +446,7 @@ export class Panorama25D {
     if (!Number.isFinite(data?.azDeg) || !Number.isFinite(data?.elDeg) || !Number.isFinite(horizon)) return;
     const ctx = this.ctx;
     const color = body === 'sun' ? this.colors.sun : this.colors.earth;
-    const label = body === 'sun' ? 'Sol' : 'Tierra';
+    const label = body === 'sun' ? t('panorama.sun') : t('panorama.earth');
     const x = this.xFor(plot, data.azDeg);
     const y = this.yFor(plot, range, data.elDeg);
     const pixelsPerDegree = (plot.bottom - plot.top) / (range.max - range.min);
@@ -493,7 +499,11 @@ export class Panorama25D {
     }
 
     const compact = this.width < 480;
-    const text = below ? (compact ? `${label} ↓` : `${label} · bajo el horizonte`) : label;
+    const text = below
+      ? compact
+        ? `${label} ↓`
+        : `${label} · ${t('panorama.belowHorizon')}`
+      : label;
     ctx.font = `600 ${compact ? 9.5 : 10.5}px ${FONT_SANS}`;
     ctx.textBaseline = 'middle';
     ctx.fillStyle = rgba(color, 0.95);
@@ -554,13 +564,21 @@ export class Panorama25D {
       ctx.textAlign = 'left';
       ctx.font = `9px ${FONT_SANS}`;
       ctx.fillStyle = 'rgba(245,185,66,0.9)';
-      ctx.fillText(`${cardinalName(this.sky.sun.azDeg)} · Sol`, plot.left + 4, plot.top + 12);
+      ctx.fillText(
+        `${cardinalName(this.sky.sun.azDeg)} · ${t('panorama.sun')}`,
+        plot.left + 4,
+        plot.top + 12
+      );
     }
     if (this.sky?.earth) {
       ctx.textAlign = 'right';
       ctx.font = `9px ${FONT_SANS}`;
       ctx.fillStyle = 'rgba(90,169,230,0.9)';
-      ctx.fillText(`Tierra · ${cardinalName(this.sky.earth.azDeg)}`, plot.right - 4, plot.top + 12);
+      ctx.fillText(
+        `${t('panorama.earth')} · ${cardinalName(this.sky.earth.azDeg)}`,
+        plot.right - 4,
+        plot.top + 12
+      );
     }
     ctx.restore();
   }

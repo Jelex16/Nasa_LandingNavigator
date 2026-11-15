@@ -39,6 +39,7 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
   Filas seleccionables; sin la antigua tabla de “acción” fuera de pantalla.
 - **Matriz sitio × fecha**: 9 sitios × 36 meses con selector de métrica (score, Sol, DTE o corte);
   una celda carga ese sitio y esa fecha en la vista principal.
+- **UI bilingüe**: inglés por defecto y selector EN/ES que conserva la preferencia en el navegador.
 - **Veredicto de primera pantalla**: porcentaje de horas con Sol, DTE centro y corte DTE máximo;
   el score compuesto queda como índice secundario, con el desglose plegado.
 - **Barrido de fechas (launch slip)**: 36 ventanas mensuales 2026–2028 precalculadas con energía,

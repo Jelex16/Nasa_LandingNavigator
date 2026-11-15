@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import {
   diskVisibleFraction,
   longestTrueRunHours
@@ -12,8 +13,8 @@ export const SHADOW_THRESHOLD = 0.05;
 export const MISSION_PROFILES = [
   {
     id: 'technology_demo',
-    name: 'Demo tecnológica de corta duración',
-    description: 'Demostración de 28 días; tolera un eclipse moderado pero es sensible a la energía y a cortes de radio largos.',
+    nameKey: 'profile.technology_demo.name',
+    descriptionKey: 'profile.technology_demo.description',
     energyReqKWhM2: 300,
     dMaxTolHours: 160,
     dteReqPct: 60,
@@ -22,8 +23,8 @@ export const MISSION_PROFILES = [
   },
   {
     id: 'night_survivor',
-    name: 'Rover superviviente de noche lunar',
-    description: 'Rover limitado por baterías que debe sobrevivir al eclipse continuo más largo; la energía domina la decisión.',
+    nameKey: 'profile.night_survivor.name',
+    descriptionKey: 'profile.night_survivor.description',
     energyReqKWhM2: 400,
     dMaxTolHours: 380,
     dteReqPct: 30,
@@ -32,8 +33,8 @@ export const MISSION_PROFILES = [
   },
   {
     id: 'crewed_outpost',
-    name: 'Puesto tripulado con DTE directo',
-    description: 'Puesto tripulado con continuidad estricta de enlace a Tierra y eclipse solar corto tolerado.',
+    nameKey: 'profile.crewed_outpost.name',
+    descriptionKey: 'profile.crewed_outpost.description',
     energyReqKWhM2: 450,
     dMaxTolHours: 120,
     dteReqPct: 90,
@@ -42,9 +43,8 @@ export const MISSION_PROFILES = [
   },
   {
     id: 'relay_store_forward',
-    name: 'Relé / store-and-forward',
-    description:
-      'Perfil para una misión con relé o almacenamiento a bordo: tolera outages DTE largos y no exige visibilidad directa continua. No es DTE directo puro; se muestra para comparar alternativas.',
+    nameKey: 'profile.relay_store_forward.name',
+    descriptionKey: 'profile.relay_store_forward.description',
     energyReqKWhM2: 300,
     dMaxTolHours: 200,
     dteReqPct: 20,
@@ -59,21 +59,21 @@ export const DEFAULT_PROFILE_ID = 'technology_demo';
 export const PANELS = {
   horizontal: {
     id: 'horizontal',
-    label: 'Horizontal',
-    shortLabel: 'H',
-    description: 'Normal al cenit. Irradiancia proporcional a sin(elevación solar).'
+    labelKey: 'panel.horizontal.label',
+    descriptionKey: 'panel.horizontal.description',
+    shortLabel: 'H'
   },
   vertical_fixed: {
     id: 'vertical_fixed',
-    label: 'Vertical fijo',
-    shortLabel: 'V',
-    description: 'Panel vertical orientado al azimut óptimo del sitio.'
+    labelKey: 'panel.vertical_fixed.label',
+    descriptionKey: 'panel.vertical_fixed.description',
+    shortLabel: 'V'
   },
   vertical_tracker: {
     id: 'vertical_tracker',
-    label: 'Vertical con seguimiento',
-    shortLabel: 'V+',
-    description: 'Panel vertical cuyo azimut sigue al Sol; maximiza la captura en el polo.'
+    labelKey: 'panel.vertical_tracker.label',
+    descriptionKey: 'panel.vertical_tracker.description',
+    shortLabel: 'V+'
   }
 };
 
@@ -148,42 +148,56 @@ export function scoreComponents(metrics, profile) {
   return { energy, dark, dte, comms, total };
 }
 
-function buildStatus(site, metrics, components, profile) {
+export function buildStatus(site, metrics, components, profile) {
   const limits = [];
   const slope = Number(site.slopeDeg ?? site.maxSlopeDeg ?? 0);
   if (metrics.dMaxHours > profile.dMaxTolHours) {
-    limits.push(`eclipse ${metrics.dMaxHours.toFixed(1)} h > ${profile.dMaxTolHours} h`);
+    limits.push(
+      t("limit.eclipse", {
+        hours: metrics.dMaxHours.toFixed(1),
+        tol: profile.dMaxTolHours
+      })
+    );
   }
   if (metrics.dteCenterPct < profile.dteReqPct) {
-    limits.push(`DTE ${metrics.dteCenterPct.toFixed(0)}% < ${profile.dteReqPct}%`);
+    limits.push(
+      t("limit.dte", {
+        pct: metrics.dteCenterPct.toFixed(0),
+        req: profile.dteReqPct
+      })
+    );
   }
   if (metrics.gMaxHours > profile.gMaxTolHours) {
-    limits.push(`corte DTE ${metrics.gMaxHours.toFixed(1)} h > ${profile.gMaxTolHours} h`);
+    limits.push(
+      t("limit.outage", {
+        hours: metrics.gMaxHours.toFixed(1),
+        tol: profile.gMaxTolHours
+      })
+    );
   }
-  if (site.role !== 'reference' && slope > 15) {
-    limits.push(`pendiente local ${slope.toFixed(1)}° > 15°`);
+  if (site.role !== "reference" && slope > 15) {
+    limits.push(t("limit.slope", { slope: slope.toFixed(1) }));
   }
 
-  if (site.role === 'reference') {
+  if (site.role === "reference") {
     return {
-      status: 'REFERENCIA',
-      badgeClass: 'status-reference',
-      statusText: 'Sitio ecuatorial de control histórico; no es un candidato polar de aterrizaje.'
+      status: t("status.reference"),
+      badgeClass: "status-reference",
+      statusText: t("status.referenceText")
     };
   }
-  if (site.role === 'custom') {
+  if (site.role === "custom") {
     return {
-      status: 'ESTIMACIÓN',
-      badgeClass: 'status-warning',
-      statusText:
-        'Sitio definido por el usuario con horizonte aproximado. El score es una estimación; no usa un DEM LOLA y no certifica el terreno.'
+      status: t("status.estimate"),
+      badgeClass: "status-warning",
+      statusText: t("status.customText")
     };
   }
   if (slope > 25) {
     return {
-      status: 'NO-GO - PELIGROSO',
-      badgeClass: 'status-danger',
-      statusText: `Pendiente local ${slope.toFixed(1)}°: el terreno no es apto para el perfil seleccionado.`
+      status: t("status.noGo"),
+      badgeClass: "status-danger",
+      statusText: t("status.slopeDanger", { slope: slope.toFixed(1) })
     };
   }
 
@@ -193,34 +207,34 @@ function buildStatus(site, metrics, components, profile) {
     metrics.dteCenterPct < profile.dteReqPct * 0.5;
   if (severe) {
     return {
-      status: 'NO-GO - PELIGROSO',
-      badgeClass: 'status-danger',
-      statusText: `No cumple el perfil: ${limits.join('; ')}. Se requiere otro perfil, otra fecha o un relé de comunicaciones.`
+      status: t("status.noGo"),
+      badgeClass: "status-danger",
+      statusText: t("status.severe", { limits: limits.join("; ") })
     };
   }
 
   if (components.total >= 75 && limits.length === 0) {
     return {
-      status: 'GO - SEGURO',
-      badgeClass: 'status-safe',
-      statusText: 'Cumple el perfil de misión con los supuestos seleccionados; revisar las métricas crudas antes de decidir.'
+      status: t("status.go"),
+      badgeClass: "status-safe",
+      statusText: t("status.goText")
     };
   }
   if (components.total >= 50) {
     return {
-      status: 'CAUTION - MARGINAL',
-      badgeClass: 'status-warning',
+      status: t("status.caution"),
+      badgeClass: "status-warning",
       statusText: limits.length
-        ? `Viable con reservas: ${limits.join('; ')}.`
-        : 'Score intermedio; conviene comparar otra fecha o sitio.'
+        ? t("status.cautionLimits", { limits: limits.join("; ") })
+        : t("status.cautionGeneric")
     };
   }
   return {
-    status: 'NO-GO - PELIGROSO',
-    badgeClass: 'status-danger',
+    status: t("status.noGo"),
+    badgeClass: "status-danger",
     statusText: limits.length
-      ? `No cumple el perfil: ${limits.join('; ')}.`
-      : 'Score bajo; la combinación sitio-fecha no es viable con este perfil.'
+      ? t("status.noGoLimits", { limits: limits.join("; ") })
+      : t("status.noGoGeneric")
   };
 }
 
@@ -250,7 +264,12 @@ export function analyzeSite({
     const timeMs = startMs + i * stepMs;
     const bodies = sampleAt(timeMs);
     if (!bodies) {
-      throw new Error(`Sin efemérides para ${new Date(timeMs).toISOString()} (${site.id})`);
+      throw new Error(
+        t('error.noEphemeris', {
+          time: new Date(timeMs).toISOString(),
+          site: site.id
+        })
+      );
     }
     const sky = makeSky(site, bodies, mastHeightM);
     const energyWm2 = panelIrradianceWm2(

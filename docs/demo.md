@@ -13,18 +13,18 @@ Use the comparison matrix and the site × date matrix to show the trade-off. Do 
 
 ## 30-second video
 
-Use the real app, desktop viewport, default settings: Malapert Massif, Demo DTE directo, vertical tracker, mast 2 m, base date 2026-11-14.
+Use the real app, desktop viewport, default settings and the default English UI: Malapert Massif, **Direct DTE demo**, **Vertical tracker**, mast 2 m, base date 2026-11-14.
 
 | Time | Visual | English narration / subtitles |
 |---|---|---|
 | 0–5 s | App hero + south-pole globe | “Mission planners need to compare lunar south-pole sites and dates fast. Existing tools are built for experts.” |
 | 5–15 s | Left verdict card for Malapert, 14 Nov 2026 | “Pick Malapert. 50% of the hours have sunlight, the Earth is visible 42% of the time, and the longest direct-to-Earth blackout is 12 days. With direct DTE, this is not viable.” |
-| 15–25 s | Open **Fechas** (launch slip), hover the curve, click **May 2027** | “Now sweep 36 months. A launch slip to May 2027 moves the site into polar night: zero sunlight and a 15-day blackout. That is the trade-off planners need to see before the date is fixed.” |
-| 25–30 s | Data/validation or comparison matrix | “Real LOLA terrain, JPL Horizons, and a 4,032-sample validation. Decision-support, not flight-certified.” |
+| 15–25 s | Open **Dates** (launch slip), hover the curve, click **May 2027** | “Now sweep 36 months. A launch slip to May 2027 moves the site into polar night: zero sunlight and a 15-day blackout. That is the trade-off planners need to see before the date is fixed.” |
+| 25–30 s | NASA data panel or comparison matrix | “Real LOLA terrain, JPL Horizons, and a 4,032-sample validation. Decision-support, not flight-certified.” |
 
 ### Exact numbers to use (default assumptions)
 
-- **2026-11-14**: 50% Sun, 42% DTE, 12.0-day blackout, mission index 48/100, NO-GO for direct DTE.
+- **2026-11-14**: 50% Sun, 42% DTE, 12.0-day outage, mission index 48/100, NO-GO for direct DTE.
 - **2027-05-01**: 0% Sun, 47% DTE, 14.8-day blackout (354 h), polar night for the 28-day window.
 - These values come from `public/data/sweep/site23.json` and the live verdict. If the UI shows slightly different rounded values, read them from the screen.
 
@@ -32,10 +32,10 @@ Use the real app, desktop viewport, default settings: Malapert Massif, Demo DTE 
 
 - [ ] `npm run build` passes.
 - [ ] Dev server or preview is running; browser at 1264×630 or larger.
-- [ ] Malapert selected; profile **Demo DTE directo**; panel **Vertical con seguimiento**; mast **2 m**; date **2026-11-14**.
+- [ ] Malapert selected; profile **Direct DTE demo**; panel **Vertical tracker**; mast **2 m**; date **2026-11-14**.
 - [ ] Console has no errors.
-- [ ] The first-screen verdict shows Sol 50%, DTE 42%, Corte 12.0 días.
-- [ ] **Fechas** opens the 36-month sweep; the current-date marker is visible.
+- [ ] The first-screen verdict shows Sun 50%, DTE 42%, Outage 12.0 days.
+- [ ] **Dates** opens the 36-month sweep; the current-date marker is visible.
 - [ ] Clicking May 2027 loads the date and updates the verdict.
 - [ ] Record at 30 seconds or less; add English subtitles if the narration is in Spanish.
 - [ ] Do not show the data modal for more than 2 seconds; the story is the decision.

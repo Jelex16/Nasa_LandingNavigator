@@ -303,6 +303,24 @@ html, body {
   color: var(--ink);
 }
 
+.language-select {
+  flex: 0 0 auto;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 5px;
+  cursor: pointer;
+}
+
+.language-select:hover,
+.language-select:focus-visible {
+  border-color: var(--accent-line);
+  color: var(--ink);
+}
+
 /* ---- Camera rail -------------------------------------------------------- */
 /* A segmented instrument rail, not a floating capsule. */
 .floating-camera-bar {
@@ -2870,6 +2888,7 @@ html, body {
   .pill-btn,
   .cam-btn,
   .nav-action-btn,
+  .language-select,
   .layer-btn,
   .relief-btn,
   .btn-step,
