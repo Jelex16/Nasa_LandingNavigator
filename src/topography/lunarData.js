@@ -194,6 +194,21 @@ async function fetchJson(url) {
   return response.json();
 }
 
+const sweepCache = new Map();
+
+export async function loadDateSweep(siteId) {
+  if (sweepCache.has(siteId)) return sweepCache.get(siteId);
+  const promise = (async () => {
+    try {
+      return await fetchJson(`${import.meta.env.BASE_URL}data/sweep/${siteId}.json`);
+    } catch {
+      return null;
+    }
+  })();
+  sweepCache.set(siteId, promise);
+  return promise;
+}
+
 /**
  * Loads the metadata and all LOLA horizon profiles. The seven primary sites
  * are required; the two regional-80 m sites are optional so the app still

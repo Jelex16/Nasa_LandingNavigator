@@ -4,23 +4,17 @@ import { SkyDomeRadar } from './ui/skyDomeRadar.js';
 import { TimelineChart } from './ui/timelineChart.js';
 import { Panorama25D } from './ui/panorama25d.js';
 import { renderComparisonTable } from './ui/comparisonView.js';
+import { renderDateSweep } from './ui/dateSweepView.js';
 import {
   loadLandingSites,
+  loadDateSweep,
   setMastHeight,
   getCustomSite,
   getQuickMapUrl,
   getMoonTrekUrl
 } from './topography/lunarData.js';
-import { calculateLunarEphemeris } from './ephemeris/astronomy.js';
+import { loadEphemeris } from './ephemeris/jplEphemeris.js';
 import {
-  loadEphemeris,
-  sampleEphemeris,
-  AU_KM,
-  SUN_RADIUS_KM,
-  EARTH_RADIUS_KM
-} from './ephemeris/jplEphemeris.js';
-import {
-  analyzeSite,
   findNextEvents,
   makeSky,
   panelIrradianceWm2,
@@ -29,7 +23,8 @@ import {
   DEFAULT_PROFILE_ID,
   WINDOW_DAYS
 } from './analysis/scoring.js';
-import { angularRadiusDeg, azElToMcmf, clamp } from './analysis/geometry.js';
+import { azElToMcmf, clamp } from './analysis/geometry.js';
+import { sampleSite, evaluateSiteScenario } from './analysis/sampling.js';
 
 const DAY_MS = 86_400_000;
 const WINDOW_MS = WINDOW_DAYS * DAY_MS;
@@ -68,6 +63,7 @@ const siteDataQuality = $('site-data-quality');
 const siteDataSource = $('site-data-source');
 const hudSiteName = $('hud-site-name');
 const hudCoords = $('hud-coords');
+const leftPanel = $('left-panel');
 const mastSelect = $('mast-select');
 const panelSelect = $('panel-select');
 const profileSelect = $('profile-select');
@@ -75,9 +71,17 @@ const profileSelect = $('profile-select');
 const scoreNumber = $('score-number');
 const classificationBadge = $('classification-badge');
 const classificationText = $('classification-text');
+const verdictSummary = $('verdict-summary');
 const verdictBar = $('verdict-bar');
 const verdictRows = $('verdict-rows');
 const scoreWindowLabel = $('score-window-label');
+const keySun = $('key-sun');
+const keyDte = $('key-dte');
+const keyOutage = $('key-outage');
+const keyDteCard = $('key-dte-card');
+const keyOutageCard = $('key-outage-card');
+const keyDteSub = $('key-dte-sub');
+const keyOutageSub = $('key-outage-sub');
 
 const hudSunElev = $('hud-sun-elev');
 const hudEarthElev = $('hud-earth-elev');
@@ -105,6 +109,12 @@ const comparisonModal = $('comparison-modal');
 const comparisonModalBody = $('comparison-modal-body');
 const closeComparisonModal = $('close-comparison-modal');
 const openComparisonBtn = $('open-comparison-btn');
+const sweepModal = $('sweep-modal');
+const sweepModalBody = $('sweep-modal-body');
+const sweepModalTitle = $('sweep-modal-title');
+const sweepModalBadge = $('sweep-modal-badge');
+const closeSweepModal = $('close-sweep-modal');
+const openSweepBtn = $('open-sweep-btn');
 const horizonsModal = $('horizons-modal');
 const closeHorizonsModal = $('close-horizons-modal');
 const openHorizonsBtn = $('open-horizons-btn');
@@ -178,34 +188,6 @@ function setLoading(visible, message) {
     if (text) text.textContent = message;
   }
   loadingOverlay.classList.toggle('hidden', !visible);
-}
-
-function localSample(site, timeMs) {
-  const eph = calculateLunarEphemeris(new Date(timeMs), site.lat, site.lon);
-  const sunDistanceKm = eph.sun.distanceKm;
-  return {
-    timeMs,
-    sun: {
-      azDeg: eph.sun.az,
-      elDeg: eph.sun.el,
-      distance: sunDistanceKm / AU_KM,
-      angularRadiusDeg: angularRadiusDeg(SUN_RADIUS_KM, sunDistanceKm)
-    },
-    earth: {
-      azDeg: eph.earth.az,
-      elDeg: eph.earth.el,
-      distance: eph.earth.distanceKm,
-      angularRadiusDeg: angularRadiusDeg(EARTH_RADIUS_KM, eph.earth.distanceKm)
-    }
-  };
-}
-
-function sampleSite(site, timeMs) {
-  if (site.ephem) {
-    const sample = sampleEphemeris(site.ephem, timeMs);
-    if (sample) return sample;
-  }
-  return localSample(site, timeMs);
 }
 
 async function ensureEphemeris(site) {
@@ -309,19 +291,82 @@ function initModelLayerControls() {
   });
 }
 
+function formatOutage(metrics) {
+  const windowHours = metrics.sampleCount * metrics.stepHours;
+  const days = metrics.gMaxHours / 24;
+  const capped = metrics.gMaxHours >= windowHours;
+  return `${capped ? '≥' : ''}${capped ? days.toFixed(0) : days.toFixed(1)} días`;
+}
+
+function buildVerdictSummary(analysis) {
+  const { metrics: m, profile: p, site } = analysis;
+  if (site.role === 'reference') {
+    return `Sitio de referencia: ${m.dteCenterPct.toFixed(0)}% de DTE y ${m.sunlitPct.toFixed(0)}% de horas con Sol. No es un candidato polar.`;
+  }
+  if (site.role === 'custom') {
+    return `Estimación con horizonte aproximado: ${m.sunlitPct.toFixed(0)}% de horas con Sol, ${m.dteCenterPct.toFixed(0)}% de DTE y un corte máximo de ${formatOutage(m)}.`;
+  }
+  const commsText =
+    m.gMaxHours >= p.gMaxTolHours
+      ? `sin enlace DTE continuo: el corte más largo es de ${formatOutage(m)} y la tolerancia es ${p.gMaxTolHours} h`
+      : `enlace DTE dentro de tolerancia: el corte más largo es de ${formatOutage(m)}`;
+  return `${m.sunlitPct.toFixed(0)}% de las horas con Sol, ${m.dteCenterPct.toFixed(0)}% de DTE y ${commsText}.`;
+}
+
 function updateDecisionUI(analysis) {
   scoreNumber.textContent = analysis.scorePercent;
   classificationBadge.className = `verdict-status ${analysis.badgeClass}`;
   classificationBadge.textContent = analysis.status;
   classificationText.textContent = analysis.statusText;
+  if (verdictSummary) verdictSummary.textContent = buildVerdictSummary(analysis);
+
+  const profile = analysis.profile;
+  const metrics = analysis.metrics;
+  if (keySun) keySun.textContent = `${metrics.sunlitPct.toFixed(0)}%`;
+  if (keyDte) keyDte.textContent = `${metrics.dteCenterPct.toFixed(0)}%`;
+  if (keyOutage) keyOutage.textContent = formatOutage(metrics);
+  if (keyDteSub) keyDteSub.textContent = `≥ ${profile.dteReqPct}%`;
+  if (keyOutageSub) keyOutageSub.textContent = `≤ ${profile.gMaxTolHours} h`;
+  keyDteCard?.classList.toggle('is-good', metrics.dteCenterPct >= profile.dteReqPct);
+  keyDteCard?.classList.toggle('is-bad', metrics.dteCenterPct < profile.dteReqPct);
+  keyOutageCard?.classList.toggle('is-good', metrics.gMaxHours < profile.gMaxTolHours);
+  keyOutageCard?.classList.toggle('is-bad', metrics.gMaxHours >= profile.gMaxTolHours);
 
   const weights = analysis.profile.weights;
   const weightSum = weights.energy + weights.dark + weights.dte + weights.comms;
   const terms = [
-    { label: 'Energía', metric: `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`, weight: weights.energy, share: analysis.components.energy },
-    { label: 'Eclipse', metric: `${analysis.metrics.dMaxHours.toFixed(1)} h`, weight: weights.dark, share: analysis.components.dark },
-    { label: 'DTE', metric: `${analysis.metrics.dteCenterPct.toFixed(0)}%`, weight: weights.dte, share: analysis.components.dte },
-    { label: 'Comms', metric: `${analysis.metrics.gMaxHours.toFixed(1)} h`, weight: weights.comms, share: analysis.components.comms }
+    {
+      label: 'Energía',
+      metric: `${(analysis.metrics.energyWhM2 / 1000).toFixed(1)} kWh/m²`,
+      weight: weights.energy,
+      share: analysis.components.energy,
+      title: `Requerido ${analysis.profile.energyReqKWhM2} kWh/m²; el score se satura al alcanzarlo.`
+    },
+    {
+      label: 'Eclipse',
+      metric: `${analysis.metrics.dMaxHours.toFixed(1)} h`,
+      weight: weights.dark,
+      share: analysis.components.dark,
+      title: `Tolerancia ${analysis.profile.dMaxTolHours} h de eclipse continuo.`
+    },
+    {
+      label: 'DTE',
+      metric: `${analysis.metrics.dteCenterPct.toFixed(0)}%`,
+      weight: weights.dte,
+      share: analysis.components.dte,
+      title: `Requerido ${analysis.profile.dteReqPct}%; disco parcial ${analysis.metrics.dtePartialPct.toFixed(0)}%.`
+    },
+    {
+      label: 'Comms',
+      metric: `${analysis.metrics.gMaxHours.toFixed(1)} h`,
+      weight: weights.comms,
+      share: analysis.components.comms,
+      title: `Tolerancia ${analysis.profile.gMaxTolHours} h; ${
+        analysis.metrics.gMaxHours >= analysis.profile.gMaxTolHours
+          ? 'fuera de tolerancia: 0/100.'
+          : 'dentro de tolerancia.'
+      }`
+    }
   ];
 
   verdictBar.innerHTML = '';
@@ -335,11 +380,13 @@ function updateDecisionUI(analysis) {
     const segment = document.createElement('span');
     segment.className = `verdict-bar-seg verdict-level-${level}`;
     segment.style.width = `${points}%`;
+    if (points <= 0) segment.classList.add('is-zero');
     segment.title = `${term.label}: ${points.toFixed(1)} de ${maxPoints.toFixed(1)} puntos`;
     verdictBar.appendChild(segment);
 
     const row = document.createElement('li');
     row.className = `verdict-row verdict-level-${level}`;
+    row.title = term.title ?? '';
     row.innerHTML = `
       <span class="verdict-row-label">${term.label}</span>
       <span class="verdict-row-metric">${term.metric}</span>
@@ -376,6 +423,15 @@ function renderDecisionModel(analysis) {
   const profileEl = $('decision-profile');
   if (profileEl) {
     profileEl.textContent = `${analysis.profile.name}: energía ≥ ${analysis.profile.energyReqKWhM2} kWh/m²; eclipse ≤ ${analysis.profile.dMaxTolHours} h; DTE ≥ ${analysis.profile.dteReqPct}%; corte DTE ≤ ${analysis.profile.gMaxTolHours} h. Panel: ${PANELS[analysis.panelType].label}; mástil: ${analysis.mastHeightM.toFixed(1)} m.`;
+  }
+  const commsNote = $('decision-comms-note');
+  if (commsNote) {
+    const p = analysis.profile;
+    const m = analysis.metrics;
+    commsNote.textContent =
+      `Comms = 1 − corte DTE máximo / tolerancia. En este perfil, un corte ≥ ${p.gMaxTolHours} h da 0/100; ` +
+      `no significa que falte el dato. DTE usa el centro de la Tierra (${m.dteCenterPct.toFixed(0)}% del tiempo); ` +
+      `el disco parcial (${m.dtePartialPct.toFixed(0)}%) se calcula pero no entra en el score.`;
   }
 }
 
@@ -508,13 +564,12 @@ async function calculateSeriesAndEvaluate() {
   await ensureEphemeris(state.currentSite);
   if (token !== state.evaluationToken) return;
   try {
-    const analysis = analyzeSite({
+    const analysis = evaluateSiteScenario({
       site: state.currentSite,
       startMs: state.baseDate.getTime(),
       mastHeightM: state.mastHeightM,
       panelType: state.panelType,
-      profileId: state.profileId,
-      sampleAt: (ms) => sampleSite(state.currentSite, ms)
+      profileId: state.profileId
     });
     if (token !== state.evaluationToken) return;
     state.analysis = analysis;
@@ -564,6 +619,7 @@ async function prepareSite(site) {
   state.evaluationToken += 1;
   setMastHeight(allSites(), state.mastHeightM);
   updateSitePanel(site);
+  if (leftPanel) leftPanel.scrollTop = 0;
   const sitesForScene = allSites();
   moonScene.setLandingSites(sitesForScene, (siteId) => {
     const found = allSites().find((s) => s.id === siteId);
@@ -803,13 +859,12 @@ async function openComparison() {
     const sites = allSites();
     await Promise.all(sites.map(ensureEphemeris));
     const analyses = sites.map((site) =>
-      analyzeSite({
+      evaluateSiteScenario({
         site,
         startMs: state.baseDate.getTime(),
         mastHeightM: state.mastHeightM,
         panelType: state.panelType,
-        profileId: state.profileId,
-        sampleAt: (ms) => sampleSite(site, ms)
+        profileId: state.profileId
       })
     );
     renderComparisonTable(
@@ -836,6 +891,48 @@ async function openComparison() {
     console.error('No se pudo comparar los sitios.', error);
     comparisonModalBody.innerHTML = `<p class="data-note">No se pudo completar la comparación: ${error.message}</p>`;
     openModal(comparisonModal);
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function openSweep() {
+  if (!state.currentSite) return;
+  setLoading(true, 'Cargando barrido mensual de fechas…');
+  try {
+    const sweep = await loadDateSweep(state.currentSite.id);
+    if (sweepModalTitle) {
+      sweepModalTitle.textContent = `Barrido de fechas · ${state.currentSite.name}`;
+    }
+    if (!sweep) {
+      if (sweepModalBadge) sweepModalBadge.textContent = 'Sin datos precalculados';
+      sweepModalBody.innerHTML = `<p class="data-note">No hay barrido precalculado para ${state.currentSite.name}. Ejecuta <code>npm run data:sweep</code> para generarlo.</p>`;
+    } else {
+      if (sweepModalBadge) {
+        sweepModalBadge.textContent = `${sweep.points.length} ventanas mensuales · 2026–2028`;
+      }
+      renderDateSweep(sweepModalBody, {
+        sweep,
+        context: {
+          profile: PROFILE_BY_ID[state.profileId],
+          panelType: state.panelType,
+          mastHeightM: state.mastHeightM,
+          currentDateMs: state.baseDate.getTime(),
+          siteName: state.currentSite.name
+        },
+        onSelectDate: (startMs) => {
+          closeModal(sweepModal);
+          state.baseDate = new Date(startMs);
+          state.currentDate = new Date(startMs);
+          calculateSeriesAndEvaluate();
+        }
+      });
+    }
+    openModal(sweepModal);
+  } catch (error) {
+    console.error('No se pudo cargar el barrido de fechas.', error);
+    sweepModalBody.innerHTML = `<p class="data-note">No se pudo cargar el barrido: ${error.message}</p>`;
+    openModal(sweepModal);
   } finally {
     setLoading(false);
   }
@@ -916,6 +1013,8 @@ function initPanelCollapse() {
 function initModals() {
   openComparisonBtn.addEventListener('click', openComparison);
   closeComparisonModal.addEventListener('click', () => closeModal(comparisonModal));
+  openSweepBtn?.addEventListener('click', openSweep);
+  closeSweepModal?.addEventListener('click', () => closeModal(sweepModal));
   openHorizonsBtn.addEventListener('click', () => openModal(horizonsModal));
   closeHorizonsModal.addEventListener('click', () => closeModal(horizonsModal));
   toggleNnViewBtn.addEventListener('click', () => {
@@ -939,7 +1038,7 @@ function initModals() {
   $('open-trek-modal-btn')?.addEventListener('click', openTrek);
   closeTrekModal?.addEventListener('click', () => closeModal(trekModal));
 
-  for (const modal of [comparisonModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
+  for (const modal of [comparisonModal, sweepModal, horizonsModal, nnModal, panoramaModal, trekModal].filter(Boolean)) {
     modal.addEventListener('click', (event) => {
       if (event.target === modal) closeModal(modal);
     });

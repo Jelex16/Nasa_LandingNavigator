@@ -12,6 +12,8 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
 > table, custom coordinates and a data/validation panel. It is decision-support and educational
 > software, not a flight-certified tool.
 
+> **For judges:** [English README](README.en.md) · [30-second demo script and 7-slide outline](docs/demo.md)
+
 ---
 
 ## Qué incluye
@@ -35,6 +37,10 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
   con pesos y umbrales visibles, cuatro perfiles de misión y un modal de modelo auditable.
 - **Comparación de los 9 sitios** con la misma fecha de inicio, ventana, perfil, panel y mástil.
   Filas seleccionables; sin la antigua tabla de “acción” fuera de pantalla.
+- **Veredicto de primera pantalla**: porcentaje de horas con Sol, DTE centro y corte DTE máximo;
+  el score compuesto queda como índice secundario, con el desglose plegado.
+- **Barrido de fechas (launch slip)**: 36 ventanas mensuales 2026–2028 precalculadas con energía,
+  DTE, corte máximo y próximo Earthset; un clic carga la fecha en la vista principal.
 - **Selector visible**, coordenadas personalizadas (modelo aproximado, sin DEM LOLA), selector de
   altura de mástil (0.5–20 m), panel horizontal/vertical/tracker y perfiles de misión.
 - **28 días de ventana** en todos los cálculos; el *playback* no altera la ventana de evaluación.
@@ -103,15 +109,22 @@ Score = 100 · (wE·E + wD·D + wC·C + wG·G) / (wE + wD + wC + wG)
 ```
 
 - `E`: energía específica acumulada en 28 días / requerimiento del perfil.
-- `D`: supervivencia al eclipse continuo máximo `D_max` / tolerancia.
+- `D = 1 − D_max / tolerancia_eclipse`.
 - `C`: visibilidad del centro de la Tierra (DTE) / requerimiento.
-- `G`: tolerancia al corte DTE máximo `G_max`.
+- `G = 1 − G_max / tolerancia_corte`.
 - Se aplican restricciones duras: pendiente local >15° limita el estado; >25° es NO-GO; outages
   severos de DTE/eclipse también fuerzan NO-GO.
 - Los perfiles son: **Demo directa DTE**, **Rover nocturno**, **Puesto tripulado** y
   **Relé / store-and-forward**. El perfil de relé solo relaja las tolerancias; no simula un relé
   concreto.
 - Apollo 11 se marca **REFERENCIA** aunque su score numérico sea alto: no es un candidato polar.
+
+`Comms` mide la racha continua más larga sin el centro de la Tierra visible, no el porcentaje
+medio de DTE. Con el perfil directo por defecto (24 h de tolerancia), los sitios polares tienen
+cortes de 226–672 h y el término vale 0/100. Eso es un resultado del modelo, no un dato
+faltante. Con el perfil de relé (400 h) aparecen valores de 18–44 en la mayoría de los
+candidatos; Shackleton y Haworth siguen en 0. Apollo 11, que nunca pierde la Tierra, da 100
+pero se marca como referencia.
 
 Con el perfil directo por defecto, varios sitios polares aparecen **NO-GO** porque los horizontes
 LOLA reales producen outages DTE de días. Ese es el resultado científico, no un fallo de la UI: el
@@ -152,7 +165,15 @@ python scripts/build_regional_horizons.py --north-mode true
 
 # Corregir los 6 horizontes híbridos heredados (idempotente)
 npm run data:fix-azimuth
+
+# Regenerar el barrido mensual 2026–2028 de los 9 sitios
+npm run data:sweep
 ```
+
+El barrido usa 28 días, paso de 1 h, mástil 2 m, panel vertical con seguimiento y perfil Demo DTE
+como supuestos de referencia. La energía se guarda para los tres paneles; DTE y corte se calculan
+con el mástil de 2 m y la UI avisa si el mástil actual es distinto. Los archivos generados están en
+`public/data/sweep/`.
 
 El pipeline completo de LOLA/Horizons que generó los datos base está en el proyecto hermano
 `../` (SUNDIAL, `pipeline/`). Los DEMs locales necesarios no están en este repositorio.

@@ -19,6 +19,18 @@ function limitClass(value, limit) {
   return value > limit ? 'metric-danger' : 'metric-good';
 }
 
+function commsState(metrics, profile, comps) {
+  const out = metrics.gMaxHours >= profile.gMaxTolHours;
+  const pct = Math.round(comps.comms * 100);
+  return {
+    className: out ? 'metric-danger' : 'metric-good',
+    label: out ? '0/100 · fuera de tolerancia' : `${pct}/100`,
+    title: out
+      ? `Corte DTE ${metrics.gMaxHours.toFixed(1)} h ≥ tolerancia ${profile.gMaxTolHours} h: 0/100, fuera de tolerancia. No falta el dato.`
+      : `Corte DTE ${metrics.gMaxHours.toFixed(1)} h dentro de la tolerancia de ${profile.gMaxTolHours} h: ${pct}/100.`
+  };
+}
+
 export function renderComparisonTable(containerElement, analyses, context, onSelectSite) {
   if (!containerElement) return;
   const profile = context.profile;
@@ -30,6 +42,7 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
       const isReference = site.role === 'reference';
       const statusShort = analysis.status.split(' ')[0];
       const scoreLabel = isReference ? 'REFERENCIA' : `${statusShort} · ${analysis.scorePercent}%`;
+      const comms = commsState(metrics, profile, comps);
       return `
         <tr class="comparison-row" data-site-id="${site.id}">
           <td>
@@ -51,10 +64,11 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
           <td class="${termClass(comps.dte)}">
             <strong>${metrics.dteCenterPct.toFixed(0)}%</strong>
             <div class="site-cell-meta">req ${profile.dteReqPct}% · ${Math.round(comps.dte * 100)}/100</div>
+            <div class="site-cell-meta">disco parcial ${metrics.dtePartialPct.toFixed(0)}%</div>
           </td>
-          <td class="${limitClass(metrics.gMaxHours, profile.gMaxTolHours)}">
+          <td class="comms-cell ${comms.className}" title="${comms.title}" aria-label="${comms.title}">
             <strong>${metrics.gMaxHours.toFixed(1)} h</strong>
-            <div class="site-cell-meta">tol ${profile.gMaxTolHours} h · ${Math.round(comps.comms * 100)}/100</div>
+            <div class="site-cell-meta">tol ${profile.gMaxTolHours} h · ${comms.label}</div>
           </td>
           <td class="${site.maxSlopeDeg < 10 ? 'metric-good' : site.maxSlopeDeg < 20 ? 'metric-warn' : 'metric-danger'}">
             <strong>${site.maxSlopeDeg.toFixed(1)}°</strong>
@@ -88,18 +102,26 @@ export function renderComparisonTable(containerElement, analyses, context, onSel
         <table class="comparison-table">
           <thead>
             <tr>
-              <th>Sitio / datos</th>
-              <th>Score</th>
-              <th>Energía (28 d)</th>
-              <th>Eclipse continuo</th>
-              <th>DTE centro</th>
-              <th>Corte DTE</th>
-              <th>Pendiente local</th>
+              <th scope="col">Sitio / datos</th>
+              <th scope="col">Score</th>
+              <th scope="col">Energía (28 d)</th>
+              <th scope="col">Eclipse continuo</th>
+              <th scope="col">DTE centro</th>
+              <th scope="col">Comms (corte DTE)</th>
+              <th scope="col">Pendiente local</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
+
+      <p class="comparison-footnote">
+        <b>Comms</b> = 1 − corte DTE máximo / tolerancia. Un 0/100 indica que el corte iguala o
+        supera la tolerancia del perfil, no que falte el dato. El corte se mide dentro de la
+        ventana de 28 días; si dura más, el valor es una cota inferior. DTE usa el centro de la
+        Tierra; el disco parcial se muestra como referencia y no entra en el score. Cambia el
+        perfil a “Relé / store-and-forward” para ver valores distintos de 0.
+      </p>
     </div>
   `;
 

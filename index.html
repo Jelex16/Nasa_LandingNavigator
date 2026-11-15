@@ -40,6 +40,9 @@
           <button class="nav-action-btn" id="open-comparison-btn" type="button" title="Comparar sitios con la misma ventana temporal">
             Comparar
           </button>
+          <button class="nav-action-btn" id="open-sweep-btn" type="button" title="Barrido mensual de fechas (launch slip)">
+            Fechas
+          </button>
           <button class="nav-action-btn" id="open-horizons-btn" type="button" title="Fuentes de datos NASA y validación">
             Datos NASA
           </button>
@@ -60,6 +63,7 @@
       <button class="cam-btn cam-btn-accent" id="open-panorama-btn" type="button" title="Panorama 2.5D del horizonte LOLA">
         Panorama 2.5D
       </button>
+      <span class="cam-note" aria-hidden="true">Globo visual · score LOLA</span>
     </div>
 
     <div class="ui-overlay-container">
@@ -92,19 +96,41 @@
 
           <div class="verdict-headline">
             <span class="verdict-status status-safe" id="classification-badge">CARGANDO</span>
-            <span class="verdict-score">
+            <span class="verdict-score-secondary" title="Índice de decisión; no es una probabilidad de éxito">
+              <span>Índice de misión</span>
               <span class="verdict-score-value" id="score-number">—</span>
               <span class="verdict-score-unit">/100</span>
             </span>
           </div>
 
-          <div class="verdict-bar" id="verdict-bar" aria-hidden="true"></div>
+          <div class="verdict-key-metrics">
+            <div class="verdict-key-metric">
+              <span class="key-label">Sol</span>
+              <strong id="key-sun">—</strong>
+              <span class="key-sub">horas con Sol</span>
+            </div>
+            <div class="verdict-key-metric" id="key-dte-card">
+              <span class="key-label">DTE</span>
+              <strong id="key-dte">—</strong>
+              <span class="key-sub" id="key-dte-sub">centro visible</span>
+            </div>
+            <div class="verdict-key-metric" id="key-outage-card">
+              <span class="key-label">Corte</span>
+              <strong id="key-outage">—</strong>
+              <span class="key-sub" id="key-outage-sub">sin DTE</span>
+            </div>
+          </div>
 
-          <ul class="verdict-rows" id="verdict-rows"></ul>
+          <p class="verdict-summary" id="verdict-summary" aria-live="polite">Calculando métricas LOLA + Horizons…</p>
 
-          <p class="verdict-note" id="classification-text">
-            Calculando métricas LOLA + Horizons…
-          </p>
+          <details class="verdict-details">
+            <summary>Ver desglose del score</summary>
+            <div class="verdict-bar" id="verdict-bar" aria-hidden="true"></div>
+            <ul class="verdict-rows" id="verdict-rows"></ul>
+            <p class="verdict-note" id="classification-text">
+              Calculando métricas LOLA + Horizons…
+            </p>
+          </details>
 
           <p class="verdict-window" id="score-window-label">
             Ventana: 28 días desde — · instante —
@@ -133,10 +159,10 @@
           <div class="config-block">
             <label for="profile-select">Perfil de misión</label>
             <select id="profile-select">
-              <option value="technology_demo" selected>Demo DTE</option>
+              <option value="technology_demo" selected>Demo DTE directo</option>
               <option value="night_survivor">Rover nocturno</option>
               <option value="crewed_outpost">Tripulado</option>
-              <option value="relay_store_forward">Relé</option>
+              <option value="relay_store_forward">Relé / store-and-forward</option>
             </select>
           </div>
         </div>
@@ -177,35 +203,40 @@
           <p class="input-error" id="custom-coords-error" role="alert" hidden></p>
         </details>
 
-        <div class="site-brief">
-          <span class="field-label">Contexto del sitio</span>
-          <p class="site-desc-text" id="site-description">Cargando topografía LOLA y efemérides…</p>
-        </div>
+        <details class="panel-disclosure" id="site-brief-details">
+          <summary>Contexto del sitio</summary>
+          <div class="site-brief">
+            <p class="site-desc-text" id="site-description">Cargando topografía LOLA y efemérides…</p>
+          </div>
+        </details>
 
-        <div class="model3d-card" id="model3d-card">
-          <div class="model3d-header">
-            <span class="model3d-eyebrow">MODELO 3D · LRO / LOLA</span>
-            <span class="model3d-note">vista previa</span>
+        <details class="panel-disclosure" id="model3d-details">
+          <summary>Globo 3D y capas</summary>
+          <div class="model3d-card" id="model3d-card">
+            <div class="model3d-header">
+              <span class="model3d-eyebrow">MODELO 3D · LRO / LOLA</span>
+              <span class="model3d-note">vista previa · no entra en el score</span>
+            </div>
+            <div class="layer-buttons" role="group" aria-label="Capa del globo lunar">
+              <button class="layer-btn active" type="button" data-layer="lroc" title="Fotografía LROC WAC (vista previa 2k)">LROC</button>
+              <button class="layer-btn" type="button" data-layer="lola_color" title="Topografía LOLA en color (vista previa)">Topo</button>
+              <button class="layer-btn" type="button" data-layer="lola_hillshade" title="Relieve sombreado LOLA (vista previa)">Relieve</button>
+              <button class="layer-btn" type="button" data-layer="lola_slope" title="Pendientes LOLA (vista previa)">Pendiente</button>
+            </div>
+            <div class="model3d-relief-row">
+              <span class="model3d-label">Relieve</span>
+              <button class="relief-btn" type="button" data-relief="1" title="Escala 1:1">1x</button>
+              <button class="relief-btn active" type="button" data-relief="2.5" title="Exageración 2.5x">2.5x</button>
+              <button class="relief-btn" type="button" data-relief="5" title="Exageración 5x">5x</button>
+              <button class="relief-btn" type="button" data-relief="0" title="Desactivar desplazamiento">Plano</button>
+            </div>
+            <div class="nasa-links-row">
+              <a id="btn-open-quickmap" class="btn-nasa-tool" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer">LROC QuickMap ↗</a>
+              <a id="btn-open-moontrek" class="btn-nasa-tool" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer">Moon Trek ↗</a>
+              <button id="btn-open-dossier" class="btn-nasa-tool" type="button">Capas &amp; DEM</button>
+            </div>
           </div>
-          <div class="layer-buttons" role="group" aria-label="Capa del globo lunar">
-            <button class="layer-btn active" type="button" data-layer="lroc" title="Fotografía LROC WAC (vista previa 2k)">LROC</button>
-            <button class="layer-btn" type="button" data-layer="lola_color" title="Topografía LOLA en color (vista previa)">Topo</button>
-            <button class="layer-btn" type="button" data-layer="lola_hillshade" title="Relieve sombreado LOLA (vista previa)">Relieve</button>
-            <button class="layer-btn" type="button" data-layer="lola_slope" title="Pendientes LOLA (vista previa)">Pendiente</button>
-          </div>
-          <div class="model3d-relief-row">
-            <span class="model3d-label">Relieve</span>
-            <button class="relief-btn" type="button" data-relief="1" title="Escala 1:1">1x</button>
-            <button class="relief-btn active" type="button" data-relief="2.5" title="Exageración 2.5x">2.5x</button>
-            <button class="relief-btn" type="button" data-relief="5" title="Exageración 5x">5x</button>
-            <button class="relief-btn" type="button" data-relief="0" title="Desactivar desplazamiento">Plano</button>
-          </div>
-          <div class="nasa-links-row">
-            <a id="btn-open-quickmap" class="btn-nasa-tool" href="https://quickmap.lroc.asu.edu" target="_blank" rel="noopener noreferrer">LROC QuickMap ↗</a>
-            <a id="btn-open-moontrek" class="btn-nasa-tool" href="https://trek.nasa.gov/moon/" target="_blank" rel="noopener noreferrer">Moon Trek ↗</a>
-            <button id="btn-open-dossier" class="btn-nasa-tool" type="button">Capas &amp; DEM</button>
-          </div>
-        </div>
+        </details>
       </aside>
 
       <aside class="glass-panel right-floating-panel" id="right-panel">
@@ -410,7 +441,7 @@
               <dt>Modelo</dt>
               <dd>
                 <strong>Multicriterio transparente</strong>
-                <span>Energía, eclipse continuo, DTE y corte de comunicaciones. Los pesos y umbrales del perfil son visibles y editables en la UI.</span>
+                <span>Energía, eclipse continuo, DTE y corte de comunicaciones. Los pesos y umbrales de cada perfil son visibles; se seleccionan con el perfil de misión.</span>
               </dd>
             </div>
           </dl>
@@ -592,6 +623,7 @@
             Score = 100 · (w<sub>E</sub>·E + w<sub>D</sub>·D + w<sub>C</sub>·C + w<sub>G</sub>·G) / Σw
           </div>
           <div class="decision-components" id="decision-components"></div>
+          <p class="data-note" id="decision-comms-note"></p>
           <div class="data-section">
             <label class="sec-label">Perfil seleccionado:</label>
             <div id="decision-profile" class="data-note"></div>
@@ -650,6 +682,19 @@
             horizonte. Los discos se agrandan para legibilidad salvo que actives la escala angular real.
           </p>
         </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="sweep-modal" role="dialog" aria-modal="true" aria-labelledby="sweep-modal-title">
+      <div class="modal-window modal-sweep">
+        <div class="modal-header">
+          <div class="modal-title-with-badge">
+            <h2 id="sweep-modal-title">Barrido de fechas · launch slip</h2>
+            <span class="m-badge" id="sweep-modal-badge">36 ventanas mensuales · 2026–2028</span>
+          </div>
+          <button class="btn-modal-close" id="close-sweep-modal" type="button" aria-label="Cerrar barrido">&times;</button>
+        </div>
+        <div class="modal-body" id="sweep-modal-body"></div>
       </div>
     </div>
 

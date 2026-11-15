@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "data:fix-azimuth": "node scripts/fix_horizon_azimuth.mjs",
-    "data:regional-horizons": "python scripts/build_regional_horizons.py --north-mode true"
+    "data:regional-horizons": "python scripts/build_regional_horizons.py --north-mode true",
+    "data:sweep": "node scripts/build_monthly_sweep.mjs"
   },
   "devDependencies": {
     "vite": "^8.3.6"
