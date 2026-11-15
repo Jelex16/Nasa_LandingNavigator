@@ -55,6 +55,22 @@ los perfiles predefinidos son supuestos del equipo, **no requisitos NASA**; los 
 personalizados son supuestos del usuario. La métrica de energía es irradiancia acumulada en el plano
 del panel, no un presupuesto eléctrico completo.
 
+## Capturas
+
+| Panel principal | Comparación de sitios |
+|:---:|:---:|
+| [![Panel principal](docs/screenshots/01-dashboard.png)](docs/screenshots/01-dashboard.png) | [![Matriz de comparación de sitios](docs/screenshots/02-comparison.png)](docs/screenshots/02-comparison.png) |
+| Veredicto, radar LOLA, globo 3D y dock de misión. | 28 sitios bajo la misma ventana, perfil y supuestos. |
+
+| Barrido de fechas | Panorama 2.5D del horizonte |
+|:---:|:---:|
+| [![Barrido de fechas](docs/screenshots/03-sweep.png)](docs/screenshots/03-sweep.png) | [![Panorama 2.5D del horizonte LOLA](docs/screenshots/04-panorama.png)](docs/screenshots/04-panorama.png) |
+| 36 ventanas mensuales de 2026 a 2028. | Terreno LOLA, trayectoria solar y bucle de libración terrestre. |
+
+**Línea de tiempo de 28 días** — ventanas de visibilidad Sol/Tierra frente al horizonte LOLA.
+
+[![Línea de tiempo de 28 días](docs/screenshots/05-timeline.png)](docs/screenshots/05-timeline.png)
+
 ## Uso de inteligencia artificial (SI)
 
 Este proyecto usó un asistente de codificación con IA de la familia Gemini como apoyo al desarrollo:

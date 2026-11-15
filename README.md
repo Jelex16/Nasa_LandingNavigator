@@ -52,6 +52,22 @@ The LOLA horizons and JPL Horizons ephemerides are NASA/JPL data. The built-in p
 weights are team assumptions, **not NASA requirements**; custom thresholds are user assumptions. The
 energy metric is accumulated panel-plane irradiance, not a full electrical power budget.
 
+## Screenshots
+
+| Main dashboard | Site comparison |
+|:---:|:---:|
+| [![Main dashboard](docs/screenshots/01-dashboard.png)](docs/screenshots/01-dashboard.png) | [![Site comparison matrix](docs/screenshots/02-comparison.png)](docs/screenshots/02-comparison.png) |
+| Verdict, LOLA radar, 3D globe and mission dock. | 28 sites under the same window, profile and assumptions. |
+
+| Launch-slip sweep | 2.5D horizon panorama |
+|:---:|:---:|
+| [![Launch-slip sweep](docs/screenshots/03-sweep.png)](docs/screenshots/03-sweep.png) | [![2.5D LOLA horizon panorama](docs/screenshots/04-panorama.png)](docs/screenshots/04-panorama.png) |
+| 36 monthly windows from 2026 to 2028. | LOLA terrain, solar path and Earth libration loop. |
+
+**28-day elevation timeline** — Sun and Earth visibility windows against the LOLA horizon.
+
+[![28-day elevation timeline](docs/screenshots/05-timeline.png)](docs/screenshots/05-timeline.png)
+
 ## AI (SI) usage
 
 This project used a Gemini-family AI coding assistant as a development aid for code drafting and
