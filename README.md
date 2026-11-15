@@ -1,89 +1,111 @@
-# Lunar Landing Site Navigator — LOLA + JPL Horizons
+# Lua Navigator
 
-Herramienta de apoyo a decisiones para comparar sitios y fechas de alunizaje en el polo sur lunar.
-Combina **topografía LOLA real** con **efemérides aparentes de JPL Horizons** para estimar energía solar,
-eclipses, visibilidad directa a Tierra (DTE), cortes de comunicaciones y el efecto de la fecha de aterrizaje.
+**A decision-support web app that compares lunar south-pole landing sites and dates using real NASA LOLA terrain and JPL Horizons ephemerides.**
 
-Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator**.
+NASA Space Apps Challenge 2026 · [Leer en español](README.es.md)
 
-## Uso de inteligencia artificial (SI)
+Lua Navigator turns NASA terrain and ephemeris data into a fast, auditable site/date trade-off:
+sunlight, eclipses, direct-to-Earth (DTE) visibility, communication blackouts, slope and a
+transparent multi-criteria index. It is educational and decision-support software, **not** a
+flight-certified landing analysis.
 
-Este proyecto usó un asistente de codificación con IA de la familia Gemini como apoyo al desarrollo:
-redacción y refactorización de código, tests, documentación y scripts de generación de datos
-derivados. La idea del reto, el alcance científico, la selección de sitios, los perfiles de misión y
-la interpretación de resultados fueron definidos por el equipo; la SI no se usó para concebir la
-solución. Los DEM LOLA y las efemérides de JPL Horizons son datos auténticos de NASA/JPL; no se
-generaron mediciones con IA. No se incluyen imágenes, vídeos ni audio generados con IA.
+## The problem
 
-La declaración completa está en [`docs/SI_USAGE.es.md`](docs/SI_USAGE.es.md). `package.json` y
-`public/data/manifest.json` incluyen `siDisclosure`, y cada JSON derivado de `public/data` incluye un
-objeto `si`.
+Missions to the Moon's south pole face extreme lighting and communication constraints. A ridge a few
+degrees high can decide whether a lander gets solar power, a direct radio link to Earth, both, or
+neither. Existing tools (QuickMap, Moon Trek, Horizons) are built for detailed analysis, not for
+rapid scenario comparison. When a launch date slips, planners need to re-evaluate sites and dates
+quickly.
 
-> English summary: this is a static Vite web app that compares 28 lunar sites (25 curated plus
-> three international references) using real NASA LOLA horizon profiles and JPL Horizons DE441
-> Sun/Earth ephemerides. It includes a 2.5D LOLA horizon panorama, a 28-day power/DTE timeline, a
-> transparent multi-criteria score, a site comparison matrix, a site × date heatmap, a visual
-> side-by-side A/B view, shareable scenario links, JSON/CSV export, a bilingual educational guide and
-> custom coordinates. It is decision-support and educational software, not a flight-certified tool.
+## What it does
 
-> **For judges:** [English README](README.en.md) · [Feature reference (English)](docs/features.md) ·
-> [Referencia de features (Español)](docs/features.es.md) ·
-> [30-second demo script and 7-slide outline](docs/demo.md)
+- **Pick a site and a date**: 28 curated sites — eight polar sites (Malapert, Connecting Ridge,
+  Shackleton, Peak near Shackleton, de Gerlache, Mons Mouton, Nobile, Haworth), thirteen historical
+  sites (Apollo 11–17, Luna 9/16/17/21, Chang'e 3/5/6), four CLPS/commercial sites (IM-1 Odysseus,
+  IM-2 Athena, Blue Ghost 1, IM-3 Reiner Gamma) and three international references (Chandrayaan-3,
+  SLIM, Chang'e 4) — or custom lunar coordinates. The selector groups them by category.
+- **See Sun and Earth against the real LOLA horizon**: a 2.5D horizon panorama, a polar radar, and a
+  28-day Sun/Earth elevation timeline.
+- **Read a plain-language verdict first**: percent of hours with sunlight, percent of time the Earth's
+  center is visible (DTE), the longest continuous DTE blackout, and a secondary mission index.
+- **Run a launch-slip sweep**: 36 monthly 28-day windows from 2026 to 2028 with energy, DTE, longest
+  outage, and next Earthset. Click a month to load that date in the main view.
+- **Compare sites with the same assumptions**: a 28-site comparison matrix with energy, eclipse,
+  DTE, comms/outage, slope, and a transparent multi-criteria score.
+- **Side-by-side A/B**: two site/date scenarios with compact LOLA radars, verdicts, metrics, a B−A
+  delta table and “load in main view” for either scenario.
+- **Site × date matrix**: 28 sites × 36 months with a metric selector (score, Sun, DTE, outage);
+  reference rows are marked. Click a cell to load that site and date in the main view.
+- **Share and export**: the scenario is encoded in the URL and copied by **Share**; export scenario
+  JSON (with the 672-point series) and CSV for the comparison, sweep and site × date matrix.
+- **Educational guide**: **How to read** opens a bilingual quick start, metric definitions, why the
+  south pole is hard, a glossary, “try this” examples and limits.
+- **Explore mission profiles**: direct-to-Earth demo, night-surviving rover, crewed outpost,
+  relay/store-and-forward, and a custom profile. All weights and thresholds are visible.
+- **Set your own thresholds**: the custom profile lets you define energy, eclipse, DTE and outage
+  requirements. The tool rescores the current site, comparison, sweep and matrix. Meeting all four
+  thresholds is GO. In strict mode (default), any unmet threshold is NO-GO; without strict mode, a
+  missed threshold is CAUTION when the index is ≥50, otherwise NO-GO.
+- **Bilingual UI**: English by default with an EN/ES selector; the choice is persisted locally.
 
----
+The LOLA horizons and JPL Horizons ephemerides are NASA/JPL data. The built-in profile thresholds and
+weights are team assumptions, **not NASA requirements**; custom thresholds are user assumptions. The
+energy metric is accumulated panel-plane irradiance, not a full electrical power budget.
 
-## Qué incluye
+## AI (SI) usage
 
-- **28 sitios**: 8 polares —Malapert Massif, Connecting Ridge, Shackleton Rim (punto LOLA no
-  oficial), Peak near Shackleton, de Gerlache Rim, Mons Mouton/Leibnitz Beta, Nobile Rim 1 y Haworth—
-  más 13 históricos (Apollo 11–17, Luna 9/16/17/21 y Chang'e 3/5/6), 4 CLPS/comerciales (IM-1
-  Odysseus, IM-2 Athena, Blue Ghost 1 e IM-3 Reiner Gamma) y 3 referencias internacionales:
-  Chandrayaan-3 (Shiv Shakti), SLIM (Shioli) y Chang'e 4 (Von Kármán).
-- **Horizontes LOLA reales**:
-  - 6 sitios polares con DEM local de **5 m/px** + DEM regional **80 m/px** hasta 100 km (SUNDIAL hybrid).
-  - Nobile Rim 1, Haworth, IM-1 e IM-2 con **DEM regional LOLA 80 m/px** únicamente; se etiquetan
-    como tal. IM-1 está cerca del borde del DEM 80S y se advierte de la cobertura parcial.
-  - Apollo 11 y el resto de referencias históricas, CLPS no polares e internacionales con horizonte
-    analítico plano; **no** son análisis LOLA del terreno. Chang'e 4 y Chang'e 6 están en la cara
-    oculta: DTE 0% y necesidad de relé.
-- **Efemérides JPL Horizons DE441**: azimut/elevación aparentes del Sol y la Tierra, paso de 1 h,
-  2026-01-01 → 2029-02-01, con interpolación cúbica de Hermite en el cliente.
-- **Panorama 2.5D** de 360°: silueta LOLA, relieve sombreado, trayectoria solar de 24 h, bucle de
-  libración terrestre de 28 días, discos finitos y etiquetas “bajo el horizonte”.
-- **Globo 3D con capas LROC/LOLA** (vistas previas 2k/1k), control de relieve 1x/2.5x/5x/plano y
-  enlaces centrados a **LROC QuickMap** y **NASA Moon Trek**. Las texturas del globo son visuales:
-  el score usa los horizontes LOLA de `public/data/horizon`, no las texturas.
-- **Radar polar** de horizonte, Sol y Tierra; curvas de 28 días con ventanas solares y DTE.
-- **Score multicriterio transparente** (energía, eclipse continuo, DTE y corte de comunicaciones)
-  con pesos y umbrales visibles, cuatro perfiles predefinidos, un perfil personalizado y un modal de
-  modelo auditable.
-- **Perfil personalizado**: el usuario define energía, eclipse, DTE y corte; la herramienta recalcula
-  el score y el veredicto del sitio, la comparación, el barrido y la matriz. Cumplir los cuatro
-  umbrales es `GO`. En modo estricto (por defecto), cualquier umbral incumplido es `NO-GO`; sin modo
-  estricto, un umbral incumplido es `PRECAUCIÓN` si el índice es ≥50; si no, `NO-GO`.
-- **Comparación de los 28 sitios** con la misma fecha de inicio, ventana, perfil, panel y mástil.
-  Filas seleccionables; las referencias llevan badge `REFERENCE`.
-- **A/B lado a lado**: dos escenarios sitio/fecha con radares LOLA, veredictos, métricas y tabla de
-  deltas B−A; “Cargar en vista principal” abre cualquiera de los dos.
-- **Matriz sitio × fecha**: 28 sitios × 36 meses con selector de métrica (score, Sol, DTE o corte);
-  una celda carga ese sitio y esa fecha en la vista principal. Las filas de referencia están marcadas.
-- **Compartir y exportar**: enlace de escenario con sitio/fecha/perfil/panel/mástil/idioma; botón
-  Compartir; JSON del escenario con la serie de 672 puntos; CSV de comparación, barrido y matriz.
-- **Guía educativa bilingüe**: “Cómo leer” abre inicio rápido, métricas, por qué el polo sur es
-  difícil, glosario, “prueba esto” y límites.
-- **UI bilingüe**: inglés por defecto y selector EN/ES que conserva la preferencia en el navegador.
-- **Veredicto de primera pantalla**: porcentaje de horas con Sol, DTE centro y corte DTE máximo;
-  el score compuesto queda como índice secundario, con el desglose plegado.
-- **Barrido de fechas (launch slip)**: 36 ventanas mensuales 2026–2028 precalculadas con energía,
-  DTE, corte máximo y próximo Earthset; un clic carga la fecha en la vista principal.
-- **Selector visible**, coordenadas personalizadas (modelo aproximado, sin DEM LOLA), selector de
-  altura de mástil (0.5–20 m), panel horizontal/vertical/tracker y perfiles de misión.
-- **28 días de ventana** en todos los cálculos; el *playback* no altera la ventana de evaluación.
-- **Datos y validación**: modal con fuentes, corrección de azimut, RMS de interpolación y manifiesto.
+This project used a Gemini-family AI coding assistant as a development aid for code drafting and
+refactoring, tests, documentation and the scripts that generate derived data products. The team
+defined the challenge idea, scientific scope, site selection, mission profiles and interpretation of
+results; AI was not used to conceive the solution. NASA LOLA DEMs and JPL Horizons ephemerides are
+authentic NASA/JPL source data; no measurements were generated with AI. No AI-generated images,
+video or audio are included.
 
----
+The full disclosure is in [`docs/SI_USAGE.md`](docs/SI_USAGE.md) (Spanish:
+[`docs/SI_USAGE.es.md`](docs/SI_USAGE.es.md)). `package.json` and `public/data/manifest.json`
+include `siDisclosure`, and every derived JSON under `public/data` includes a top-level `si` object.
 
-## Inicio rápido
+## NASA data and validation
+
+| Source | Use |
+|---|---|
+| NASA PGDA LOLA 5 m/px landing-site DEMs | Near-field horizon for six sites |
+| NASA PGDA LOLA 80S 80 m/px regional DEM | Far field to 100 km; Nobile, Haworth, IM-1 and IM-2 only |
+| NASA/JPL Horizons DE441 | Apparent topocentric Sun/Earth azimuth, elevation, and distance, 1 h step |
+| NASA LRO / ASU LROC QuickMap | Official site links and preview textures |
+| NASA Solar System Treks (Moon Trek) | Official site links and LOLA layers |
+
+- Horizon profiles: 720 azimuth bins (0.5°), five mast heights (0.5, 2, 5, 10, 20 m), lunar
+  curvature correction.
+- Ephemerides: JPL Horizons DE441, 2026-01-01 to 2029-02-01, cubic Hermite interpolation in the
+  browser.
+- Validation: 4,032 off-grid samples against Horizons; **RMS 5e-6°** (shown as 1e-5° in the UI),
+  maximum error **1.22e-4°** (shown as 1.2e-4°).
+- Terrain cross-validation: `public/data/terrain-validation.json` compares the 5 m/px near-field DEM
+  with the 80 m/px regional DEM over each site's near-field range (24 azimuths, 2 m mast). Aggregate
+  RMS 0.51°, maximum 2.18° over 144 comparisons. It measures cross-product agreement, not absolute
+  accuracy; both products derive from LOLA.
+- Azimuth provenance: the inherited hybrid horizons used the direction toward the lunar south pole as
+  “north”. They were rotated by 180° (360 bins) so that bin 0 is true north and matches Horizons
+  azimuths; the correction is recorded in the manifest and in each horizon's notes.
+- Nobile, Haworth, IM-1 and IM-2 use the regional 80 m/px DEM and the local IAU 2000 engine for
+  ephemerides; this is labeled in the UI. IM-1 is near the northern edge of the 80S DEM, so distant
+  relief may be underrepresented to the north.
+- Historical, international and non-polar CLPS/commercial reference sites use analytic flat horizons
+  and the local IAU 2000 engine; they are labeled `REFERENCE` and are not Artemis III candidates.
+- The 3D globe textures are previews only, and the Sun/Earth spheres in the 3D scene are illustrative
+  and not to scale. The analysis uses the LOLA horizon files and the Horizons ephemerides, not the
+  textures.
+- **International reference sites** (Chandrayaan-3, SLIM, Chang'e 4) use real mission coordinates but
+  **not** LOLA terrain at those points: their horizon is analytic flat and their ephemerides are the
+  local IAU 2000 engine. They are labeled `REFERENCE` and are not ranked as candidates. Chang'e 4 is
+  on the far side, so its DTE is 0% and a relay is required; Chandrayaan-3 at 69.4°S is a
+  simplification because polar illumination is terrain-sensitive.
+- **Data manifest**: `public/data/manifest.json` lists 70 derived files with sizes and SHA-256
+  checksums. The manifest includes `referenceSitesNote` for the international references. The
+  original DEMs (~0.5 GB) are not distributed.
+
+## Quick start
 
 ```bash
 npm install
@@ -91,203 +113,74 @@ npm run dev
 # http://localhost:5173
 ```
 
-Build de producción:
+Production build:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-El catálogo real y los horizontes se cargan desde `public/data/`. La app no necesita red para el
-recorrido principal: las efemérides y los horizontes están precalculados y versionados.
+Regenerate the monthly sweep and data manifest (optional; the generated files are versioned):
 
-Tests de regresión (motor, datos, i18n y exportación):
+```bash
+npm run data:sweep
+npm run data:flat-horizons
+npm run data:manifest
+```
+
+Regression tests (engine, catalog, data, i18n and export):
 
 ```bash
 npm test
 ```
 
----
+## Documentation
 
-## Datos NASA y procedencia
+- **Feature reference:** [English](docs/features.md) · [Español](docs/features.es.md)
+- **AI (SI) usage disclosure:** [English](docs/SI_USAGE.md) · [Español](docs/SI_USAGE.es.md)
+- **Data manifest and checksums:** `public/data/manifest.json`
+- The application UI defaults to English and can switch to Spanish from the EN/ES selector; the
+  choice is persisted locally. The submission page and this README are in English.
 
-| Fuente | Uso | Enlace |
-|---|---|---|
-| NASA PGDA LOLA 5 m/px landing-site DEMs | Campo cercano de 6 sitios | https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/ |
-| NASA PGDA LOLA 80S 80 m/px regional DEM | Campo lejano y Nobile/Haworth | https://pgda.gsfc.nasa.gov/products/90 |
-| NASA/JPL Horizons (DE441) | Az/el/distancias aparentes Sol/Tierra | https://ssd-api.jpl.nasa.gov/doc/horizons.html |
-| NASA LRO / ASU LROC QuickMap | Enlaces y texturas preview LROC WAC | https://quickmap.lroc.asu.edu/ |
-| NASA Solar System Treks (Moon Trek) | Enlaces y capas LOLA | https://trek.nasa.gov/moon/ |
-| Barker et al. (2021) | DEMs LOLA de sitios de aterrizaje | https://doi.org/10.1016/j.pss.2020.105119 |
-| Mazarico et al. (2011) | Iluminación polar con LOLA | https://doi.org/10.1016/j.icarus.2010.10.030 |
+## Project structure
 
-Los productos derivados y sus hashes están en
-[`public/data/manifest.json`](public/data/manifest.json). Los DEM originales (~0.5 GB) no se
-distribuyen aquí; los horizontes, efemérides y metadatos derivados sí.
+| Path | Purpose |
+|---|---|
+| `index.html` | Single-page shell: header, verdict panel, radar, timeline, dock and modals |
+| `src/main.js` | Application state, controls, URL state, share/export wiring |
+| `src/analysis/` | Horizon geometry, sampling, scoring and status logic |
+| `src/ephemeris/` | Horizons decoder/interpolation and local IAU 2000 fallback |
+| `src/topography/` | Site catalog, horizon lookup and localized site helpers |
+| `src/render/` | 3D lunar globe rendering |
+| `src/ui/` | Radar, timeline, panorama, comparison, sweep, matrix, A/B and guide |
+| `src/i18n.js`, `src/i18n-static.js` | EN/ES messages and static HTML translation |
+| `src/export.js` | JSON/CSV serialization and downloads |
+| `public/data/` | Sites, horizons, ephemerides, sweeps, validation and manifest |
+| `scripts/` | Data generation and manifest maintenance |
+| `tests/` | Analysis, catalog, custom-site, data, i18n, export and SI regression tests |
 
-Los sitios internacionales de referencia (Chandrayaan-3, SLIM, Chang'e 4) usan un horizonte
-analítico plano y el motor IAU 2000 local; **no** son análisis LOLA del terreno. El manifiesto
-incluye una nota `referenceSitesNote` y el modal de datos lo indica.
+## Limitations
 
-### Corrección de azimut (importante)
+This is decision-support and educational software, **not flight-certified**. It does not model rocks
+below the DEM resolution, thermal state, batteries, rover mobility, relay constellations, or a
+certified landing point. The horizon is a 1D profile per azimuth; the 2.5D panorama is a shaded
+representation. `gMaxHours` is a lower bound because it is measured inside a 28-day window. Nobile,
+Haworth, IM-1 and IM-2 use 80 m/px regional terrain; custom coordinates use the nearest real LOLA
+horizon within 10 km or a flat horizon. International references use analytic flat horizons and local
+IAU 2000; they are context, not LOLA analyses. The 3D globe and Sun/Earth spheres are illustrative
+and not to scale. Ephemeris coverage is 2026-01-01 to 2029-02-01. The score is a decision index, not
+a probability of success.
 
-El pipeline SUNDIAL original (`build_horizons.py`) tomaba la dirección hacia el polo sur lunar como
-“norte”. Para un sitio del hemisferio sur, esa dirección es el **sur geográfico**, por lo que los
-horizontes de 720 bins quedaron rotados 180° respecto de los azimuts de Horizons. En esta app:
+## References
 
-- los 6 horizontes híbridos heredados se rotaron **+360 bins (+180°)**;
-- Nobile/Haworth se regeneraron con `scripts/build_regional_horizons.py --north-mode true`;
-- el bin 0 es ahora **norte geográfico** y el ajuste está documentado en el manifiesto y en las
-  notas de cada archivo.
+- NASA PGDA LOLA 5 m/px landing-site DEMs: https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/
+- NASA PGDA LOLA 80S 80 m/px regional DEM: https://pgda.gsfc.nasa.gov/products/90
+- NASA/JPL Horizons System (DE441): https://ssd.jpl.nasa.gov/horizons/
+- NASA LRO / ASU LROC QuickMap: https://quickmap.lroc.asu.edu/
+- NASA Solar System Treks (Moon Trek): https://trek.nasa.gov/moon/
+- Barker et al. (2021), Improved LOLA Elevation Maps for South Pole Landing Sites:
+  https://doi.org/10.1016/j.pss.2020.105119
+- Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography:
+  https://doi.org/10.1016/j.icarus.2010.10.030
 
-Esto cambia los resultados respecto de la versión anterior; por ejemplo, Malapert Massif pasa de un
-“GO” basado en un horizonte invertido a un resultado conservador con el horizonte real.
-
----
-
-## Modelo
-
-El score **no es una red neuronal entrenada** ni una probabilidad de éxito. Es una suma ponderada:
-
-```text
-Score = 100 · (wE·E + wD·D + wC·C + wG·G) / (wE + wD + wC + wG)
-```
-
-- `E`: energía específica acumulada en 28 días / requerimiento del perfil.
-- `D = 1 − D_max / tolerancia_eclipse`.
-- `C`: visibilidad del centro de la Tierra (DTE) / requerimiento.
-- `G = 1 − G_max / tolerancia_corte`.
-- Se aplican restricciones duras: pendiente local >15° limita el estado; >25° es NO-GO; outages
-  severos de DTE/eclipse también fuerzan NO-GO en los perfiles predefinidos.
-- Los perfiles son: **Demo directa DTE**, **Rover nocturno**, **Puesto tripulado**,
-  **Relé / store-and-forward** y **Personalizado**. El perfil de relé solo relaja las tolerancias;
-  no simula un relé concreto. El perfil personalizado usa pesos iguales (1/1/1/1); en modo estricto,
-  cualquier umbral incumplido es NO-GO.
-- **Procedencia de los umbrales**: los horizontes LOLA y las efemérides Horizons son datos
-  NASA/JPL. Los umbrales y pesos de los perfiles predefinidos son supuestos del equipo, **no
-  requisitos NASA**; los umbrales personalizados son supuestos del usuario. La métrica de energía es
-  irradiancia acumulada en el plano del panel, no un presupuesto eléctrico completo.
-- Apollo 11 se marca **REFERENCIA** aunque su score numérico sea alto: no es un candidato polar.
-
-`Comms` mide la racha continua más larga sin el centro de la Tierra visible, no el porcentaje
-medio de DTE. Con el perfil directo por defecto (24 h de tolerancia), los sitios polares tienen
-cortes de 226–672 h y el término vale 0/100. Eso es un resultado del modelo, no un dato
-faltante. Con el perfil de relé (400 h) aparecen valores de 18–44 en la mayoría de los
-candidatos; Shackleton y Haworth siguen en 0. Apollo 11, que nunca pierde la Tierra, da 100
-pero se marca como referencia.
-
-Con el perfil directo por defecto, varios sitios polares aparecen **NO-GO** porque los horizontes
-LOLA reales producen outages DTE de días. Ese es el resultado científico, no un fallo de la UI: el
-selector de perfil permite explorar un escenario con relé o almacenamiento. Si esos umbrales no
-representan tu misión, usa **Personalizado** para definir energía, eclipse, DTE y corte; el veredicto
-se recalcula con tus supuestos. En el pitch: *NASA data, our assumptions*.
-
-### Fórmulas principales
-
-- Horizonte: `h(θ) = max_r arctan[(z(r,θ) − z0 − h_obs − r²/(2R_M)) / r]`, `R_M = 1,737,400 m`.
-- Fracción visible del disco finito: `f = [arccos x − x√(1−x²)] / π`, `x = clip((h−a)/ρ, −1, 1)`.
-- Irradiancia: `DNI = 1361 (1 AU/d)²`; panel horizontal `DNI·f·sin a`; vertical fijo
-  `DNI·f·cos a·cos Δβ`; tracker `DNI·f·cos a`.
-- Energía: `Σ G·Δt` en Wh/m² sobre 28 días.
-
-Las métricas crudas, los pesos y los umbrales se muestran en la UI y en el modal “Ver modelo”.
-
----
-
-## Validación
-
-`public/data/validation.json` contiene la validación fuera de malla del pipeline SUNDIAL contra
-Horizons para 4.032 muestras:
-
-- **RMS angular: 5×10⁻⁶°** (la UI lo redondea a 1×10⁻⁵°)
-- **Error máximo: 1.22×10⁻⁴°** (la UI lo redondea a 1.2×10⁻⁴°)
-- Aceptación: RMS < 0.01° y máximo < 0.05° → **PASS**.
-
-El motor local IAU 2000 (usado para Nobile/Haworth, los sitios históricos, CLPS e internacionales,
-las coordenadas personalizadas y como fallback fuera de cobertura) se comparó puntualmente con Horizons en
-`-89.5°, 0°` el 2026-11-14: Δaz Sol 0.016°, Δel −0.001°; Δaz Tierra 0.011°, Δel 0.0003°. No
-sustituye la validación completa del pipeline.
-
-`public/data/terrain-validation.json` añade una comparación entre productos DEM: el DEM de 5 m/px
-de campo cercano frente al DEM regional de 80 m/px, en los mismos 24 azimuts y el mismo rango radial
-(mástil 2 m). Resultado agregado: RMS 0.51°, máximo 2.18° en 144 comparaciones. Mide la concordancia
-entre dos productos LOLA, no la precisión absoluta del terreno; ninguno resuelve rocas por debajo de
-su píxel. Se muestra en el modal de datos.
-
-Las referencias internacionales no están cubiertas por esta validación LOLA: su horizonte es
-analítico plano y sus efemérides son IAU 2000 local. Se incluyen para comparación y educación, no
-como candidatos certificados.
-
----
-
-## Regenerar datos (opcional)
-
-```bash
-# Nobile/Haworth desde el DEM regional 80 m/px (norte geográfico)
-python scripts/build_regional_horizons.py --north-mode true
-
-# IM-1/IM-2 desde el DEM regional 80 m/px (norte geográfico)
-npm run data:clps-horizons
-
-# Validación cruzada 5 m/px vs 80 m/px (requiere Python con rasterio y los DEM del pipeline)
-npm run data:terrain-validation
-
-# Corregir los 6 horizontes híbridos heredados (idempotente)
-npm run data:fix-azimuth
-
-# Regenerar el barrido mensual 2026–2028 de los 28 sitios
-npm run data:sweep
-
-# Regenerar los horizontes planos de las referencias históricas, CLPS e internacionales
-npm run data:flat-horizons
-
-# Reaplicar metadatos de IA y regenerar el manifiesto de datos y sus checksums
-npm run data:si-metadata
-npm run data:manifest
-```
-
-El barrido usa 28 días, paso de 1 h, mástil 2 m, panel vertical con seguimiento y perfil Demo DTE
-como supuestos de referencia. La energía se guarda para los tres paneles; DTE y corte se calculan
-con el mástil de 2 m y la UI avisa si el mástil actual es distinto. Los archivos generados están en
-`public/data/sweep/`. Las referencias internacionales usan el motor IAU 2000 local y su horizonte
-plano; su barrido es comparable solo con esa etiqueta de aproximación.
-
-El pipeline SUNDIAL que generó los datos base no se distribuye en este repositorio; los productos
-derivados y sus checksums están en `public/data/manifest.json`. Los DEM originales (~0.5 GB) no se
-incluyen.
-
----
-
-## Limitaciones
-
-- Es una herramienta de apoyo a decisiones y educativa, **no flight-certified**.
-- No modela rocas por debajo de la resolución del DEM, estado térmico, baterías, movilidad del rover,
-  constelaciones de relé ni incertidumbre Monte Carlo.
-- El horizonte es un perfil 1D por azimut; el panorama 2.5D es una representación sombreada de ese
-  perfil, no un mesh 3D.
-- Las texturas del globo 3D son **vistas previas** (2048×1024 y 1024×512); no son el DEM LOLA de
-  5 m/px/80 m/px que alimenta el análisis y no se usan para calcular el score.
-- Nobile/Haworth usan 80 m/px: el relieve sub-kilométrico no está resuelto y se etiqueta como
-  regional.
-- La coordenada de Haworth cae dentro de la cuenca del cráter (el DEM muestra las paredes dominando
-  el horizonte), no en un punto de borde certificado.
-- **Referencias internacionales**: Chandrayaan-3, SLIM y Chang'e 4 usan un horizonte analítico plano
-  y IAU 2000 local, no LOLA; se muestran como `REFERENCE`. Chandrayaan-3 a 69.4°S es una
-  simplificación; Chang'e 4 está en la cara oculta (DTE 0%, relé).
-- **Coordenadas personalizadas**: usan el horizonte LOLA del sitio más cercano a ≤10 km o un
-  horizonte plano; pendiente y elevación no están disponibles.
-- **Globo 3D**: las texturas son previews y las esferas Sol/Tierra son ilustrativas y no a escala; no
-  entran en el score.
-- Cobertura de efemérides: 2026-01-01 a 2029-02-01; “tiempo real” se limita a ese rango.
-- El score depende de los supuestos del perfil; no es una probabilidad de éxito.
-
----
-
-## Créditos y uso de IA
-
-Datos: NASA PGDA/LOLA, NASA/JPL Horizons, NASA LRO/LROC (ASU QuickMap) y NASA Solar System Treks.
-Pipeline de datos base: SUNDIAL contributors. Texturas LROC/LOLA del globo: previews de NASA/ASU.
-Código y adaptación: equipo de este repositorio. Desarrollo asistido por IA; las cifras y los datos
-provienen del pipeline determinista y de las fuentes citadas, no de texto generado.
-
-Este proyecto es independiente y no está avalado por NASA.
+This project is independent and is not endorsed by NASA.

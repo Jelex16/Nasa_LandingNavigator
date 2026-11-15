@@ -1,8 +1,8 @@
 {
-  "name": "lunar-landing-site-navigator",
+  "name": "lua-navigator",
   "version": "1.0.0",
   "private": true,
-  "description": "Lunar south-pole landing-site decision tool with real NASA LOLA terrain and JPL Horizons ephemerides (NASA Space Apps 2026).",
+  "description": "Lua Navigator: lunar south-pole landing-site decision tool with real NASA LOLA terrain and JPL Horizons ephemerides (NASA Space Apps 2026).",
   "siDisclosure": {
     "assisted": true,
     "tools": "Gemini-family AI coding assistant",

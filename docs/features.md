@@ -1,6 +1,6 @@
 # Feature reference
 
-**Lunar Landing Site Navigator — NASA Space Apps Challenge 2026.**
+**Lua Navigator — NASA Space Apps Challenge 2026.**
 
 A static Vite web app that compares lunar landing sites and dates using real NASA LOLA terrain and
 JPL Horizons ephemerides. It is decision-support and educational software, not a flight-certified
@@ -8,12 +8,14 @@ landing analysis. The UI defaults to English; the EN/ES selector in the top bar 
 and remembers the choice.
 
 - [Feature reference (English)](features.md) · [Referencia de features (Español)](features.es.md)
-- [README](../README.en.md) · [Demo script and slides](demo.md)
+- [README (English)](../README.md) · [README (Español)](../README.es.md)
 
 ## 1. Site catalog
 
-Twelve sites plus custom coordinates. Candidate sites are scored; reference sites are shown as
-context and are not ranked as candidates.
+28 curated sites plus custom coordinates: 8 polar, 13 historical, 4 CLPS/commercial and 3
+international references. The table below lists the polar candidates and the main reference entries;
+the remaining sites are summarized after it. Candidate sites are scored; reference sites are shown
+as context and are not ranked as candidates.
 
 | Site | Role | Horizon | Ephemerides |
 |---|---|---|---|
@@ -152,8 +154,8 @@ Profiles and their assumptions are visible and selectable:
   tables, tooltips, the guide and generated values.
 - The choice is persisted in `localStorage`; a URL `lang=en|es` overrides it for a shared link.
 - The `<html lang>`, document title, meta description and ARIA labels follow the language.
-- The README, this reference and the demo script are available in both English and Spanish; English
-  is the submission language.
+- The README and this feature reference are available in both English and Spanish; English is the
+  submission language.
 
 ## 8. Share and export
 
@@ -190,7 +192,7 @@ All exports are client-side downloads; no server or account is required.
   outage, slope and data sources.
 - **Export CSV** (sweep): 36 monthly rows with energy for the current panel, Sun %, DTE %, outage,
   Earthset and score.
-- **Export CSV** (site × date matrix): 12 site rows × 36 monthly scores, with the role column.
+- **Export CSV** (site × date matrix): 28 site rows × 36 monthly scores, with the role column.
 
 ## 9. Educational guide
 
@@ -239,7 +241,7 @@ All exports are client-side downloads; no server or account is required.
   scrollable matrices, sticky 28-day timeline toggle.
 - Tests: engine, geometry, real-data decode, 28-day Malapert regression, i18n key parity,
   interpolation and JSON/CSV export. Run `npm test`.
-- Production build: Vite; current bundle ~801 KB minified / ~216 KB gzip. The >500 KB chunk warning
+- Production build: Vite; current bundle ~838 KB minified / ~226 KB gzip. The >500 KB chunk warning
   remains; code-splitting is a future optimization.
 
 ## 12. Limits
