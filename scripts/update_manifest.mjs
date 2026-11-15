@@ -115,7 +115,7 @@ function sourceFor(relative) {
     }
   }
   return {
-    source: 'SUNDIAL pipeline; NASA PGDA LOLA data and JPL Horizons DE441',
+    source: 'LOLA data pipeline; NASA PGDA LOLA data and JPL Horizons DE441',
     sourceUrl: 'https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/',
     generatedUtc: iso(fs.statSync(path.join(DATA, relative)).mtimeMs)
   };

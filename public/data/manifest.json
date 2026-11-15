@@ -232,7 +232,7 @@
       "path": "horizon/control_eq.json",
       "bytes": 17116,
       "sha256": "c4b4fcc67dfd4fc2e448c874369b3ef366e58dbf2eb1713bf091508549a90bc2",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -312,7 +312,7 @@
       "path": "horizon/site01.json",
       "bytes": 39328,
       "sha256": "7381008c13e3c5e29c329fbbe2d573a63bead90963d58eebf3cbc8934fa3f491",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -320,7 +320,7 @@
       "path": "horizon/site04.json",
       "bytes": 38696,
       "sha256": "5e1d9bf5f8909a2376a07d9cd695a622ae4d98a49ae1c898ff03bb19234d1186",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -328,7 +328,7 @@
       "path": "horizon/site07.json",
       "bytes": 40089,
       "sha256": "1ce5c2effb1517038dcd8f39d55d36eec41041a8ac21c78e6eaa5c3cce9bdf2b",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -336,7 +336,7 @@
       "path": "horizon/site11.json",
       "bytes": 39625,
       "sha256": "2137b59ab870a0fb4eefdd84b58e3cb9c3ded8e10eae6abe7953f7da99bf7422",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -344,7 +344,7 @@
       "path": "horizon/site20.json",
       "bytes": 38661,
       "sha256": "8023a1516e387f199e95db98e6062dbcb5fb80a8edfa2da68aba840f885874e7",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -352,7 +352,7 @@
       "path": "horizon/site23.json",
       "bytes": 38188,
       "sha256": "aedc3b9cc462c1874290c99b7c0967ac9a96fdccc641e5acf3ad876f05b3545c",
-      "source": "SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
+      "source": "LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -400,7 +400,7 @@
       "path": "sites.json",
       "bytes": 10529,
       "sha256": "c8d10ee16983c588d6c35bd7073e69069a4ae6023497d7821b7d513633ad5f8c",
-      "source": "SUNDIAL pipeline; site coordinates derived from PGDA GeoTIFF CRS",
+      "source": "LOLA data pipeline; site coordinates derived from PGDA GeoTIFF CRS",
       "sourceUrl": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "generatedUtc": "2026-11-14T17:17:32Z"
     },
@@ -640,7 +640,7 @@
       "path": "validation.json",
       "bytes": 4926,
       "sha256": "23f9db16e602b1b265355b9f269b7cff0756329747b069e43acdbd051b9873dc",
-      "source": "SUNDIAL validation pipeline; direct JPL Horizons off-grid samples + LOLA",
+      "source": "Horizons validation pipeline; direct JPL Horizons off-grid samples + LOLA",
       "sourceUrl": "https://ssd-api.jpl.nasa.gov/doc/horizons.html",
       "generatedUtc": "2026-11-14T17:17:32Z"
     }

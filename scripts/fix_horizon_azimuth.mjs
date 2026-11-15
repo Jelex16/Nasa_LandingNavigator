@@ -57,7 +57,7 @@ for (const id of horizonIds) {
       source:
         id === 'nobile_rim_1' || id === 'haworth_rim'
           ? 'Regional LOLA 80 m/px; true-north azimuth'
-          : 'SUNDIAL pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction',
+          : 'LOLA data pipeline; NASA PGDA LOLA hybrid DEM; true-north azimuth correction',
       sourceUrl:
         id === 'nobile_rim_1' || id === 'haworth_rim'
           ? 'https://pgda.gsfc.nasa.gov/products/90'

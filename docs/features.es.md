@@ -1,6 +1,6 @@
 # Referencia de features
 
-**Lunar Landing Site Navigator — NASA Space Apps Challenge 2026.**
+**Lua Navigator — NASA Space Apps Challenge 2026.**
 
 Web app estática (Vite) que compara sitios y fechas de alunizaje con topografía real LOLA de NASA y
 efemérides JPL Horizons. Es apoyo a decisiones y software educativo, no un análisis de aterrizaje
@@ -8,12 +8,14 @@ certificado. La UI usa inglés por defecto; el selector EN/ES de la barra superi
 recuerda la elección.
 
 - [Referencia de features (Español)](features.es.md) · [Feature reference (English)](features.md)
-- [README](../README.md) · [Guion de demo y slides](demo.md)
+- [README (English)](../README.md) · [README (Español)](../README.es.md)
 
 ## 1. Catálogo de sitios
 
-Doce sitios más coordenadas personalizadas. Los candidatos se puntúan; las referencias se muestran
-como contexto y no se clasifican como candidatos.
+28 sitios curados más coordenadas personalizadas: 8 polares, 13 históricos, 4 CLPS/comerciales y
+3 referencias internacionales. La tabla siguiente lista los candidatos polares y las referencias
+principales; el resto se resume a continuación. Los candidatos se puntúan; las referencias se
+muestran como contexto y no se clasifican como candidatos.
 
 | Sitio | Rol | Horizonte | Efemérides |
 |---|---|---|---|
@@ -160,8 +162,8 @@ Perfiles y supuestos visibles y seleccionables:
 - La elección se guarda en `localStorage`; un `lang=en|es` en la URL la anula para un enlace
   compartido.
 - `<html lang>`, título, meta description y etiquetas ARIA siguen el idioma.
-- README, esta referencia y el guion de demo están disponibles en inglés y español; el inglés es el
-  idioma de submission.
+- El README y esta referencia están disponibles en inglés y español; el inglés es el idioma de
+  submission.
 
 ## 8. Compartir y exportar
 
@@ -198,7 +200,7 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
   DTE, corte, pendiente y fuentes de datos.
 - **Exportar CSV** (barrido): 36 filas mensuales con energía del panel actual, Sol %, DTE %, corte,
   Earthset y score.
-- **Exportar CSV** (matriz sitio × fecha): 12 filas de sitios × 36 scores mensuales, con columna de rol.
+- **Exportar CSV** (matriz sitio × fecha): 28 filas de sitios × 36 scores mensuales, con columna de rol.
 
 ## 9. Guía educativa
 
@@ -247,7 +249,7 @@ Todas son descargas en cliente; no requieren servidor ni cuenta.
   con scroll horizontal y botón de timeline de 28 días sticky.
 - Tests: motor, geometría, decodificación de datos reales, regresión de 28 días de Malapert, paridad
   de claves i18n, interpolación y exportación JSON/CSV. Ejecuta `npm test`.
-- Build de producción: Vite; bundle actual ~801 KB minificado / ~216 KB gzip. Sigue el warning de
+- Build de producción: Vite; bundle actual ~838 KB minificado / ~226 KB gzip. Sigue el warning de
   chunk >500 KB; el code-splitting es una optimización futura.
 
 ## 12. Límites
