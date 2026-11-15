@@ -36,6 +36,11 @@ import {
   PROFILE_BY_ID,
   PANELS,
   DEFAULT_PROFILE_ID,
+  CUSTOM_PROFILE_ID,
+  CUSTOM_PROFILE_DEFAULTS,
+  CUSTOM_PROFILE_RANGES,
+  createCustomProfile,
+  resolveProfile,
   WINDOW_DAYS
 } from './analysis/scoring.js';
 import { azElToMcmf, clamp } from './analysis/geometry.js';
@@ -65,6 +70,8 @@ const state = {
   mastHeightM: 2,
   panelType: 'vertical_tracker',
   profileId: DEFAULT_PROFILE_ID,
+  customProfile: createCustomProfile(CUSTOM_PROFILE_DEFAULTS),
+  customProfileTouched: false,
   series: [],
   analysis: null,
   currentSky: null,
@@ -78,6 +85,10 @@ const state = {
 };
 
 const $ = (id) => document.getElementById(id);
+
+function currentProfile() {
+  return resolveProfile(state.profileId, state.customProfile);
+}
 
 const siteSelect = $('site-select');
 const cameraBar = document.querySelector('.floating-camera-bar');
@@ -93,6 +104,16 @@ const leftPanel = $('left-panel');
 const mastSelect = $('mast-select');
 const panelSelect = $('panel-select');
 const profileSelect = $('profile-select');
+const customProfilePanel = $('custom-profile-panel');
+const customEnergyInput = $('custom-energy');
+const customEclipseInput = $('custom-eclipse');
+const customDteInput = $('custom-dte');
+const customOutageInput = $('custom-outage');
+const customStrictInput = $('custom-strict');
+const customProfileError = $('custom-profile-error');
+const applyCustomProfileBtn = $('apply-custom-profile-btn');
+const resetCustomProfileBtn = $('reset-custom-profile-btn');
+const decisionProfileBasis = $('decision-profile-basis');
 
 const scoreNumber = $('score-number');
 const classificationBadge = $('classification-badge');
@@ -227,7 +248,17 @@ function scenarioParams() {
     params.set('site', site.id);
   }
   params.set('date', new Date(state.baseDate.getTime()).toISOString());
-  params.set('profile', state.profileId);
+  if (state.profileId === CUSTOM_PROFILE_ID) {
+    const profile = currentProfile();
+    params.set('profile', CUSTOM_PROFILE_ID);
+    params.set('energy', String(profile.energyReqKWhM2));
+    params.set('eclipse', String(profile.dMaxTolHours));
+    params.set('dte', String(profile.dteReqPct));
+    params.set('outage', String(profile.gMaxTolHours));
+    params.set('strict', profile.strict ? '1' : '0');
+  } else {
+    params.set('profile', state.profileId);
+  }
   params.set('panel', state.panelType);
   params.set('mast', String(state.mastHeightM));
   params.set('lang', getLanguage());
@@ -239,6 +270,13 @@ function updateURLState() {
   const next = `${location.pathname}?${scenarioParams().toString()}`;
   const current = `${location.pathname}${location.search}`;
   if (next !== current) history.replaceState(null, '', next);
+}
+
+function scenarioNumberParam(params, name, fallback) {
+  const raw = params.get(name);
+  if (raw == null || raw.trim() === '') return fallback;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : fallback;
 }
 
 function parseScenarioURL(sites) {
@@ -254,7 +292,30 @@ function parseScenarioURL(sites) {
     result.baseDate = clampDate(date, min, max);
   }
   const profile = params.get('profile');
-  if (profile && PROFILE_BY_ID[profile]) result.profileId = profile;
+  if (profile === CUSTOM_PROFILE_ID) {
+    result.profileId = CUSTOM_PROFILE_ID;
+    result.customProfile = createCustomProfile({
+      energyReqKWhM2: scenarioNumberParam(
+        params,
+        'energy',
+        CUSTOM_PROFILE_DEFAULTS.energyReqKWhM2
+      ),
+      dMaxTolHours: scenarioNumberParam(
+        params,
+        'eclipse',
+        CUSTOM_PROFILE_DEFAULTS.dMaxTolHours
+      ),
+      dteReqPct: scenarioNumberParam(params, 'dte', CUSTOM_PROFILE_DEFAULTS.dteReqPct),
+      gMaxTolHours: scenarioNumberParam(
+        params,
+        'outage',
+        CUSTOM_PROFILE_DEFAULTS.gMaxTolHours
+      ),
+      strict: params.get('strict') !== '0'
+    });
+  } else if (profile && PROFILE_BY_ID[profile]) {
+    result.profileId = profile;
+  }
   const panel = params.get('panel');
   if (panel && PANELS[panel]) result.panelType = panel;
   const mast = Number.parseFloat(params.get('mast'));
@@ -648,15 +709,22 @@ function renderDecisionModel(analysis) {
       mast: analysis.mastHeightM.toFixed(1)
     });
   }
+  if (decisionProfileBasis) {
+    decisionProfileBasis.textContent = analysis.profile.basisKey
+      ? t(analysis.profile.basisKey)
+      : '';
+  }
   const commsNote = $('decision-comms-note');
   if (commsNote) {
     const p = analysis.profile;
     const m = analysis.metrics;
-    commsNote.textContent = t('model.commsNote', {
+    const commsText = t('model.commsNote', {
       tol: p.gMaxTolHours,
       dte: m.dteCenterPct.toFixed(0),
       partial: m.dtePartialPct.toFixed(0)
     });
+    commsNote.textContent =
+      p.id === CUSTOM_PROFILE_ID ? `${t('model.customNote')} ${commsText}` : commsText;
   }
 }
 
@@ -819,7 +887,8 @@ async function calculateSeriesAndEvaluate() {
       startMs: state.baseDate.getTime(),
       mastHeightM: state.mastHeightM,
       panelType: state.panelType,
-      profileId: state.profileId
+      profileId: state.profileId,
+      profile: currentProfile()
     });
     if (token !== state.evaluationToken) return;
     state.analysis = analysis;
@@ -920,6 +989,135 @@ function initSiteSelector(sites) {
   });
 }
 
+function clearCustomProfileError() {
+  if (!customProfileError) return;
+  customProfileError.hidden = true;
+  customProfileError.textContent = '';
+  for (const input of [
+    customEnergyInput,
+    customEclipseInput,
+    customDteInput,
+    customOutageInput
+  ]) {
+    input?.removeAttribute('aria-invalid');
+  }
+}
+
+function syncCustomProfileForm() {
+  if (!customEnergyInput) return;
+  const profile = state.customProfile;
+  customEnergyInput.value = String(profile.energyReqKWhM2);
+  customEclipseInput.value = String(profile.dMaxTolHours);
+  customDteInput.value = String(profile.dteReqPct);
+  customOutageInput.value = String(profile.gMaxTolHours);
+  customStrictInput.checked = profile.strict;
+  clearCustomProfileError();
+}
+
+function updateCustomProfileVisibility() {
+  if (customProfilePanel) {
+    customProfilePanel.hidden = state.profileId !== CUSTOM_PROFILE_ID;
+  }
+}
+
+function readCustomProfileForm() {
+  return createCustomProfile({
+    energyReqKWhM2: Number(customEnergyInput?.value),
+    dMaxTolHours: Number(customEclipseInput?.value),
+    dteReqPct: Number(customDteInput?.value),
+    gMaxTolHours: Number(customOutageInput?.value),
+    strict: Boolean(customStrictInput?.checked)
+  });
+}
+
+function validateCustomProfileForm() {
+  const fields = [
+    {
+      input: customEnergyInput,
+      key: 'customProfile.energy',
+      range: CUSTOM_PROFILE_RANGES.energyReqKWhM2
+    },
+    {
+      input: customEclipseInput,
+      key: 'customProfile.eclipse',
+      range: CUSTOM_PROFILE_RANGES.dMaxTolHours
+    },
+    {
+      input: customDteInput,
+      key: 'customProfile.dte',
+      range: CUSTOM_PROFILE_RANGES.dteReqPct
+    },
+    {
+      input: customOutageInput,
+      key: 'customProfile.outage',
+      range: CUSTOM_PROFILE_RANGES.gMaxTolHours
+    }
+  ];
+  for (const field of fields) {
+    const raw = field.input?.value ?? '';
+    const value = Number(raw);
+    if (
+      raw.trim() === '' ||
+      !Number.isFinite(value) ||
+      value < field.range.min ||
+      value > field.range.max
+    ) {
+      field.input?.setAttribute('aria-invalid', 'true');
+      field.input?.focus();
+      if (customProfileError) {
+        customProfileError.textContent = t('customProfile.range', {
+          field: t(field.key),
+          min: field.range.min,
+          max: field.range.max
+        });
+        customProfileError.hidden = false;
+      }
+      return false;
+    }
+  }
+  clearCustomProfileError();
+  return true;
+}
+
+function applyCustomProfile() {
+  if (!validateCustomProfileForm()) return;
+  state.customProfile = readCustomProfileForm();
+  state.customProfileTouched = true;
+  updateCustomProfileVisibility();
+  calculateSeriesAndEvaluate();
+  showToast(t('customProfile.applied'));
+}
+
+function resetCustomProfile() {
+  state.customProfile = createCustomProfile(CUSTOM_PROFILE_DEFAULTS);
+  state.customProfileTouched = true;
+  syncCustomProfileForm();
+  if (state.profileId === CUSTOM_PROFILE_ID) {
+    calculateSeriesAndEvaluate();
+  }
+}
+
+function initCustomProfileControls() {
+  if (!customProfilePanel) return;
+  applyCustomProfileBtn?.addEventListener('click', applyCustomProfile);
+  resetCustomProfileBtn?.addEventListener('click', resetCustomProfile);
+  for (const input of [
+    customEnergyInput,
+    customEclipseInput,
+    customDteInput,
+    customOutageInput
+  ]) {
+    input?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        applyCustomProfile();
+      }
+    });
+  }
+  syncCustomProfileForm();
+  updateCustomProfileVisibility();
+}
+
 function initConfigControls() {
   mastSelect.addEventListener('change', () => {
     state.mastHeightM = Number.parseFloat(mastSelect.value);
@@ -931,7 +1129,20 @@ function initConfigControls() {
     calculateSeriesAndEvaluate();
   });
   profileSelect.addEventListener('change', () => {
-    state.profileId = profileSelect.value;
+    const next = profileSelect.value;
+    if (next === CUSTOM_PROFILE_ID && !state.customProfileTouched) {
+      const source = currentProfile();
+      state.customProfile = createCustomProfile({
+        energyReqKWhM2: source.energyReqKWhM2,
+        dMaxTolHours: source.dMaxTolHours,
+        dteReqPct: source.dteReqPct,
+        gMaxTolHours: source.gMaxTolHours,
+        strict: true
+      });
+      syncCustomProfileForm();
+    }
+    state.profileId = next;
+    updateCustomProfileVisibility();
     calculateSeriesAndEvaluate();
   });
 }
@@ -1114,6 +1325,7 @@ async function openComparison() {
   setLoading(true, t('action.loading.compare'));
   try {
     const sites = allSites();
+    const profile = currentProfile();
     await Promise.all(sites.map(ensureEphemeris));
     const analyses = sites.map((site) =>
       evaluateSiteScenario({
@@ -1121,7 +1333,8 @@ async function openComparison() {
         startMs: state.baseDate.getTime(),
         mastHeightM: state.mastHeightM,
         panelType: state.panelType,
-        profileId: state.profileId
+        profileId: state.profileId,
+        profile
       })
     );
     renderComparisonTable(
@@ -1130,7 +1343,7 @@ async function openComparison() {
       {
         startMs: state.baseDate.getTime(),
         windowDays: WINDOW_DAYS,
-        profile: PROFILE_BY_ID[state.profileId],
+        profile,
         mastHeightM: state.mastHeightM,
         panelType: state.panelType,
         panelLabel: t(PANELS[state.panelType].labelKey)
@@ -1196,7 +1409,7 @@ async function openSweep() {
         });
       }
       const sweepContext = {
-        profile: PROFILE_BY_ID[state.profileId],
+        profile: currentProfile(),
         panelType: state.panelType,
         mastHeightM: state.mastHeightM,
         currentDateMs: state.baseDate.getTime(),
@@ -1245,14 +1458,15 @@ function openGuide() {
   openModal(guideModal);
 }
 
-async function evaluateABScenario(site, startMs) {
+async function evaluateABScenario(site, startMs, profile = currentProfile()) {
   await ensureEphemeris(site);
   return evaluateSiteScenario({
     site,
     startMs,
     mastHeightM: state.mastHeightM,
     panelType: state.panelType,
-    profileId: state.profileId
+    profileId: state.profileId,
+    profile
   });
 }
 
@@ -1270,16 +1484,17 @@ async function openABComparison() {
   const show = async () => {
     setLoading(true, t('ab.loading'));
     try {
+      const profile = currentProfile();
       const [left, right] = await Promise.all([
-        evaluateABScenario(leftSite, leftStart),
-        evaluateABScenario(rightSite, rightStart)
+        evaluateABScenario(leftSite, leftStart, profile),
+        evaluateABScenario(rightSite, rightStart, profile)
       ]);
       renderSideBySide(abModalBody, {
         sites,
         left,
         right,
         context: {
-          profile: PROFILE_BY_ID[state.profileId],
+          profile,
           panelLabel: t(PANELS[state.panelType].labelKey),
           mastHeightM: state.mastHeightM
         },
@@ -1343,7 +1558,7 @@ async function openSiteDateMatrix() {
         });
       }
       const matrixContext = {
-        profile: PROFILE_BY_ID[state.profileId],
+        profile: currentProfile(),
         panelType: state.panelType,
         mastHeightM: state.mastHeightM,
         currentDateMs: state.baseDate.getTime()
@@ -1552,6 +1767,10 @@ async function bootstrap() {
         state.currentDate = new Date(urlState.baseDate);
       }
       if (urlState.profileId) state.profileId = urlState.profileId;
+      if (urlState.customProfile) {
+        state.customProfile = urlState.customProfile;
+        state.customProfileTouched = true;
+      }
       if (urlState.panelType) state.panelType = urlState.panelType;
       if (urlState.mastHeightM != null) state.mastHeightM = urlState.mastHeightM;
       if (urlState.customSite) state.customSite = urlState.customSite;
@@ -1563,6 +1782,7 @@ async function bootstrap() {
       sites[0];
     initSiteSelector(sites);
     initConfigControls();
+    initCustomProfileControls();
     initTimeControls();
     initCameraHUDControls();
     initModelLayerControls();

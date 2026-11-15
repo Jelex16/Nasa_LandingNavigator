@@ -10,11 +10,30 @@ export const WINDOW_DAYS = 28;
 export const STEP_HOURS = 1;
 export const SHADOW_THRESHOLD = 0.05;
 
+export const CUSTOM_PROFILE_ID = 'custom';
+export const CUSTOM_PROFILE_DEFAULTS = {
+  energyReqKWhM2: 300,
+  dMaxTolHours: 160,
+  dteReqPct: 60,
+  gMaxTolHours: 24,
+  weights: { energy: 1, dark: 1, dte: 1, comms: 1 },
+  strict: true
+};
+
+export const CUSTOM_PROFILE_RANGES = {
+  energyReqKWhM2: { min: 0, max: 5000 },
+  dMaxTolHours: { min: 0, max: 2000 },
+  dteReqPct: { min: 0, max: 100 },
+  gMaxTolHours: { min: 0, max: 2000 },
+  weight: { min: 0, max: 100 }
+};
+
 export const MISSION_PROFILES = [
   {
     id: 'technology_demo',
     nameKey: 'profile.technology_demo.name',
     descriptionKey: 'profile.technology_demo.description',
+    basisKey: 'profile.technology_demo.basis',
     energyReqKWhM2: 300,
     dMaxTolHours: 160,
     dteReqPct: 60,
@@ -25,6 +44,7 @@ export const MISSION_PROFILES = [
     id: 'night_survivor',
     nameKey: 'profile.night_survivor.name',
     descriptionKey: 'profile.night_survivor.description',
+    basisKey: 'profile.night_survivor.basis',
     energyReqKWhM2: 400,
     dMaxTolHours: 380,
     dteReqPct: 30,
@@ -35,6 +55,7 @@ export const MISSION_PROFILES = [
     id: 'crewed_outpost',
     nameKey: 'profile.crewed_outpost.name',
     descriptionKey: 'profile.crewed_outpost.description',
+    basisKey: 'profile.crewed_outpost.basis',
     energyReqKWhM2: 450,
     dMaxTolHours: 120,
     dteReqPct: 90,
@@ -45,6 +66,7 @@ export const MISSION_PROFILES = [
     id: 'relay_store_forward',
     nameKey: 'profile.relay_store_forward.name',
     descriptionKey: 'profile.relay_store_forward.description',
+    basisKey: 'profile.relay_store_forward.basis',
     energyReqKWhM2: 300,
     dMaxTolHours: 200,
     dteReqPct: 20,
@@ -55,6 +77,73 @@ export const MISSION_PROFILES = [
 
 export const PROFILE_BY_ID = Object.fromEntries(MISSION_PROFILES.map((p) => [p.id, p]));
 export const DEFAULT_PROFILE_ID = 'technology_demo';
+
+function finiteOr(value, fallback) {
+  const parsed = typeof value === 'number' ? value : Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function clampProfileValue(value, range, fallback) {
+  return Math.min(range.max, Math.max(range.min, finiteOr(value, fallback)));
+}
+
+export function createCustomProfile(input = {}) {
+  const weights = input.weights ?? {};
+  return {
+    id: CUSTOM_PROFILE_ID,
+    nameKey: 'profile.custom.name',
+    descriptionKey: 'profile.custom.description',
+    basisKey: 'profile.custom.basis',
+    energyReqKWhM2: clampProfileValue(
+      input.energyReqKWhM2,
+      CUSTOM_PROFILE_RANGES.energyReqKWhM2,
+      CUSTOM_PROFILE_DEFAULTS.energyReqKWhM2
+    ),
+    dMaxTolHours: clampProfileValue(
+      input.dMaxTolHours,
+      CUSTOM_PROFILE_RANGES.dMaxTolHours,
+      CUSTOM_PROFILE_DEFAULTS.dMaxTolHours
+    ),
+    dteReqPct: clampProfileValue(
+      input.dteReqPct,
+      CUSTOM_PROFILE_RANGES.dteReqPct,
+      CUSTOM_PROFILE_DEFAULTS.dteReqPct
+    ),
+    gMaxTolHours: clampProfileValue(
+      input.gMaxTolHours,
+      CUSTOM_PROFILE_RANGES.gMaxTolHours,
+      CUSTOM_PROFILE_DEFAULTS.gMaxTolHours
+    ),
+    weights: {
+      energy: clampProfileValue(
+        weights.energy,
+        CUSTOM_PROFILE_RANGES.weight,
+        CUSTOM_PROFILE_DEFAULTS.weights.energy
+      ),
+      dark: clampProfileValue(
+        weights.dark,
+        CUSTOM_PROFILE_RANGES.weight,
+        CUSTOM_PROFILE_DEFAULTS.weights.dark
+      ),
+      dte: clampProfileValue(
+        weights.dte,
+        CUSTOM_PROFILE_RANGES.weight,
+        CUSTOM_PROFILE_DEFAULTS.weights.dte
+      ),
+      comms: clampProfileValue(
+        weights.comms,
+        CUSTOM_PROFILE_RANGES.weight,
+        CUSTOM_PROFILE_DEFAULTS.weights.comms
+      )
+    },
+    strict: input.strict !== false
+  };
+}
+
+export function resolveProfile(profileId, customProfile) {
+  if (profileId === CUSTOM_PROFILE_ID) return createCustomProfile(customProfile);
+  return PROFILE_BY_ID[profileId] ?? PROFILE_BY_ID[DEFAULT_PROFILE_ID];
+}
 
 export const PANELS = {
   horizontal: {
@@ -132,19 +221,35 @@ export function makeSky(site, bodies, mastHeightM) {
 }
 
 export function scoreComponents(metrics, profile) {
-  const energy = Math.min(metrics.energyWhM2 / (profile.energyReqKWhM2 * 1000), 1);
-  const dark = Math.max(0, Math.min(1, 1 - metrics.dMaxHours / profile.dMaxTolHours));
-  const dte = Math.min(metrics.dteCenterPct / profile.dteReqPct, 1);
-  const comms = Math.max(0, Math.min(1, 1 - metrics.gMaxHours / profile.gMaxTolHours));
+  const energyReq = Number(profile.energyReqKWhM2);
+  const dMaxTol = Number(profile.dMaxTolHours);
+  const dteReq = Number(profile.dteReqPct);
+  const gMaxTol = Number(profile.gMaxTolHours);
+  const energy = energyReq > 0 ? Math.min(metrics.energyWhM2 / (energyReq * 1000), 1) : 1;
+  const dark =
+    dMaxTol > 0
+      ? Math.max(0, Math.min(1, 1 - metrics.dMaxHours / dMaxTol))
+      : metrics.dMaxHours <= 0
+        ? 1
+        : 0;
+  const dte = dteReq > 0 ? Math.min(metrics.dteCenterPct / dteReq, 1) : 1;
+  const comms =
+    gMaxTol > 0
+      ? Math.max(0, Math.min(1, 1 - metrics.gMaxHours / gMaxTol))
+      : metrics.gMaxHours <= 0
+        ? 1
+        : 0;
+  const weights = profile.weights ?? CUSTOM_PROFILE_DEFAULTS.weights;
   const weightSum =
-    profile.weights.energy + profile.weights.dark + profile.weights.dte + profile.weights.comms;
+    weights.energy + weights.dark + weights.dte + weights.comms;
+  const safeWeightSum = weightSum > 0 ? weightSum : 1;
   const total =
     (100 *
-      (profile.weights.energy * energy +
-        profile.weights.dark * dark +
-        profile.weights.dte * dte +
-        profile.weights.comms * comms)) /
-    weightSum;
+      (weights.energy * energy +
+        weights.dark * dark +
+        weights.dte * dte +
+        weights.comms * comms)) /
+    safeWeightSum;
   return { energy, dark, dte, comms, total };
 }
 
@@ -208,6 +313,35 @@ export function buildStatus(site, metrics, components, profile) {
     };
   }
 
+  if (profile.id === CUSTOM_PROFILE_ID) {
+    if (limits.length === 0) {
+      return {
+        status: t("status.go"),
+        badgeClass: "status-safe",
+        statusText: t("status.goText")
+      };
+    }
+    if (profile.strict) {
+      return {
+        status: t("status.noGo"),
+        badgeClass: "status-danger",
+        statusText: t("status.noGoLimits", { limits: limits.join("; ") })
+      };
+    }
+    if (components.total >= 50) {
+      return {
+        status: t("status.caution"),
+        badgeClass: "status-warning",
+        statusText: t("status.cautionLimits", { limits: limits.join("; ") })
+      };
+    }
+    return {
+      status: t("status.noGo"),
+      badgeClass: "status-danger",
+      statusText: t("status.noGoLimits", { limits: limits.join("; ") })
+    };
+  }
+
   const severe =
     metrics.gMaxHours > profile.gMaxTolHours * 2 ||
     metrics.dMaxHours > profile.dMaxTolHours * 1.5 ||
@@ -251,11 +385,12 @@ export function analyzeSite({
   mastHeightM,
   panelType,
   profileId,
+  profile: profileOverride,
   sampleAt,
   stepHours = STEP_HOURS,
   windowDays = WINDOW_DAYS
 }) {
-  const profile = PROFILE_BY_ID[profileId] ?? PROFILE_BY_ID[DEFAULT_PROFILE_ID];
+  const profile = profileOverride ?? resolveProfile(profileId);
   const panelAzimuthDeg = panelAzimuthFor(site, panelType);
   const sampleCount = Math.round((windowDays * 24) / stepHours);
   const stepMs = stepHours * 3_600_000;

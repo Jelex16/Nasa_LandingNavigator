@@ -37,6 +37,16 @@ Use the real app, desktop viewport, default settings and the default English UI:
 - These values come from `public/data/sweep/site23.json`, `public/data/sweep/change4.json` and the
   live verdict. If the UI shows slightly different rounded values, read them from the screen.
 
+### Optional 10-second beat: custom thresholds
+
+- Select **Custom** in the mission profile; the form starts from the current profile values.
+- Set **Required DTE** to 90% and keep strict mode; click **Apply thresholds** → `NO-GO` because
+  Malapert's 42% DTE is below the user requirement.
+- Uncheck strict mode and apply → `CAUTION`: the index is still shown, but the unmet threshold is
+  explicit.
+- Narration: “The NASA data is fixed. The mission thresholds are assumptions — ours by default, and
+  yours in the custom profile.”
+
 ### Recording checklist
 
 - [ ] `npm run build` passes.
@@ -48,6 +58,7 @@ Use the real app, desktop viewport, default settings and the default English UI:
 - [ ] Clicking May 2027 loads the date and updates the verdict.
 - [ ] Optional: open **Compare → Side-by-side A/B**, choose Chang'e 4 in scenario B and show 0% DTE.
 - [ ] Optional: open **How to read** to show the educational guide; close it before the verdict.
+- [ ] Optional: open **Custom**, set a threshold, apply, and show the verdict change.
 - [ ] Optional: **Share** copies a scenario link; **Export JSON/CSV** downloads data.
 - [ ] Record at 30 seconds or less; add English subtitles if the narration is in Spanish.
 - [ ] Do not show the data modal for more than 2 seconds; the story is the decision.

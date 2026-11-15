@@ -112,11 +112,21 @@ Profiles and their assumptions are visible and selectable:
 | Night-surviving rover | 400 kWh/m² | 380 h | 30% | 48 h |
 | Crewed outpost with direct DTE | 450 kWh/m² | 120 h | 90% | 12 h |
 | Relay / store-and-forward | 300 kWh/m² | 200 h | 20% | 400 h |
+| Custom | user-defined | user-defined | user-defined | user-defined |
 
 - Panels: horizontal, vertical fixed and vertical tracker.
 - Mast heights: 0.5, 2, 5, 10 and 20 m.
 - Score: `100 · (wE·E + wD·D + wC·C + wG·G) / Σw`, with visible weights and thresholds.
 - A relay profile only relaxes DTE/outage tolerances; it does not simulate a concrete relay.
+- **Custom profile**: set the four thresholds in the mission panel and apply. The tool rescores the
+  current site, comparison, sweep and matrix with those thresholds. The custom profile uses equal
+  weights (1/1/1/1). Meeting all four thresholds is `GO`. In strict mode (default), any unmet
+  threshold forces `NO-GO`; without strict mode, a missed threshold is `CAUTION` when the index is
+  ≥50, otherwise `NO-GO`. The index is a margin indicator, not the pass/fail rule.
+- **Provenance**: the LOLA horizons and JPL Horizons ephemerides are NASA/JPL data. The built-in
+  profile thresholds and weights are team assumptions, **not NASA requirements**. The custom
+  thresholds are user assumptions. The energy metric is accumulated panel-plane irradiance, not a
+  full electrical power budget (no panel efficiency or load model).
 
 ## 7. Bilingual UI
 

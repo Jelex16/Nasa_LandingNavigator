@@ -41,7 +41,12 @@ Proyecto para **NASA Space Apps Challenge 2026 — Lunar Landing Site Navigator*
   el score usa los horizontes LOLA de `public/data/horizon`, no las texturas.
 - **Radar polar** de horizonte, Sol y Tierra; curvas de 28 días con ventanas solares y DTE.
 - **Score multicriterio transparente** (energía, eclipse continuo, DTE y corte de comunicaciones)
-  con pesos y umbrales visibles, cuatro perfiles de misión y un modal de modelo auditable.
+  con pesos y umbrales visibles, cuatro perfiles predefinidos, un perfil personalizado y un modal de
+  modelo auditable.
+- **Perfil personalizado**: el usuario define energía, eclipse, DTE y corte; la herramienta recalcula
+  el score y el veredicto del sitio, la comparación, el barrido y la matriz. Cumplir los cuatro
+  umbrales es `GO`. En modo estricto (por defecto), cualquier umbral incumplido es `NO-GO`; sin modo
+  estricto, un umbral incumplido es `PRECAUCIÓN` si el índice es ≥50; si no, `NO-GO`.
 - **Comparación de los 12 sitios** con la misma fecha de inicio, ventana, perfil, panel y mástil.
   Filas seleccionables; las referencias llevan badge `REFERENCE`.
 - **A/B lado a lado**: dos escenarios sitio/fecha con radares LOLA, veredictos, métricas y tabla de
@@ -139,10 +144,15 @@ Score = 100 · (wE·E + wD·D + wC·C + wG·G) / (wE + wD + wC + wG)
 - `C`: visibilidad del centro de la Tierra (DTE) / requerimiento.
 - `G = 1 − G_max / tolerancia_corte`.
 - Se aplican restricciones duras: pendiente local >15° limita el estado; >25° es NO-GO; outages
-  severos de DTE/eclipse también fuerzan NO-GO.
-- Los perfiles son: **Demo directa DTE**, **Rover nocturno**, **Puesto tripulado** y
-  **Relé / store-and-forward**. El perfil de relé solo relaja las tolerancias; no simula un relé
-  concreto.
+  severos de DTE/eclipse también fuerzan NO-GO en los perfiles predefinidos.
+- Los perfiles son: **Demo directa DTE**, **Rover nocturno**, **Puesto tripulado**,
+  **Relé / store-and-forward** y **Personalizado**. El perfil de relé solo relaja las tolerancias;
+  no simula un relé concreto. El perfil personalizado usa pesos iguales (1/1/1/1); en modo estricto,
+  cualquier umbral incumplido es NO-GO.
+- **Procedencia de los umbrales**: los horizontes LOLA y las efemérides Horizons son datos
+  NASA/JPL. Los umbrales y pesos de los perfiles predefinidos son supuestos del equipo, **no
+  requisitos NASA**; los umbrales personalizados son supuestos del usuario. La métrica de energía es
+  irradiancia acumulada en el plano del panel, no un presupuesto eléctrico completo.
 - Apollo 11 se marca **REFERENCIA** aunque su score numérico sea alto: no es un candidato polar.
 
 `Comms` mide la racha continua más larga sin el centro de la Tierra visible, no el porcentaje
@@ -154,7 +164,9 @@ pero se marca como referencia.
 
 Con el perfil directo por defecto, varios sitios polares aparecen **NO-GO** porque los horizontes
 LOLA reales producen outages DTE de días. Ese es el resultado científico, no un fallo de la UI: el
-selector de perfil permite explorar un escenario con relé o almacenamiento.
+selector de perfil permite explorar un escenario con relé o almacenamiento. Si esos umbrales no
+representan tu misión, usa **Personalizado** para definir energía, eclipse, DTE y corte; el veredicto
+se recalcula con tus supuestos. En el pitch: *NASA data, our assumptions*.
 
 ### Fórmulas principales
 

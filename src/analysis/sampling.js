@@ -37,6 +37,7 @@ export function evaluateSiteScenario({
   mastHeightM,
   panelType,
   profileId,
+  profile,
   stepHours,
   windowDays
 }) {
@@ -46,6 +47,7 @@ export function evaluateSiteScenario({
     mastHeightM,
     panelType,
     profileId,
+    profile,
     stepHours,
     windowDays,
     sampleAt: (ms) => sampleSite(site, ms)

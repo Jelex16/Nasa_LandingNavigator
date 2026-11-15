@@ -19,8 +19,11 @@ Missions to the Moon's south pole face extreme lighting and communication constr
 - **Site × date matrix**: 12 sites × 36 months with a metric selector (score, Sun, DTE, outage); reference rows are marked. Click a cell to load that site and date in the main view.
 - **Share and export**: the scenario is encoded in the URL and copied by **Share**; export scenario JSON (with the 672-point series) and CSV for the comparison, sweep and site × date matrix.
 - **Educational guide**: **How to read** opens a bilingual quick start, metric definitions, why the south pole is hard, a glossary, “try this” examples and limits.
-- **Explore mission profiles**: direct-to-Earth demo, night-surviving rover, crewed outpost, and relay/store-and-forward. All weights and thresholds are visible.
+- **Explore mission profiles**: direct-to-Earth demo, night-surviving rover, crewed outpost, relay/store-and-forward, and a custom profile. All weights and thresholds are visible.
+- **Set your own thresholds**: the custom profile lets you define energy, eclipse, DTE and outage requirements. The tool rescores the current site, comparison, sweep and matrix. Meeting all four thresholds is GO. In strict mode (default), any unmet threshold is NO-GO; without strict mode, a missed threshold is CAUTION when the index is ≥50, otherwise NO-GO.
 - **Bilingual UI**: English by default with an EN/ES selector; the choice is persisted locally.
+
+The LOLA horizons and JPL Horizons ephemerides are NASA/JPL data. The built-in profile thresholds and weights are team assumptions, **not NASA requirements**; custom thresholds are user assumptions. The energy metric is accumulated panel-plane irradiance, not a full electrical power budget.
 
 ## Why it matters
 

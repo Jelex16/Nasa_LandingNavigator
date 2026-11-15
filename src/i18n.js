@@ -67,15 +67,28 @@ const MESSAGES = {
     "profile.technology_demo.name": "Short technology demo",
     "profile.technology_demo.description":
       "28-day demonstration; tolerates a moderate eclipse but is sensitive to energy and long radio outages.",
+    "profile.technology_demo.basis":
+      "Team assumption for a short direct-DTE demo; not a NASA requirement.",
     "profile.night_survivor.name": "Night-surviving rover",
     "profile.night_survivor.description":
       "Battery-limited rover that must survive the longest continuous eclipse; energy dominates the decision.",
+    "profile.night_survivor.basis":
+      "Team assumption for a battery-limited rover; not a NASA requirement.",
     "profile.crewed_outpost.name": "Crewed outpost with direct DTE",
     "profile.crewed_outpost.description":
       "Crewed outpost with strict Earth-link continuity and a short tolerated solar eclipse.",
+    "profile.crewed_outpost.basis":
+      "Team assumption for a crewed outpost; not a NASA requirement.",
     "profile.relay_store_forward.name": "Relay / store-and-forward",
     "profile.relay_store_forward.description":
       "Profile for a mission with a relay or on-board storage: tolerates long DTE outages and does not require continuous direct visibility. It is not pure direct DTE; it is shown to compare alternatives.",
+    "profile.relay_store_forward.basis":
+      "Team assumption for a mission with a relay or on-board storage; the relay itself is not simulated.",
+    "profile.custom.name": "Custom profile",
+    "profile.custom.description":
+      "User-defined thresholds; the system scores and classifies sites against them.",
+    "profile.custom.basis":
+      "User-defined thresholds, not a NASA requirement. All four thresholds met = GO; in strict mode, any unmet threshold is NO-GO.",
     "panel.horizontal.label": "Horizontal",
     "panel.horizontal.description":
       "Normal to zenith. Irradiance proportional to sin(solar elevation).",
@@ -138,6 +151,14 @@ const MESSAGES = {
       "{name}: energy ≥ {energy} kWh/m²; eclipse ≤ {eclipse} h; DTE ≥ {dte}%; DTE outage ≤ {outage} h. Panel: {panel}; mast: {mast} m.",
     "model.commsNote":
       "Comms = 1 − max DTE outage / tolerance. In this profile, an outage ≥ {tol} h gives 0/100; it does not mean the data is missing. DTE uses the Earth center ({dte}% of the time); the partial disk ({partial}%) is computed but not part of the score.",
+    "model.customNote":
+      "Custom profile: equal weights (1/1/1/1). Meeting all four thresholds is GO; the index is a margin indicator. In strict mode, any unmet threshold is NO-GO. Without strict mode, a missed threshold is CAUTION when the index is ≥50, otherwise NO-GO.",
+    "customProfile.energy": "Required energy (kWh/m²)",
+    "customProfile.eclipse": "Maximum eclipse (h)",
+    "customProfile.dte": "Required DTE (%)",
+    "customProfile.outage": "Maximum DTE outage (h)",
+    "customProfile.range": "{field} must be between {min} and {max}.",
+    "customProfile.applied": "Custom thresholds applied.",
     "site.source": "Horizon: {horizon} · Ephemerides: {ephem}",
     "site.customName": "Custom site",
     "site.customDescription.lola":
@@ -346,7 +367,7 @@ const MESSAGES = {
       "This tool compares lunar landing sites and dates using real LOLA terrain and JPL Horizons ephemerides. It is decision-support and educational software, not a flight-certified landing analysis.",
     "guide.quickStart.title": "Quick start",
     "guide.quickStart.body":
-      "<ol><li>Pick a curated site or enter custom coordinates.</li><li>Pick a date; the 28-day evaluation window starts there.</li><li>Read the verdict: Sun %, DTE %, and the longest DTE outage.</li><li>Use the polar radar and the 2.5D panorama to see the Sun and Earth against the LOLA horizon.</li><li>Use <strong>Dates</strong> to sweep 36 months, <strong>Compare</strong> for the site matrix or side-by-side A/B, and <strong>Share</strong> to copy a scenario link.</li></ol>",
+      "<ol><li>Pick a curated site or enter custom coordinates.</li><li>Pick a date; the 28-day evaluation window starts there.</li><li>Read the verdict: Sun %, DTE %, and the longest DTE outage.</li><li>If the built-in profiles do not match your mission, choose <strong>Custom</strong> and set the energy, eclipse, DTE and outage thresholds.</li><li>Use the polar radar and the 2.5D panorama to see the Sun and Earth against the LOLA horizon.</li><li>Use <strong>Dates</strong> to sweep 36 months, <strong>Compare</strong> for the site matrix or side-by-side A/B, and <strong>Share</strong> to copy a scenario link.</li></ol>",
     "guide.metrics.title": "What the metrics mean",
     "guide.metrics.body":
       "<dl><dt>Sunlit %</dt><dd>Fraction of hours with at least 5% of the solar disk above the LOLA horizon. It is not necessarily full Sun.</dd><dt>DTE %</dt><dd>Fraction of hours with the Earth's center above the local horizon (direct-to-Earth).</dd><dt>Outage</dt><dd>Longest continuous DTE blackout inside the 28-day window.</dd><dt>Eclipse</dt><dd>Longest continuous solar eclipse inside the window.</dd><dt>Energy</dt><dd>Solar energy accumulated over 28 days for the selected panel and mast.</dd><dt>Mission index</dt><dd>A weighted decision index from energy, eclipse, DTE and outage. It is not a probability of success.</dd></dl>",
@@ -461,15 +482,28 @@ const MESSAGES = {
     "profile.technology_demo.name": "Demo tecnológica de corta duración",
     "profile.technology_demo.description":
       "Demostración de 28 días; tolera un eclipse moderado pero es sensible a la energía y a cortes de radio largos.",
+    "profile.technology_demo.basis":
+      "Supuesto del equipo para una demo corta con DTE directo; no es un requisito NASA.",
     "profile.night_survivor.name": "Rover superviviente de noche lunar",
     "profile.night_survivor.description":
       "Rover limitado por baterías que debe sobrevivir al eclipse continuo más largo; la energía domina la decisión.",
+    "profile.night_survivor.basis":
+      "Supuesto del equipo para un rover limitado por baterías; no es un requisito NASA.",
     "profile.crewed_outpost.name": "Puesto tripulado con DTE directo",
     "profile.crewed_outpost.description":
       "Puesto tripulado con continuidad estricta de enlace a Tierra y eclipse solar corto tolerado.",
+    "profile.crewed_outpost.basis":
+      "Supuesto del equipo para un puesto tripulado; no es un requisito NASA.",
     "profile.relay_store_forward.name": "Relé / store-and-forward",
     "profile.relay_store_forward.description":
       "Perfil para una misión con relé o almacenamiento a bordo: tolera outages DTE largos y no exige visibilidad directa continua. No es DTE directo puro; se muestra para comparar alternativas.",
+    "profile.relay_store_forward.basis":
+      "Supuesto del equipo para una misión con relé o almacenamiento a bordo; el relé no se simula.",
+    "profile.custom.name": "Perfil personalizado",
+    "profile.custom.description":
+      "Umbrales definidos por el usuario; el sistema puntúa y clasifica los sitios con ellos.",
+    "profile.custom.basis":
+      "Umbrales definidos por el usuario, no un requisito NASA. Cumplir los cuatro es GO; en modo estricto, cualquier umbral incumplido es NO-GO.",
     "panel.horizontal.label": "Horizontal",
     "panel.horizontal.description":
       "Normal al cenit. Irradiancia proporcional a sin(elevación solar).",
@@ -536,6 +570,14 @@ const MESSAGES = {
       "{name}: energía ≥ {energy} kWh/m²; eclipse ≤ {eclipse} h; DTE ≥ {dte}%; corte DTE ≤ {outage} h. Panel: {panel}; mástil: {mast} m.",
     "model.commsNote":
       "Comms = 1 − corte DTE máximo / tolerancia. En este perfil, un corte ≥ {tol} h da 0/100; no significa que falte el dato. DTE usa el centro de la Tierra ({dte}% del tiempo); el disco parcial ({partial}%) se calcula pero no entra en el score.",
+    "model.customNote":
+      "Perfil personalizado: pesos iguales (1/1/1/1). Cumplir los cuatro umbrales es GO; el índice es un indicador de margen. En modo estricto, cualquier umbral incumplido es NO-GO. Sin modo estricto, un umbral incumplido es PRECAUCIÓN si el índice es ≥50; si no, NO-GO.",
+    "customProfile.energy": "Energía requerida (kWh/m²)",
+    "customProfile.eclipse": "Eclipse máximo (h)",
+    "customProfile.dte": "DTE requerido (%)",
+    "customProfile.outage": "Corte DTE máximo (h)",
+    "customProfile.range": "{field} debe estar entre {min} y {max}.",
+    "customProfile.applied": "Umbrales personalizados aplicados.",
     "site.source": "Horizonte: {horizon} · Efemérides: {ephem}",
     "site.customName": "Sitio personalizado",
     "site.customDescription.lola":
@@ -744,7 +786,7 @@ const MESSAGES = {
       "Esta herramienta compara sitios y fechas de alunizaje con topografía LOLA real y efemérides JPL Horizons. Es apoyo a decisiones y software educativo, no un análisis de aterrizaje certificado.",
     "guide.quickStart.title": "Inicio rápido",
     "guide.quickStart.body":
-      "<ol><li>Elige un sitio curado o introduce coordenadas personalizadas.</li><li>Elige una fecha; la ventana de evaluación de 28 días empieza ahí.</li><li>Lee el veredicto: % Sol, % DTE y el corte DTE más largo.</li><li>Usa el radar polar y el panorama 2.5D para ver el Sol y la Tierra contra el horizonte LOLA.</li><li>Usa <strong>Fechas</strong> para barrer 36 meses, <strong>Comparar</strong> para la matriz o el A/B, y <strong>Compartir</strong> para copiar un enlace del escenario.</li></ol>",
+      "<ol><li>Elige un sitio curado o introduce coordenadas personalizadas.</li><li>Elige una fecha; la ventana de evaluación de 28 días empieza ahí.</li><li>Lee el veredicto: % Sol, % DTE y el corte DTE más largo.</li><li>Si los perfiles predefinidos no representan tu misión, elige <strong>Personalizado</strong> y define los umbrales de energía, eclipse, DTE y corte.</li><li>Usa el radar polar y el panorama 2.5D para ver el Sol y la Tierra contra el horizonte LOLA.</li><li>Usa <strong>Fechas</strong> para barrer 36 meses, <strong>Comparar</strong> para la matriz o el A/B, y <strong>Compartir</strong> para copiar un enlace del escenario.</li></ol>",
     "guide.metrics.title": "Qué significan las métricas",
     "guide.metrics.body":
       "<dl><dt>Sol %</dt><dd>Fracción de horas con al menos el 5% del disco solar sobre el horizonte LOLA; no implica Sol pleno.</dd><dt>DTE %</dt><dd>Fracción de horas con el centro de la Tierra sobre el horizonte local (directo a Tierra).</dd><dt>Corte</dt><dd>Corte DTE continuo más largo dentro de la ventana de 28 días.</dd><dt>Eclipse</dt><dd>Eclipse solar continuo más largo de la ventana.</dd><dt>Energía</dt><dd>Energía solar acumulada en 28 días para el panel y mástil seleccionados.</dd><dt>Índice de misión</dt><dd>Índice ponderado de energía, eclipse, DTE y corte; no es una probabilidad de éxito.</dd></dl>",

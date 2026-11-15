@@ -9,6 +9,10 @@ import {
 } from '../src/analysis/geometry.js';
 import {
   PROFILE_BY_ID,
+  CUSTOM_PROFILE_ID,
+  buildStatus,
+  createCustomProfile,
+  resolveProfile,
   scoreComponents,
   panelIrradianceWm2
 } from '../src/analysis/scoring.js';
@@ -43,6 +47,98 @@ test('scoreComponents saturates at 100 when every requirement is met', () => {
     gMaxHours: profile.gMaxTolHours
   };
   assert.equal(scoreComponents(failed, profile).total, 0);
+});
+
+test('custom profiles clamp values and resolve through the profile id', () => {
+  const custom = createCustomProfile({
+    energyReqKWhM2: -10,
+    dMaxTolHours: 99999,
+    dteReqPct: 150,
+    gMaxTolHours: 10,
+    strict: false
+  });
+  assert.equal(custom.energyReqKWhM2, 0);
+  assert.equal(custom.dMaxTolHours, 2000);
+  assert.equal(custom.dteReqPct, 100);
+  assert.equal(custom.gMaxTolHours, 10);
+  assert.equal(custom.strict, false);
+  assert.equal(resolveProfile(CUSTOM_PROFILE_ID, custom).id, 'custom');
+  assert.equal(resolveProfile('technology_demo').id, 'technology_demo');
+});
+
+test('zero custom thresholds produce a finite score', () => {
+  const custom = createCustomProfile({
+    energyReqKWhM2: 0,
+    dMaxTolHours: 0,
+    dteReqPct: 0,
+    gMaxTolHours: 0,
+    strict: true
+  });
+  const components = scoreComponents(
+    { energyWhM2: 0, dMaxHours: 0, dteCenterPct: 0, gMaxHours: 0 },
+    custom
+  );
+  assert.ok(Number.isFinite(components.total));
+  assert.equal(components.total, 100);
+});
+
+test('strict custom profile turns any unmet threshold into NO-GO', () => {
+  const custom = createCustomProfile({
+    energyReqKWhM2: 100,
+    dMaxTolHours: 10,
+    dteReqPct: 90,
+    gMaxTolHours: 5,
+    strict: true
+  });
+  const metrics = {
+    energyWhM2: 200000,
+    dMaxHours: 0,
+    dteCenterPct: 50,
+    gMaxHours: 0
+  };
+  const components = scoreComponents(metrics, custom);
+  const failed = buildStatus({ role: 'candidate', slopeDeg: 2 }, metrics, components, custom);
+  assert.match(failed.status, /NO-GO/);
+  assert.match(failed.statusText, /DTE/);
+
+  const metMetrics = { ...metrics, dteCenterPct: 95 };
+  const metComponents = scoreComponents(metMetrics, custom);
+  const met = buildStatus(
+    { role: 'candidate', slopeDeg: 2 },
+    metMetrics,
+    metComponents,
+    custom
+  );
+  assert.match(met.status, /GO/);
+
+  const relaxed = createCustomProfile({ ...custom, strict: false });
+  const relaxedStatus = buildStatus(
+    { role: 'candidate', slopeDeg: 2 },
+    metrics,
+    components,
+    relaxed
+  );
+  assert.match(relaxedStatus.status, /CAUTION/);
+});
+
+test('custom profile GO is threshold-based even with a low margin index', () => {
+  const custom = createCustomProfile({
+    energyReqKWhM2: 300,
+    dMaxTolHours: 200,
+    dteReqPct: 20,
+    gMaxTolHours: 400,
+    strict: true
+  });
+  const metrics = {
+    energyWhM2: 423800,
+    dMaxHours: 180,
+    dteCenterPct: 42.4,
+    gMaxHours: 289
+  };
+  const components = scoreComponents(metrics, custom);
+  const status = buildStatus({ role: 'candidate', slopeDeg: 5 }, metrics, components, custom);
+  assert.ok(components.total < 75);
+  assert.match(status.status, /GO/);
 });
 
 test('a vertical tracker outperforms a horizontal panel at grazing Sun', () => {

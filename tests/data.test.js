@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { decodeEphemeris, sampleEphemeris } from '../src/ephemeris/jplEphemeris.js';
 import { horizonElevationAt } from '../src/topography/lunarData.js';
 import { evaluateSiteScenario } from '../src/analysis/sampling.js';
+import { createCustomProfile } from '../src/analysis/scoring.js';
 
 const DATA = new URL('../public/data/', import.meta.url);
 const records = JSON.parse(readFileSync(new URL('sites.json', DATA), 'utf8')).sites;
@@ -64,4 +65,22 @@ test('28-day Malapert regression matches the published metrics', () => {
   assert.ok(Math.abs(analysis.metrics.energyWhM2 - 423800) < 100);
   assert.equal(analysis.scorePercent, 48);
   assert.match(analysis.status, /NO-GO/);
+
+  const custom = createCustomProfile({
+    energyReqKWhM2: 0,
+    dMaxTolHours: 1000,
+    dteReqPct: 0,
+    gMaxTolHours: 1000,
+    strict: true
+  });
+  const customAnalysis = evaluateSiteScenario({
+    site,
+    startMs: Date.UTC(2026, 10, 14, 0, 0, 0),
+    mastHeightM: 2,
+    panelType: 'vertical_tracker',
+    profileId: 'custom',
+    profile: custom
+  });
+  assert.match(customAnalysis.status, /GO/);
+  assert.equal(customAnalysis.profile.id, 'custom');
 });

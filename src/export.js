@@ -59,7 +59,16 @@ export function scenarioToJson(analysis) {
     profile: {
       id: profile.id,
       name: t(profile.nameKey),
-      description: t(profile.descriptionKey)
+      description: t(profile.descriptionKey),
+      basis: profile.basisKey ? t(profile.basisKey) : '',
+      thresholds: {
+        energyReqKWhM2: profile.energyReqKWhM2,
+        dMaxTolHours: profile.dMaxTolHours,
+        dteReqPct: profile.dteReqPct,
+        gMaxTolHours: profile.gMaxTolHours
+      },
+      weights: profile.weights,
+      strict: Boolean(profile.strict)
     },
     panel: {
       id: analysis.panelType,

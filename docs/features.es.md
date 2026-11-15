@@ -114,11 +114,23 @@ Perfiles y supuestos visibles y seleccionables:
 | Rover nocturno | 400 kWh/m² | 380 h | 30% | 48 h |
 | Puesto tripulado con DTE directo | 450 kWh/m² | 120 h | 90% | 12 h |
 | Relé / store-and-forward | 300 kWh/m² | 200 h | 20% | 400 h |
+| Personalizado | definido por el usuario | definido por el usuario | definido por el usuario | definido por el usuario |
 
 - Paneles: horizontal, vertical fijo y vertical con seguimiento.
 - Alturas de mástil: 0.5, 2, 5, 10 y 20 m.
 - Score: `100 · (wE·E + wD·D + wC·C + wG·G) / Σw`, con pesos y umbrales visibles.
 - El perfil de relé solo relaja tolerancias de DTE/corte; no simula un relé concreto.
+- **Perfil personalizado**: define los cuatro umbrales en el panel de misión y pulsa “Aplicar
+  umbrales”. La herramienta recalcula el sitio actual, la comparación, el barrido y la matriz con
+  esos umbrales. Usa pesos iguales (1/1/1/1). Cumplir los cuatro umbrales es `GO`. En modo estricto
+  (por defecto), cualquier umbral incumplido fuerza `NO-GO`; sin modo estricto, un umbral incumplido
+  es `PRECAUCIÓN` si el índice es ≥50; si no, `NO-GO`. El índice es un indicador de margen, no la
+  regla de aprobación.
+- **Procedencia**: los horizontes LOLA y las efemérides JPL Horizons son datos NASA/JPL. Los
+  umbrales y pesos de los perfiles predefinidos son supuestos del equipo, **no requisitos NASA**.
+  Los umbrales personalizados son supuestos del usuario. La métrica de energía es irradiancia
+  acumulada en el plano del panel, no un presupuesto eléctrico completo (sin eficiencia de panel ni
+  modelo de consumo).
 
 ## 7. UI bilingüe
 
